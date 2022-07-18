@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "test": "deno test",
+    "dev": "deno fmt && deno lint && deno task test --fail-fast"
+  }
+}
