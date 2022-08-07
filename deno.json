@@ -1,6 +1,8 @@
 {
   "tasks": {
+    "run": "deno run -A cli.ts",
     "test": "deno test",
     "dev": "deno fmt && deno lint && deno task test --fail-fast"
-  }
+  },
+  "importMap": "import_map.json"
 }
