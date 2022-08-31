@@ -3,6 +3,8 @@ name: CI
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 env:
   account_id: ${{ secrets.ACCOUNT_ID }}
@@ -10,7 +12,22 @@ env:
 
 jobs:
   test:
-    uses: ./.github/workflows/test.yml
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Denopendabot
+        uses: actions/checkout@v3
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Clone a repository for testing
+        run: git clone https://github.com/hasundue/denopendabot-test.git
+
+      - name: Test GitHub Action
+        uses: ./action.yml
 
   release:
     needs: test

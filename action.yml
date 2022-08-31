@@ -1,0 +1,27 @@
+name: Denopendabot
+
+description: Dependabot clone for Deno projects
+
+inputs:
+  files:
+    description: Files to check including import statements
+    required: true
+    default: deps.ts
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup Deno
+      uses: denoland/setup-deno@v1
+      with:
+        deno-version: v1.x
+
+    - name: Checkout Denopendabot
+      uses: actions/checkout@v3
+      with:
+        repository: hasundue/denopendabot
+
+    - name: Run Denopendabot
+      run: deno task run ${{ inputs.files }}
+      shell: bash
