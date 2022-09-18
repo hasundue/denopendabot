@@ -24,7 +24,7 @@ runs:
     - name: Setup Git
       run: |
         git config --global user.name "denopendabot"
-        git config --global user.email "noreply@denopendabot.com"
+        git config --global user.email "info@denopendabot.dev"
       shell: bash
 
     - name: Run Denopendabot
