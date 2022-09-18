@@ -24,13 +24,12 @@ jobs:
           deno-version: v1.x
 
       - name: Clone a repository for testing
-        run: |
-          git clone https://github.com/hasundue/denopendabot-test.git
-          cd denopendabot-test
+        run: git clone https://github.com/hasundue/denopendabot-test.git
 
       - name: Test GitHub Action
         uses: ./
         with:
+          workdir: ./denopendabot-test
           files: deps.ts
 
   release:

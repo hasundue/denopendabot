@@ -7,6 +7,10 @@ inputs:
     description: Files to check including import statements
     required: true
     default: deps.ts
+  workdir:
+    description: Path to run denopendabot in
+    required: true
+    default: ./
 
 runs:
   using: composite
@@ -28,4 +32,5 @@ runs:
         deno run -A --import-map https://pax.deno.dev/hasundue/denopendabot/import_map.json
         https://pax.deno.dev/hasundue/denopendabot/cli.ts
         ${{ inputs.files }}
+      working-directory: ${{ inputs.workdir }}
       shell: bash
