@@ -18,5 +18,8 @@ runs:
         deno-version: v1.x
 
     - name: Run Denopendabot
-      run: deno run -A https://pax.deno.dev/hasundue/denopendabot/cli.ts ${{ inputs.files }}
+      run: >
+        deno run -A --import-map https://pax.deno.dev/hasundue/denopendabot/import_map.json
+        https://pax.deno.dev/hasundue/denopendabot/cli.ts
+        ${{ inputs.files }}
       shell: bash
