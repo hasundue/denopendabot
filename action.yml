@@ -17,6 +17,12 @@ runs:
       with:
         deno-version: v1.x
 
+    - name: Setup Git
+      run: |
+        git config --global user.name "denopendabot"
+        git config --global user.email "noreply@denopendabot.com"
+      shell: bash
+
     - name: Run Denopendabot
       run: >
         deno run -A --import-map https://pax.deno.dev/hasundue/denopendabot/import_map.json
