@@ -28,6 +28,8 @@ jobs:
 
       - name: Test GitHub Action
         uses: ./action.yml
+        with:
+          files: denopendabot-test/deps.ts
 
   release:
     needs: test

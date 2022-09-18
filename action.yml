@@ -17,11 +17,6 @@ runs:
       with:
         deno-version: v1.x
 
-    - name: Checkout Denopendabot
-      uses: actions/checkout@v3
-      with:
-        repository: hasundue/denopendabot
-
     - name: Run Denopendabot
-      run: deno task run ${{ inputs.files }}
+      run: deno run -A https://pax.deno.dev/hasundue/denopendabot/cli.ts ${{ inputs.files }}
       shell: bash
