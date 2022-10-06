@@ -39,12 +39,16 @@ for (const module of modules) {
   if (latest) {
     const name = defaultName(latest);
     const version = defaultVersion(latest);
-    await $`git checkout -b ${name}-${version}`;
+    const branch = `${name}-${version}`;
+    await $`git checkout -b ${branch}`;
 
     await Promise.all(udds.map((udd) => udd.update(latest)));
 
     const message = `build(deps): bump ${name} to ${version}`;
     await $`git commit -a -m "${message}"`;
+
+    await $`git push -u origin ${branch}`;
+    await $`gh pr create --title ${message}`;
 
     if (options.verbose) console.log();
   }
