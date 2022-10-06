@@ -21,11 +21,10 @@ const { args, options } = await new Command()
   .parse(Deno.args);
 
 const files = args[0];
-const decoder = new TextDecoder();
 const modules: string[] = [];
 
 for (const file of files) {
-  const content = decoder.decode(await Deno.readFile(file));
+  const content = await Deno.readTextFile(file);
   importUrls(content, REGISTRIES).forEach((module) => modules.push(module));
 }
 
