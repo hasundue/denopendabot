@@ -7,8 +7,6 @@ const env = Deno.env.get("DENO_DEPLOYMENT_ID")
   ? Deno.env.toObject()
   : dotenv.configSync();
 
-console.log(env);
-
 const redis = new Redis({
   url: env["UPSTASH_REDIS_REST_URL"],
   token: env["UPSTASH_REDIS_REST_TOKEN"],
@@ -16,7 +14,7 @@ const redis = new Redis({
 
 const privateKey: string | null = await redis.get("private_key");
 
-if (!privateKey) throw Error("Private key is not deployed on Upstash.");
+if (!privateKey) throw Error("Private key is not deployed on Upstash Redis.");
 
 const app = new Octokit.App({
   appId: env["APP_ID"],
@@ -35,14 +33,11 @@ app.webhooks.onAny(({ name }) => {
 });
 
 const handler = async (request: Request): Promise<Response> => {
-  console.log(request);
-  const body = await request.json();
-  console.log(body);
   await app.webhooks.verifyAndReceive({
     id: request.headers.get("x-github-delivery") as string,
     name: request.headers.get("x-github-event"),
     signature: request.headers.get("x-hub-signature-256") as string,
-    payload: body,
+    payload: await request.json(),
   });
   return new Response();
 };

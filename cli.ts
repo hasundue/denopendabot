@@ -1,16 +1,16 @@
-import { Command } from "cliffy/command/mod.ts";
+import { Command } from "https://deno.land/x/cliffy@v0.24.3/mod.ts";
 
-import { Udd } from "udd/mod.ts";
-import { importUrls } from "udd/search.ts";
+import { Udd } from "https://deno.land/x/udd@0.7.5/mod.ts";
+import { importUrls } from "https://deno.land/x/udd@0.7.5/search.ts";
 
 import {
   defaultName,
   defaultVersion,
   lookup,
   REGISTRIES,
-} from "udd/registry.ts";
+} from "https://deno.land/x/udd@0.7.5/registry.ts";
 
-import $ from "dax/mod.ts";
+import $ from "https://deno.land/x/dax@0.13.0/mod.ts";
 
 const { args, options } = await new Command()
   .name("denopendabot")

@@ -19,14 +19,14 @@ jobs:
         with:
           deno-version: v1.x
 
-      - name: Clone a repository for testing
-        run: git clone https://github.com/hasundue/denopendabot-test.git
+      - name: Format
+        run: deno fmt --check
 
-      - name: Test GitHub Action
-        uses: ./
-        with:
-          workdir: ./denopendabot-test
-          files: deps.ts
+      - name: Lint
+        run: deno lint
+
+      - name: Test
+        run: deno task test
 
   release:
     needs: test
@@ -42,19 +42,9 @@ jobs:
         with:
           deno-version: v1.x
 
-      - name: Install ghlog
-        run: deno install -A https://pax.deno.dev/hasundue/ghlog/ghlog.ts 
-
-      - name: Generate Release Notes
-        run: ghlog ${{ github.repository }} -s | xargs -I {tag} echo "NEW_TAG={tag}" >> $GITHUB_ENV
-
-      - name: Release
-        id: release
-        if: ${{ env.NEW_TAG != 'UNRELEASED' }}
-        uses: ncipollo/release-action@v1
-        with:
-          tag: '${{ env.NEW_TAG }}'
-          name: '${{ env.NEW_TAG }}'
-          bodyFile: 'CHANGELOG.md'
-          draft: false
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Semantic Release
+        run: >
+          deno run --allow-env --allow-net
+          https://deno.land/x/denomantic_release@0.1.0/main.ts
+          ${{ github.repository }}
+          --token ${{ secrets.GITHUB_TOKEN }}

@@ -1,7 +1,0 @@
-{
-  "imports": {
-    "cliffy/": "https://deno.land/x/cliffy@v0.24.3/",
-    "dax/": "https://deno.land/x/dax@0.9.0/",
-    "udd/": "https://deno.land/x/udd@0.7.5/"
-  }
-}
