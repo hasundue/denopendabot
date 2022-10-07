@@ -15,13 +15,17 @@ import $ from "https://deno.land/x/dax@0.13.0/mod.ts";
 const { args, options } = await new Command()
   .name("denopendabot")
   .version("0.1.0")
-  .description("Dependabot clone for Deno projects")
+  .description("A script to keep your Deno projects up-to-date.")
   .globalOption("-v, --verbose", "Enable logging.")
+  .globalOption("-t, --token <token>", "GitHub access token.")
   .arguments("<files...>")
   .parse(Deno.args);
 
 const files = args[0];
 const modules: string[] = [];
+
+await $`git config --global user.email "denopendabot@gmail.com"`;
+await $`git config --global user.name "denopendabot"`;
 
 for (const file of files) {
   const content = await Deno.readTextFile(file);
