@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: Test
     runs-on: ubuntu-latest
 
     steps:
@@ -17,7 +18,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.x
+          deno-version: v1.26.0
 
       - name: Format
         run: deno fmt --check
@@ -29,6 +30,7 @@ jobs:
         run: deno task test
 
   release:
+    name: Release
     needs: test
 
     runs-on: ubuntu-latest
@@ -40,7 +42,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.x
+          deno-version: v1.26.0
 
       - name: Semantic Release
         run: >
