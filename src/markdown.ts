@@ -1,6 +1,5 @@
-import * as semver from "./semver.ts";
 import { getLatestRelease } from "./github.ts";
-import { Repository } from "./repository.ts";
+import { Repository, semverRegExp } from "./common.ts";
 
 export async function update(
   input: string,
@@ -16,7 +15,7 @@ export async function update(
       output = output.replace(
         RegExp(
           "(?<=!\\[" + repo.name + "\\]" + "\\(.*)" +
-            semver.regex.source + "(?=.*\\))",
+            semverRegExp.source + "(?=.*\\))",
         ),
         latest,
       );

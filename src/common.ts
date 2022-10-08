@@ -3,3 +3,5 @@ export interface Repository {
   initial?: string;
   latest?: string;
 }
+
+export const semverRegExp = /v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/;
