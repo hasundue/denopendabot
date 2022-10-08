@@ -1,7 +1,7 @@
 {
   "tasks": {
-    "run": "deno run -A cli.ts",
-    "test": "deno test",
+    "run": "deno run --allow-env --allow-net main.ts",
+    "test": "deno test --allow-env --allow-net",
     "dev": "deno fmt && deno lint && deno task test --fail-fast"
   }
 }
