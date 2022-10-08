@@ -1,10 +1,6 @@
 import * as semver from "./semver.ts";
 import { getLatestRelease } from "./github.ts";
-
-interface Repository {
-  name: string;
-  latest?: string;
-}
+import { Repository } from "./repository.ts";
 
 export async function update(
   input: string,

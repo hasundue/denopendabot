@@ -1,6 +1,7 @@
 import { parse as parseYaml } from "https://deno.land/std@0.158.0/encoding/yaml.ts";
 import { gt, valid } from "https://deno.land/std@0.158.0/semver/mod.ts";
 import { getLatestRelease } from "./github.ts";
+import { Repository } from "./repository.ts";
 
 interface Workflow {
   jobs: {
@@ -23,12 +24,6 @@ interface Step {
 interface UpdateResult {
   output: string;
   repos: Repository[];
-}
-
-export interface Repository {
-  name: string;
-  initial: string;
-  latest: string;
 }
 
 interface Action {
