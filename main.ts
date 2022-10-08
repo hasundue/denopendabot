@@ -1,58 +1,59 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.2/mod.ts";
+import { globToRegExp } from "https://deno.land/std@0.159.0/path/glob.ts";
+import { groupBy } from "https://deno.land/std@0.159.0/collections/mod.ts";
+import { walkSync } from "https://deno.land/std@0.159.0/fs/mod.ts";
+import * as Module from "./src/module.ts";
 
-import { Udd } from "https://deno.land/x/udd@0.7.5/mod.ts";
-import { importUrls } from "https://deno.land/x/udd@0.7.5/search.ts";
-
-import {
-  defaultName,
-  lookup,
-  REGISTRIES,
-} from "https://deno.land/x/udd@0.7.5/registry.ts";
-
-import $ from "https://deno.land/x/dax@0.13.0/mod.ts";
-
-const { args: files, options } = await new Command()
+const { options } = await new Command()
   .name("denopendabot")
   .version("0.1.0") // @denopendabot hasundue/denopendabot
-  .description("A script to keep your Deno projects up-to-date.")
-  .globalOption("-v, --verbose", "Enable logging.")
-  .arguments("<files...>")
+  .description("A script and library to keep your Deno projects up-to-date.")
+  .option("-x --exclude <...globs>", "Files to exclude.")
+  .option("-s --sources <...paths>", "Files to update modules.")
+  .option(
+    "-m --module <url> <version>",
+    "Update a TypeScript/JavaScript modules to a specified version.",
+  )
+  .option(
+    "-w --workflows <paths>",
+    "GitHub workflowsa to update.",
+    {
+      default: "./github/workflows/*.{yml,yaml}",
+    },
+  )
+  .option(
+    "-d --documents <paths>",
+    "Markdown documenst to update.",
+    {
+      default: "*.md",
+    },
+  )
   .parse(Deno.args);
 
-const modules: string[] = [];
+const exclude = options.exclude?.map((glob) => globToRegExp(glob)) ?? [];
 
-await $`git config --global user.email "denopendabot@gmail.com"`;
-await $`git config --global user.name "denopendabot"`;
+const files = walkSync("./", {
+  includeDirs: false,
+  skip: exclude.concat([/.git/]),
+});
+
+type Result = {
+  file: string;
+} & Module.Result;
+
+let results: Result[] = [];
 
 for (const file of files) {
-  const content = await Deno.readTextFile(file);
-  importUrls(content, REGISTRIES).forEach((module) => modules.push(module));
+  const input = Deno.readTextFileSync(file.path);
+  const modules = options.module && [{
+    url: options.module[0],
+    target: options.module[1],
+  }];
+  const updated = await Module.update(input, modules);
+  results = results.concat(
+    updated.map((entry) => ({ file: file.path, ...entry })),
+  );
 }
 
-if (options.verbose) console.log(modules);
-
-const udds = files.map((file) => new Udd(file, { quiet: !options.verbose }));
-const branch = await $`git branch --show-current`;
-
-try {
-  for (const module of modules) {
-    const latest = lookup(module, REGISTRIES);
-
-    if (latest) {
-      const name = defaultName(latest);
-      await $`git checkout -b denopendabot/${name}`;
-
-      const results = await Promise.all(udds.map((udd) => udd.update(latest)));
-      const message = "build(deps): " + results[0].message;
-
-      await $`git commit -a -m "${message}"`;
-
-      await $`git push -u origin ${branch}`;
-      await $`gh pr create --title ${message}`;
-
-      if (options.verbose) console.log();
-    }
-  }
-} finally {
-  await $`git checkout ${branch}`;
-}
+const grouped = groupBy(results, (it) => it.url.toString());
+console.log(grouped);

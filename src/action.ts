@@ -48,17 +48,17 @@ export async function update(
         const initial = step.with[action.with];
 
         if (valid(initial)) {
-          const latest = action.repo.latest ??
+          const target = action.repo.target ??
             await getLatestRelease(action.repo.name);
 
-          if (latest) {
-            repos.push({ name: action.repo.name, initial, latest });
+          if (target) {
+            repos.push({ name: action.repo.name, initial, target });
           }
 
-          if (latest && gt(latest, initial)) {
+          if (target && gt(target, initial)) {
             output = output.replace(
               RegExp(`${action.with}: ` + `["']?` + initial + `["']?`),
-              `${action.with}: ${latest}`,
+              `${action.with}: ${target}`,
             );
           }
         }

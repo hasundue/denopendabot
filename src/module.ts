@@ -1,45 +1,45 @@
 import { lookup, REGISTRIES } from "https://deno.land/x/udd@0.7.5/registry.ts";
+import { gt, valid } from "https://deno.land/std@0.159.0/semver/mod.ts";
 import { importUrls } from "https://deno.land/x/udd@0.7.5/search.ts";
 
 interface Module {
-  url: string;
+  url: string | RegExp;
   initial?: string;
-  latest?: string;
+  target?: string;
 }
 
-interface Result {
+export interface Result extends Module {
   output: string;
-  modules: Module[];
 }
 
 export async function update(
   input: string,
-  targets?: Module[],
-): Promise<Result> {
+  modules?: Module[],
+): Promise<Result[]> {
   const urls = importUrls(input, REGISTRIES);
   const registries = urls.map((module) => lookup(module, REGISTRIES));
-
-  let output = input;
-  const results: Module[] = [];
+  const results: Result[] = [];
 
   for (const registry of registries) {
     if (!registry) continue;
 
-    const target = targets &&
-      targets.find((target) => registry.url.match(target.url));
+    const module = modules &&
+      modules.find((target) => registry.url.match(target.url));
 
-    if (!targets || target) {
-      const latest = target?.latest ?? (await registry.all())[0];
+    if (!modules || module) {
+      const target = module?.target ?? (await registry.all())[0];
+      const initial = registry.version();
 
-      results.push({
-        url: registry.url,
-        initial: registry.version(),
-        latest: latest,
-      });
-
-      output = output.replace(registry.url, registry.at(latest).url);
+      if (valid(target) && valid(initial) && gt(target, initial)) {
+        results.push({
+          url: registry.url,
+          initial,
+          target,
+          output: input.replace(registry.url, registry.at(target).url),
+        });
+      }
     }
   }
 
-  return { output, modules: results };
+  return results;
 }
