@@ -12,12 +12,14 @@ export async function update(
     const latest = repo.latest ?? await getLatestRelease(repo.name);
 
     if (latest) {
-      // update badges
-      const regexp = RegExp(
-        "(?<=!\\[" + repo.name + "\\]" + "\\(.*)" +
-          semver.regex.source + "(?=.*\\))",
+      // update a badge
+      output = output.replace(
+        RegExp(
+          "(?<=!\\[" + repo.name + "\\]" + "\\(.*)" +
+            semver.regex.source + "(?=.*\\))",
+        ),
+        latest,
       );
-      output = output.replace(regexp, latest);
     }
   }
 
