@@ -57,7 +57,7 @@ export async function update(
 
           if (latest && gt(latest, initial)) {
             output = output.replace(
-              `${action.with}: ${initial}`,
+              RegExp(`${action.with}: ` + `["']?` + initial + `["']?`),
               `${action.with}: ${latest}`,
             );
           }
