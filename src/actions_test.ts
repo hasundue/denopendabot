@@ -1,5 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.158.0/testing/asserts.ts";
-import { getLatestRelease, update } from "./actions.ts";
+import { getLatestRelease } from "./github.ts";
+import { update } from "./actions.ts";
 
 const latest = await getLatestRelease("denoland/deno");
 

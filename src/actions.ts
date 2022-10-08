@@ -1,6 +1,6 @@
 import { parse as parseYaml } from "https://deno.land/std@0.158.0/encoding/yaml.ts";
 import { gt, valid } from "https://deno.land/std@0.158.0/semver/mod.ts";
-import { Octokit } from "https://esm.sh/@octokit/core@4.0.5";
+import { getLatestRelease } from "./github.ts";
 
 const ACTIONS = [
   {
@@ -14,25 +14,6 @@ const ACTIONS = [
     repo: "nodejs/node",
   },
 ] as const;
-
-const octokit = new Octokit({
-  auth: Deno.env.get("GITHUB_TOKEN") ?? Deno.env.get("GH_TOKEN"),
-});
-
-export async function getLatestRelease(
-  repository: string,
-): Promise<string | null> {
-  const [owner, repo] = repository.split("/");
-  try {
-    const { data: release } = await octokit.request(
-      "GET /repos/{owner}/{repo}/releases/latest",
-      { owner, repo },
-    );
-    return release.tag_name;
-  } catch {
-    return null;
-  }
-}
 
 interface Workflow {
   jobs: {
@@ -57,7 +38,7 @@ interface UpdateResult {
   repos: Repository[];
 }
 
-interface Repository {
+export interface Repository {
   name: string;
   initial: string;
   latest: string;
