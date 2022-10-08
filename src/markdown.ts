@@ -4,12 +4,12 @@ export function update(input: string, repos: Repository[]): string {
   let output = input;
 
   for (const repo of repos) {
+    // update badges
     const regexp = RegExp(
       "(?<=!\\[" + repo.name + "\\]" + "\\(.*)" +
         repo.initial.replaceAll(".", "\\.") + "(?=.*\\))",
-      "g",
     );
-    output = output.replaceAll(regexp, repo.latest);
+    output = output.replace(regexp, repo.latest);
   }
 
   return output;
