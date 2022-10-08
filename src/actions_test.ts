@@ -1,8 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.158.0/testing/asserts.ts";
-import { getLatestRelease } from "./github.ts";
 import { update } from "./actions.ts";
 
-const latest = await getLatestRelease("denoland/deno");
+const latest = "v1.26.1"; // @denopendabot denoland/deno
 
 Deno.test("update", async () => {
   const result = await update(
@@ -18,7 +17,10 @@ Deno.test("update", async () => {
       {
         name: "denoland/setup-deno",
         with: "deno-version",
-        repo: "denoland/deno",
+        repo: {
+          name: "denoland/deno",
+          latest: latest,
+        },
       },
     ],
   );

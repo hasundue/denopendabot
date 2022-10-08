@@ -29,7 +29,7 @@ interface UpdateResult {
 interface Action {
   name: string;
   with: string;
-  repo: string;
+  repo: Repository;
 }
 
 export async function update(
@@ -48,10 +48,11 @@ export async function update(
         const initial = step.with[action.with];
 
         if (valid(initial)) {
-          const latest = await getLatestRelease(action.repo);
+          const latest = action.repo.latest ??
+            await getLatestRelease(action.repo.name);
 
           if (latest) {
-            repos.push({ name: action.repo, initial, latest });
+            repos.push({ name: action.repo.name, initial, latest });
           }
 
           if (latest && gt(latest, initial)) {
