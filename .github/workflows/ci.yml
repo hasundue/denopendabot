@@ -27,7 +27,15 @@ jobs:
         run: deno lint
 
       - name: Test
-        run: deno task test
+        run: deno task test --coverage=./coverage
+
+      - name: Create coverage report
+        run: deno coverage ./coverage --lcov > ./coverage.lcov
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.lcov
 
   release:
     name: Release
