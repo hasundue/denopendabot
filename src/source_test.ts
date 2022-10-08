@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.158.0/testing/asserts.ts";
-import { update } from "./sources.ts";
+import { update } from "./source.ts";
 
 const latest = "v1.26.1"; // @denopendabot denoland/deno
 
