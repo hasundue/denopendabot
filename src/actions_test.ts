@@ -14,6 +14,13 @@ Deno.test("update", async () => {
             with:
               deno-version: v1.26.0
     `,
+    [
+      {
+        name: "denoland/setup-deno",
+        with: "deno-version",
+        repo: "denoland/deno",
+      },
+    ],
   );
   assertEquals(
     `

@@ -13,7 +13,7 @@ import $ from "https://deno.land/x/dax@0.13.0/mod.ts";
 
 const { args: files, options } = await new Command()
   .name("denopendabot")
-  .version("0.1.0")
+  .version("0.1.0") // @denopendabot hasundue/denopendabot
   .description("A script to keep your Deno projects up-to-date.")
   .globalOption("-v, --verbose", "Enable logging.")
   .arguments("<files...>")
