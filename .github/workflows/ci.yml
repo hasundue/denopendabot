@@ -28,6 +28,8 @@ jobs:
 
       - name: Test
         run: deno task test --coverage=./coverage
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create coverage report
         run: deno coverage ./coverage --lcov > ./coverage.lcov
