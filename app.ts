@@ -1,11 +1,7 @@
-import * as dotenv from "https://deno.land/std@0.158.0/dotenv/mod.ts";
 import { Redis } from "https://deno.land/x/upstash_redis@v1.13.1/mod.ts";
 import * as Octokit from "https://esm.sh/octokit@2.0.7";
 import { serve } from "https://deno.land/std@0.158.0/http/server.ts";
-
-const env = Deno.env.get("DENO_DEPLOYMENT_ID")
-  ? Deno.env.toObject()
-  : dotenv.configSync();
+import { env } from "./src/env.ts";
 
 const redis = new Redis({
   url: env["UPSTASH_REDIS_REST_URL"],
@@ -16,7 +12,7 @@ const privateKey: string | null = await redis.get("private_key");
 
 if (!privateKey) throw Error("Private key is not deployed on Upstash Redis.");
 
-const app = new Octokit.App({
+export const app = new Octokit.App({
   appId: env["APP_ID"],
   privateKey,
   oauth: {

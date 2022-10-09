@@ -12,6 +12,10 @@ export interface Result extends Module {
   output: string;
 }
 
+export interface Update extends Result {
+  path: string;
+}
+
 export async function update(
   input: string,
   modules?: Module[],

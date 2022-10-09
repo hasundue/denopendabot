@@ -37,11 +37,11 @@ const files = walkSync("./", {
   skip: exclude.concat([/.git/]),
 });
 
-type Result = {
+type ModuleUpdate = {
   file: string;
 } & Module.Result;
 
-let results: Result[] = [];
+let updates: ModuleUpdate[] = [];
 
 for (const file of files) {
   const input = Deno.readTextFileSync(file.path);
@@ -50,10 +50,10 @@ for (const file of files) {
     target: options.module[1],
   }];
   const updated = await Module.update(input, modules);
-  results = results.concat(
+  updates = updates.concat(
     updated.map((entry) => ({ file: file.path, ...entry })),
   );
 }
 
-const grouped = groupBy(results, (it) => it.url.toString());
+const grouped = groupBy(updates, (it) => it.url.toString());
 console.log(grouped);
