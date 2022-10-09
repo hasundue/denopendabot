@@ -1,6 +1,5 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.2/mod.ts";
 import { globToRegExp } from "https://deno.land/std@0.159.0/path/glob.ts";
-import { groupBy } from "https://deno.land/std@0.159.0/collections/mod.ts";
 import { walkSync } from "https://deno.land/std@0.159.0/fs/mod.ts";
 import * as Module from "./src/module.ts";
 
@@ -54,6 +53,3 @@ for (const file of files) {
     updated.map((entry) => ({ file: file.path, ...entry })),
   );
 }
-
-const grouped = groupBy(updates, (it) => it.url.toString());
-console.log(grouped);

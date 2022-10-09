@@ -22,7 +22,7 @@ Deno.test("getCommit", async () => {
   assert(commit);
 });
 
-Deno.test("createBranch", async () => {
+Deno.test("createBranch/deleteBranch", async () => {
   const name = "test-" + Date.now().valueOf();
 
   const exists = await github.getBranch(repo, name);
@@ -41,7 +41,7 @@ Deno.test("createBranch", async () => {
   assertEquals(await github.getBranch(repo, name), null);
 });
 
-Deno.test("createCommit", async () => {
+Deno.test("createPullRequest", async () => {
   const branch = "test-" + Date.now().valueOf();
   const url = "https://deno.land/std@0.158.0";
   const target = "0.159.0";
@@ -49,17 +49,15 @@ Deno.test("createCommit", async () => {
   assertEquals(await github.getBranch(repo, branch), null);
   await github.createBranch(repo, branch);
 
-  await github.createCommit(repo, branch, [
-    {
-      path: "test.ts",
-      url,
-      target,
-      output: "https://deno.land/std@0.159.0",
-    },
+  const content =
+    "import { assert } from https://deno.land/std@0.159.0/testing/mod.ts;";
+
+  await github.createPullRequest(repo, branch, [
+    { path: "test.ts", url, target, output: content },
   ]);
 
-  const { commit } = await github.getCommit(repo, branch);
-  assertEquals(commit.message, `build(deps): bump ${url} to ${target}`);
+  const prs = await github.getPullRequests(repo);
+  assertEquals(prs[0].title, `build(deps): bump ${url} to ${target}`);
 
   await github.deleteBranch(repo, branch);
   assertEquals(await github.getBranch(repo, branch), null);

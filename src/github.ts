@@ -1,3 +1,4 @@
+import { groupBy } from "https://deno.land/std@0.159.0/collections/group_by.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.0.5";
 import { Update as ModuleUpdate } from "./module.ts";
 import { env } from "./env.ts";
@@ -98,12 +99,14 @@ export async function createCommit(
     { owner, repo, ref: `heads/${branch}`, sha: commit.sha },
   );
 
-  console.log(`Created a commit: ${commit.html_url}.`);
+  console.log(`Created a commit: ${commit.message}.`);
+
+  return commit;
 }
 
 export async function getCommit(
   repository: string,
-  branch: string,
+  branch = "main",
 ) {
   const [owner, repo] = repository.split("/");
 
@@ -142,6 +145,8 @@ export async function createBranch(
   );
 
   console.log(`Created a branch ${result.ref}.`);
+
+  return result;
 }
 
 export async function deleteBranch(
@@ -156,4 +161,48 @@ export async function deleteBranch(
   );
 
   console.log(`Deleted a branch ${branch}.`);
+}
+
+export async function createPullRequest(
+  repository: string,
+  branch: string,
+  updates: ModuleUpdate[],
+  base = "main",
+) {
+  const [owner, repo] = repository.split("/");
+
+  const groups = groupBy(updates, (update) => update.url.toString());
+  const length = Object.keys(groups).length;
+
+  if (!length) throw Error("Unable to make a PR with no updates.");
+
+  for (const dep of Object.keys(groups)) {
+    await createCommit(repository, branch, groups[dep]!);
+  }
+
+  const title = length > 1
+    ? "build(deps): update dependencies"
+    : (await getCommit(repository, branch)).commit.message;
+
+  const { data: result } = await octokit.request(
+    "POST /repos/{owner}/{repo}/pulls",
+    { owner, repo, title, base, head: branch },
+  );
+
+  console.log(`Created a PR: ${result.title}.`);
+
+  return result;
+}
+
+export async function getPullRequests(
+  repository: string,
+) {
+  const [owner, repo] = repository.split("/");
+
+  const { data: results } = await octokit.request(
+    "GET /repos/{owner}/{repo}/pulls",
+    { owner, repo },
+  );
+
+  return results;
 }
