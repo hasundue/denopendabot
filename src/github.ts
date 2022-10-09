@@ -118,7 +118,7 @@ export async function getCommit(
 export async function createBranch(
   repository: string,
   branch: string,
-  base: string = "main",
+  base = "main",
 ) {
   const [owner, repo] = repository.split("/");
 
