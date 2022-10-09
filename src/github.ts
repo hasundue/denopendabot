@@ -72,8 +72,7 @@ export async function createCommit(
     { owner, repo, tree: treeObject, base_tree: base.commit.sha },
   );
 
-  const { url, target } = updates[0];
-  const message = `build(deps): bump ${url} to ${target}`;
+  const message = createMessage(updates[0]);
 
   const author = {
     name: "denopendabot",
@@ -163,6 +162,12 @@ export async function deleteBranch(
   console.log(`Deleted a branch ${branch}.`);
 }
 
+export function createMessage(update: ModuleUpdate) {
+  const { url, target } = update;
+  const dep = url.toString().replace("https://", "");
+  return `build(deps): bump ${dep} to ${target}`;
+}
+
 export async function createPullRequest(
   repository: string,
   branch: string,
@@ -180,9 +185,11 @@ export async function createPullRequest(
     await createCommit(repository, branch, groups[dep]!);
   }
 
-  const title = length > 1
-    ? "build(deps): update dependencies"
-    : (await getCommit(repository, branch)).commit.message;
+  const header = env["CI"] ? "[TEST] " : "";
+  const title = header +
+    (length > 1
+      ? "build(deps): update dependencies"
+      : (await getCommit(repository, branch)).commit.message);
 
   const { data: result } = await octokit.request(
     "POST /repos/{owner}/{repo}/pulls",

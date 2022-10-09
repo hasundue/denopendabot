@@ -3,6 +3,7 @@ import {
   assertEquals,
 } from "https://deno.land/std@0.159.0/testing/asserts.ts";
 import * as github from "./github.ts";
+import { env } from "./env.ts";
 
 const repo = "hasundue/denopendabot";
 
@@ -45,19 +46,17 @@ Deno.test("createPullRequest", async () => {
   const branch = "test-" + Date.now().valueOf();
   const url = "https://deno.land/std@0.158.0";
   const target = "0.159.0";
-
-  assertEquals(await github.getBranch(repo, branch), null);
-  await github.createBranch(repo, branch);
-
   const content =
     "import { assert } from https://deno.land/std@0.159.0/testing/mod.ts;";
+  const update = { path: "test.ts", url, target, output: content };
 
-  await github.createPullRequest(repo, branch, [
-    { path: "test.ts", url, target, output: content },
-  ]);
+  await github.createBranch(repo, branch);
+
+  await github.createPullRequest(repo, branch, [update]);
 
   const prs = await github.getPullRequests(repo);
-  assertEquals(prs[0].title, `build(deps): bump ${url} to ${target}`);
+  const header = env["CI"] ? "[TEST] " : "";
+  assertEquals(prs[0].title, header + github.createMessage(update));
 
   await github.deleteBranch(repo, branch);
   assertEquals(await github.getBranch(repo, branch), null);
