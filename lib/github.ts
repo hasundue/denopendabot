@@ -164,8 +164,8 @@ export async function deleteBranch(
 }
 
 export function createMessage(update: ModuleUpdate) {
-  const { spec, target } = update;
-  const dep = spec.toString().replace("https://", "");
+  const { url, target } = update;
+  const dep = url.toString().replace("https://", "");
   return `build(deps): bump ${dep} to ${target}`;
 }
 
@@ -177,7 +177,7 @@ export async function createPullRequest(
 ) {
   const [owner, repo] = repository.split("/");
 
-  const groups = groupBy(updates, (update) => update.spec.toString());
+  const groups = groupBy(updates, (update) => update.url.toString());
   const length = Object.keys(groups).length;
 
   if (!length) throw Error("Unable to make a PR with no updates.");

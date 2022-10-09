@@ -1,49 +1,49 @@
 import { lookup, REGISTRIES } from "https://deno.land/x/udd@0.7.5/registry.ts";
 import { gt, valid } from "https://deno.land/std@0.159.0/semver/mod.ts";
 import { importUrls } from "https://deno.land/x/udd@0.7.5/search.ts";
+import { Update } from "./common.ts";
 
 export interface Module {
-  spec: string | RegExp;
-  initial?: string;
+  url: string | RegExp;
   target?: string;
 }
 
-export interface Result extends Module {
+export interface Result extends Required<Module> {
   content: string;
 }
 
-export interface Update extends Result {
-  path: string;
-}
-
-export async function update(
+export async function checkUpdate(
   input: string,
-  modules?: Module[],
-): Promise<Result[]> {
+): Promise<Update[]> {
   const urls = importUrls(input, REGISTRIES);
-  const registries = urls.map((module) => lookup(module, REGISTRIES));
-  const results: Result[] = [];
+  const registries = urls.map((url) => lookup(url, REGISTRIES));
+  const updates: Update[] = [];
 
   for (const registry of registries) {
     if (!registry) continue;
 
-    const module = modules &&
-      modules.find((target) => registry.url.match(target.spec));
+    const initial = registry.version();
+    const latest = (await registry.all())[0];
 
-    if (!modules || module) {
-      const target = module?.target ?? (await registry.all())[0];
-      const initial = registry.version();
-
-      if (valid(target) && valid(initial) && gt(target, initial)) {
-        results.push({
-          spec: registry.url,
-          initial,
-          target,
-          content: input.replace(registry.url, registry.at(target).url),
-        });
-      }
+    if (valid(latest) && valid(initial) && gt(latest, initial)) {
+      updates.push({
+        repo: registry.url,
+        target: latest,
+      });
     }
   }
 
-  return results;
+  return updates;
+}
+
+export async function getContent(
+  input: string,
+  update: Update,
+): Promise<string> {
+  const registry = lookup(update.repo, REGISTRIES);
+
+  if (!registry) {
+    throw Error(`Module ${update.repo} not found in the registry`);
+  }
+  return input.replace(update.repo, registry.at(update.target).url);
 }

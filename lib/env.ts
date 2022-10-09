@@ -1,7 +1,10 @@
-import { configSync } from "https://deno.land/std@0.158.0/dotenv/mod.ts";
+import "https://deno.land/std@0.159.0/dotenv/load.ts";
 
-const ENV: { DENO_DEPLOYMENT_ID?: string; CI?: string } = Deno.env.toObject();
+interface Env {
+  CI?: string;
+  DENO_DEPLOYMENT_ID?: string;
+  GH_TOKEN?: string;
+  GITHUB_TOKEN?: string;
+}
 
-export const env = (ENV.CI || ENV.DENO_DEPLOYMENT_ID)
-  ? Deno.env.toObject()
-  : configSync();
+export const env: Env = Deno.env.toObject();

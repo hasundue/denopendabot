@@ -1,7 +1,8 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.2/mod.ts";
-import { globToRegExp } from "https://deno.land/std@0.159.0/path/glob.ts";
+import { update } from "./mod.ts";
+import { Module } from "./lib/module.ts";
 
-const { options } = await new Command()
+const { args, options } = await new Command()
   .name("denopendabot")
   .version("0.0.0") // @denopendabot hasundue/denopendabot
   .description("A command-line tool to keep your Deno repository up-to-date.")
@@ -35,6 +36,10 @@ const { options } = await new Command()
     "Markdown documenst to update. (default: *.md)",
   )
   .parse(Deno.args);
+
+const repo = args[0];
+
+await update(repo, options);
 
 // const exclude = options.exclude?.map((glob) => globToRegExp(glob)) ?? [];
 

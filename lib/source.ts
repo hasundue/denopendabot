@@ -8,13 +8,13 @@ export async function update(
   let output = input;
 
   for (const repo of repos) {
-    const target = repo.target ?? await getLatestRelease(repo.name);
+    const target = repo.target ?? await getLatestRelease(repo.specifier);
 
     if (target) {
       output = output.replace(
         RegExp(
           "(?<=.*)" + semverRegExp.source +
-            "(?=.*@denopendabot " + repo.name + ")",
+            "(?=.*@denopendabot " + repo.specifier + ")",
         ),
         target,
       );

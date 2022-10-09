@@ -1,7 +1,7 @@
 import { parse as parseYaml } from "https://deno.land/std@0.158.0/encoding/yaml.ts";
 import { gt, valid } from "https://deno.land/std@0.158.0/semver/mod.ts";
 import { getLatestRelease } from "./github.ts";
-import { Repository } from "./common.ts";
+import { Repository, Update } from "./common.ts";
 
 interface Workflow {
   jobs: {
@@ -21,11 +21,6 @@ interface Step {
   with?: Record<string, string>;
 }
 
-interface UpdateResult {
-  output: string;
-  repos: Repository[];
-}
-
 interface Action {
   name: string;
   with: string;
@@ -35,7 +30,7 @@ interface Action {
 export async function update(
   input: string,
   actions: Action[],
-): Promise<UpdateResult> {
+): Promise<Update[]> {
   const workflow = parseYaml(input) as Workflow;
   let output = input;
   const repos: Repository[] = [];
