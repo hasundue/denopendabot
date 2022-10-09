@@ -61,3 +61,8 @@ Deno.test("createPullRequest", async () => {
   await github.deleteBranch(repo, branch);
   assertEquals(await github.getBranch(repo, branch), null);
 });
+
+Deno.test("getTree", async () => {
+  const tree = await github.getTree(repo);
+  assert(tree);
+});

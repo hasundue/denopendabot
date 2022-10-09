@@ -1,4 +1,5 @@
 import { groupBy } from "https://deno.land/std@0.159.0/collections/group_by.ts";
+import { decode } from "https://deno.land/std@0.159.0/encoding/base64.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.0.5";
 import { Update as ModuleUpdate } from "./module.ts";
 import { env } from "./env.ts";
@@ -22,11 +23,11 @@ export async function getLatestRelease(
   }
 }
 
-function createBlob(path: string, content: string): Blob {
+function createBlobData(path: string, content: string): BlobData {
   return { path, mode: "100644", type: "blob", content };
 }
 
-interface Blob {
+interface BlobData {
   path: string;
   mode: "100644";
   type: "blob";
@@ -57,8 +58,8 @@ export async function createCommit(
   const [owner, repo] = repository.split("/");
 
   // create a tree object for updated files
-  const treeObject: Blob[] = updates.map((update) =>
-    createBlob(update.path, update.output)
+  const treeObject: BlobData[] = updates.map((update) =>
+    createBlobData(update.path, update.content)
   );
 
   // get a reference to the target branch
@@ -163,8 +164,8 @@ export async function deleteBranch(
 }
 
 export function createMessage(update: ModuleUpdate) {
-  const { url, target } = update;
-  const dep = url.toString().replace("https://", "");
+  const { spec, target } = update;
+  const dep = spec.toString().replace("https://", "");
   return `build(deps): bump ${dep} to ${target}`;
 }
 
@@ -176,7 +177,7 @@ export async function createPullRequest(
 ) {
   const [owner, repo] = repository.split("/");
 
-  const groups = groupBy(updates, (update) => update.url.toString());
+  const groups = groupBy(updates, (update) => update.spec.toString());
   const length = Object.keys(groups).length;
 
   if (!length) throw Error("Unable to make a PR with no updates.");
@@ -212,4 +213,42 @@ export async function getPullRequests(
   );
 
   return results;
+}
+
+export async function getTree(
+  repository: string,
+  branch = "main",
+) {
+  const [owner, repo] = repository.split("/");
+
+  const head = await getBranch(repository, branch);
+
+  if (!head) throw Error(`Branch ${branch} not found.`);
+
+  const { data } = await octokit.request(
+    "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
+    { owner, repo, tree_sha: head.commit.sha, recursive: "true" },
+  );
+
+  // we don't need subtrees anymore
+  return data.tree.filter((it) => it.type === "blob");
+}
+
+export async function getBlobContent(
+  repository: string,
+  sha: string,
+) {
+  const [owner, repo] = repository.split("/");
+
+  const { data: blob } = await octokit.request(
+    "GET /repos/{owner}/{repo}/git/blobs/{file_sha}",
+    { owner, repo, file_sha: sha },
+  );
+
+  if (blob.encoding !== "base64") {
+    console.error(blob);
+    throw Error("Unsupported file encoding.");
+  }
+
+  return new TextDecoder().decode(decode(blob.content));
 }

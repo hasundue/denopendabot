@@ -2,14 +2,14 @@ import { lookup, REGISTRIES } from "https://deno.land/x/udd@0.7.5/registry.ts";
 import { gt, valid } from "https://deno.land/std@0.159.0/semver/mod.ts";
 import { importUrls } from "https://deno.land/x/udd@0.7.5/search.ts";
 
-interface Module {
-  url: string | RegExp;
+export interface Module {
+  spec: string | RegExp;
   initial?: string;
   target?: string;
 }
 
 export interface Result extends Module {
-  output: string;
+  content: string;
 }
 
 export interface Update extends Result {
@@ -28,7 +28,7 @@ export async function update(
     if (!registry) continue;
 
     const module = modules &&
-      modules.find((target) => registry.url.match(target.url));
+      modules.find((target) => registry.url.match(target.spec));
 
     if (!modules || module) {
       const target = module?.target ?? (await registry.all())[0];
@@ -36,10 +36,10 @@ export async function update(
 
       if (valid(target) && valid(initial) && gt(target, initial)) {
         results.push({
-          url: registry.url,
+          spec: registry.url,
           initial,
           target,
-          output: input.replace(registry.url, registry.at(target).url),
+          content: input.replace(registry.url, registry.at(target).url),
         });
       }
     }
