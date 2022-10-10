@@ -4,7 +4,7 @@ import { getUpdateSpecs, Update } from "./module.ts";
 const initial = "0.158.0";
 const target = "0.159.0"; // @denopendabot denoland/deno_std
 
-Deno.test("check/content", async () => {
+Deno.test("getUpdateSpec/Update", async () => {
   const input = `
     const url1 = "https://deno.land/std@${initial}/testing/mod.ts";
     const url2 = "https://deno.land/std@${initial}/testing/assert.ts";
