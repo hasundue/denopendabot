@@ -1,11 +1,5 @@
-export interface Repository {
-  name: string;
-  initial?: string;
-  target?: string;
-}
-
 export type UpdateSpec = {
-  dep: string;
+  name: string;
   initial?: string;
   target: string;
 };

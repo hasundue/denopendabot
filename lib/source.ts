@@ -1,9 +1,9 @@
 import { getLatestRelease } from "./github.ts";
-import { Repository, semverRegExp } from "./common.ts";
+import { semverRegExp, UpdateSpec } from "./common.ts";
 
 export async function update(
   input: string,
-  repos: Repository[],
+  repos: UpdateSpec[],
 ): Promise<string> {
   let output = input;
 
@@ -14,7 +14,7 @@ export async function update(
       output = output.replace(
         RegExp(
           "(?<=.*)" + semverRegExp.source +
-            "(?=.*@denopendabot " + repo.specifier + ")",
+            "(?=.+@denopendabot\\s+" + repo.specifier + ")",
         ),
         target,
       );

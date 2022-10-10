@@ -1,15 +1,20 @@
 import { groupBy } from "https://deno.land/std@0.159.0/collections/group_by.ts";
 import { Update, UpdateSpec } from "./lib/common.ts";
-import * as Module from "./lib/module.ts";
 import * as github from "./lib/github.ts";
+import * as module from "./lib/module.ts";
+import * as action from "./lib/action.ts";
+
+interface Options {
+  branch?: string;
+  sources?: string[];
+  modules?: UpdateSpec[];
+  workflows?: string[];
+  actions?: UpdateSpec[];
+}
 
 export async function createPullRequest(
   repo: string,
-  options?: {
-    branch?: string;
-    modules?: UpdateSpec[];
-    sources?: string[];
-  },
+  options?: Options,
 ) {
   const base = options?.branch ?? "main";
   const baseTree = await github.getTree(repo, base);
@@ -27,11 +32,15 @@ export async function createPullRequest(
 
     // TS/JS modules
     const moduleSpecs = options?.modules ||
-      await Module.getUpdateSpecs(content);
+      await module.getUpdateSpecs(content);
 
     moduleSpecs.forEach((spec) =>
-      updates.push(new Module.Update(entry.path!, spec))
+      updates.push(new module.Update(entry.path!, spec))
     );
+
+    // GitHub Actions
+    const actionsSpecs = options?.actions ||
+      await action.getUpdateSpecs(content);
   }
 
   if (!updates.length) {
@@ -42,7 +51,7 @@ export async function createPullRequest(
   const branch = "denopendabot";
   await github.createBranch(repo, branch, base);
 
-  const groupsByDep = groupBy(updates, (it) => it.spec.dep);
+  const groupsByDep = groupBy(updates, (it) => it.spec.name);
   const deps = Object.keys(groupsByDep);
 
   // create commits for each updated dependency

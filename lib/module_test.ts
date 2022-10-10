@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.158.0/testing/asserts.ts";
-import { checkUpdate, getContent } from "./module.ts";
+import { getUpdateSpecs, Update } from "./module.ts";
 
 const initial = "0.158.0";
 const target = "0.159.0"; // @denopendabot denoland/deno_std
@@ -10,25 +10,23 @@ Deno.test("check/content", async () => {
     const url2 = "https://deno.land/std@${initial}/testing/assert.ts";
     `;
 
-  const updates = await checkUpdate(input);
+  const specs = await getUpdateSpecs(input);
 
-  assertEquals(updates.length, 2);
-  assertEquals(updates[0].target, target);
-  assertEquals(updates[1].target, target);
+  assertEquals(specs.length, 2);
+  assertEquals(specs[0].target, target);
+  assertEquals(specs[1].target, target);
 
-  const contents = await Promise.all(
-    updates.map((it) => getContent(input, it)),
-  );
+  const updates = specs.map((it) => new Update("deps.ts", it));
 
   assertEquals(
-    contents[0],
+    updates[0].content(input),
     `
     const url1 = "https://deno.land/std@${target}/testing/mod.ts";
     const url2 = "https://deno.land/std@${initial}/testing/assert.ts";
     `,
   );
   assertEquals(
-    contents[1],
+    updates[1].content(input),
     `
     const url1 = "https://deno.land/std@${initial}/testing/mod.ts";
     const url2 = "https://deno.land/std@${target}/testing/assert.ts";

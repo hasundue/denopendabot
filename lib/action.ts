@@ -1,13 +1,16 @@
 import { parse as parseYaml } from "https://deno.land/std@0.158.0/encoding/yaml.ts";
 import { gt, valid } from "https://deno.land/std@0.158.0/semver/mod.ts";
+import {
+  semverRegExp,
+  Update as AbstractUpdate,
+  UpdateSpec,
+} from "./common.ts";
 import { getLatestRelease } from "./github.ts";
-import { Repository, Update } from "./common.ts";
 
 interface Workflow {
   jobs: {
     [name: string]: Job;
   };
-  [x: string]: unknown;
 }
 
 interface Job {
@@ -24,19 +27,21 @@ interface Step {
 interface Action {
   name: string;
   with: string;
-  repo: Repository;
+  repo: UpdateSpec;
 }
 
-export async function check(): Promise<Update[]> {
+export class Update extends AbstractUpdate {
+  content = (input: string) => {
+    return input.replace(semverRegExp, this.spec.target);
+  };
 }
 
-export async function update(
+export async function getUpdateSpecs(
   input: string,
   actions: Action[],
-): Promise<Update[]> {
+): Promise<UpdateSpec[]> {
   const workflow = parseYaml(input) as Workflow;
-  let output = input;
-  const repos: Repository[] = [];
+  const specs: UpdateSpec[] = [];
 
   for (const job of Object.values(workflow.jobs)) {
     for (const step of Object.values(job.steps)) {
@@ -49,15 +54,8 @@ export async function update(
           const target = action.repo.target ??
             await getLatestRelease(action.repo.name);
 
-          if (target) {
-            repos.push({ name: action.repo.name, initial, target });
-          }
-
           if (target && gt(target, initial)) {
-            output = output.replace(
-              RegExp(`${action.with}: ` + `["']?` + initial + `["']?`),
-              `${action.with}: ${target}`,
-            );
+            repos.push({ name: action.repo.name, initial, target });
           }
         }
       }
