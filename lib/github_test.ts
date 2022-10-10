@@ -10,7 +10,7 @@ const repo = "hasundue/denopendabot";
 
 Deno.test("getLatestRelease", async () => {
   const tag = await github.getLatestRelease(repo);
-  assert(!tag);
+  assert(tag);
 });
 
 Deno.test("getBranch", async () => {
