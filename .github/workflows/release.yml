@@ -7,7 +7,6 @@ on:
 jobs:
   release:
     name: Release
-    needs: test
     runs-on: ubuntu-latest
 
     if: ${{ github.repository_owner == 'hasundue' }}
