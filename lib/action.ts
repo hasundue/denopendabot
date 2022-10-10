@@ -27,6 +27,9 @@ interface Action {
   repo: Repository;
 }
 
+export async function check(): Promise<Update[]> {
+}
+
 export async function update(
   input: string,
   actions: Action[],

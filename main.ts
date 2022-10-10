@@ -1,6 +1,5 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.2/mod.ts";
 import { update } from "./mod.ts";
-import { Module } from "./lib/module.ts";
 
 const { args, options } = await new Command()
   .name("denopendabot")

@@ -1,7 +1,6 @@
-import { groupBy } from "https://deno.land/std@0.159.0/collections/group_by.ts";
 import { decode } from "https://deno.land/std@0.159.0/encoding/base64.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.0.5";
-import { Update as ModuleUpdate } from "./module.ts";
+import { UpdateContent } from "./common.ts";
 import { env } from "./env.ts";
 
 const octokit = new Octokit({
@@ -53,7 +52,8 @@ export async function getBranch(
 export async function createCommit(
   repository: string,
   branch: string,
-  updates: ModuleUpdate[],
+  message: string,
+  updates: UpdateContent[],
 ) {
   const [owner, repo] = repository.split("/");
 
@@ -72,8 +72,6 @@ export async function createCommit(
     "POST /repos/{owner}/{repo}/git/trees",
     { owner, repo, tree: treeObject, base_tree: base.commit.sha },
   );
-
-  const message = createMessage(updates[0]);
 
   const author = {
     name: "denopendabot",
@@ -118,7 +116,7 @@ export async function getCommit(
   return commit;
 }
 
-export async function createBranch(
+export async function ensureBranch(
   repository: string,
   branch: string,
   base = "main",
@@ -129,7 +127,7 @@ export async function createBranch(
 
   if (exists) {
     console.log(`Branch ${branch} already exists.`);
-    return;
+    return exists;
   }
 
   // get a reference to main branch
@@ -145,8 +143,22 @@ export async function createBranch(
   );
 
   console.log(`Created a branch ${result.ref}.`);
-
   return result;
+}
+
+export async function updateBranch(
+  repository: string,
+  branch: string,
+  base = "main",
+) {
+  const [owner, repo] = repository.split("/");
+
+  const baseCommit = await getCommit(repository, base);
+
+  await octokit.request(
+    "PATCH /repos/{owner}/{repo}/git/refs/{ref}",
+    { owner, repo, ref: `heads/${branch}`, sha: baseCommit.sha, force: true },
+  );
 }
 
 export async function deleteBranch(
@@ -163,57 +175,52 @@ export async function deleteBranch(
   console.log(`Deleted a branch ${branch}.`);
 }
 
-export function createMessage(update: ModuleUpdate) {
-  const { url, target } = update;
-  const dep = url.toString().replace("https://", "");
-  return `build(deps): bump ${dep} to ${target}`;
-}
+// export async function createPullRequest(
+//   repository: string,
+//   branch: string,
+//   title: string,
+//   updates: UpdateContent[],
+//   base = "main",
+// ) {
+//   const [owner, repo] = repository.split("/");
 
-export async function createPullRequest(
-  repository: string,
-  branch: string,
-  updates: ModuleUpdate[],
-  base = "main",
-) {
-  const [owner, repo] = repository.split("/");
+//   const groups = groupBy(updates, (update) => update.dep.toString());
+//   const length = Object.keys(groups).length;
 
-  const groups = groupBy(updates, (update) => update.url.toString());
-  const length = Object.keys(groups).length;
+//   if (!length) throw Error("Unable to make a PR with no updates.");
 
-  if (!length) throw Error("Unable to make a PR with no updates.");
+//   for (const dep of Object.keys(groups)) {
+//     await createCommit(repository, branch, groups[dep]!);
+//   }
 
-  for (const dep of Object.keys(groups)) {
-    await createCommit(repository, branch, groups[dep]!);
-  }
+//   const header = env["CI"] ? "[TEST] " : "";
+//   const title = header +
+//     (length > 1
+//       ? "build(deps): update dependencies"
+//       : (await getCommit(repository, branch)).commit.message);
 
-  const header = env["CI"] ? "[TEST] " : "";
-  const title = header +
-    (length > 1
-      ? "build(deps): update dependencies"
-      : (await getCommit(repository, branch)).commit.message);
+//   const { data: result } = await octokit.request(
+//     "POST /repos/{owner}/{repo}/pulls",
+//     { owner, repo, title, base, head: branch },
+//   );
 
-  const { data: result } = await octokit.request(
-    "POST /repos/{owner}/{repo}/pulls",
-    { owner, repo, title, base, head: branch },
-  );
+//   console.log(`Created a PR: ${result.title}.`);
 
-  console.log(`Created a PR: ${result.title}.`);
+//   return result;
+// }
 
-  return result;
-}
+// export async function getPullRequests(
+//   repository: string,
+// ) {
+//   const [owner, repo] = repository.split("/");
 
-export async function getPullRequests(
-  repository: string,
-) {
-  const [owner, repo] = repository.split("/");
+//   const { data: results } = await octokit.request(
+//     "GET /repos/{owner}/{repo}/pulls",
+//     { owner, repo },
+//   );
 
-  const { data: results } = await octokit.request(
-    "GET /repos/{owner}/{repo}/pulls",
-    { owner, repo },
-  );
-
-  return results;
-}
+//   return results;
+// }
 
 export async function getTree(
   repository: string,

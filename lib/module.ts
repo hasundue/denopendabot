@@ -27,7 +27,7 @@ export async function checkUpdate(
 
     if (valid(latest) && valid(initial) && gt(latest, initial)) {
       updates.push({
-        repo: registry.url,
+        dep: registry.url,
         target: latest,
       });
     }
@@ -40,10 +40,18 @@ export async function getContent(
   input: string,
   update: Update,
 ): Promise<string> {
-  const registry = lookup(update.repo, REGISTRIES);
+  const registry = lookup(update.dep, REGISTRIES);
 
   if (!registry) {
-    throw Error(`Module ${update.repo} not found in the registry`);
+    throw Error(`Module ${update.dep} not found in the registry`);
   }
-  return input.replace(update.repo, registry.at(update.target).url);
+  return input.replace(update.dep, registry.at(update.target).url);
+}
+
+export function createMessage(
+  update: Update,
+) {
+  const { dep, target } = update;
+  const name = dep.toString().replace("https://", "");
+  return `build(deps): bump ${name} to ${target}`;
 }
