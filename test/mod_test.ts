@@ -4,8 +4,6 @@ import { createPullRequest } from "../mod.ts";
 const repo = "hasundue/denopendabot-test";
 
 Deno.test("updateModules", async () => {
-  const result = await createPullRequest(repo, {
-    sources: ["deps.ts"],
-  });
+  const result = await createPullRequest(repo);
   assert(result);
 });

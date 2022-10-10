@@ -18,7 +18,8 @@ export class Update extends AbstractUpdate {
     );
   };
   message = () => {
-    return `build(deps): bump ${this.spec.name} to ${this.spec.target}`;
+    const { name, target } = this.spec;
+    return `${this.type}(deps): bump ${name} to ${target}`;
   };
 }
 

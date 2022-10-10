@@ -1,4 +1,4 @@
-import { gt, valid } from "https://deno.land/std@0.159.0/semver/mod.ts";
+import { gt } from "https://deno.land/std@0.159.0/semver/mod.ts";
 import { getLatestRelease } from "./github.ts";
 import {
   semverRegExp,
@@ -11,8 +11,9 @@ export const regexp = (
   version = semverRegExp.source,
 ) =>
   RegExp(
-    "^(.*\\W)(" + version + ")(\\W+@denopendabot\\s+)(" + repo + ")(\\s*$)",
-    "g",
+    "(^.*\\W|^)(" + version + ")(\\W+@denopendabot\\s+)(" + repo +
+      ")($|\\s.*$)",
+    "mg",
   );
 
 export const versionRegExp = (
@@ -20,19 +21,20 @@ export const versionRegExp = (
   version = semverRegExp.source,
 ) =>
   RegExp(
-    "(?<=^.*\\W)" + version + "(?=\\W+@denopendabot\\s+" + repo + "\\s*$)",
-    "g",
+    "(?<=^.*\\W|^)" + version + "(?=\\W+@denopendabot\\s+" + repo +
+      "($|\\s.*$))",
+    "mg",
   );
 
 export class Update extends AbstractUpdate {
   content = (input: string) =>
     input.replaceAll(
-      versionRegExp(this.spec.name, this.spec.initial!),
+      versionRegExp(this.spec.name, this.spec.initial),
       this.spec.target,
     );
   message = () => {
     const { name, initial, target } = this.spec;
-    return `build(deps): bump ${name} from ${initial} to ${target}`;
+    return `${this.type}(deps): bump ${name} from ${initial} to ${target}`;
   };
 }
 

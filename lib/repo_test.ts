@@ -1,35 +1,33 @@
-import {
-  assert,
-  assertEquals,
-} from "https://deno.land/std@0.159.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.159.0/testing/asserts.ts";
 import { UpdateSpec } from "./common.ts";
 import { getUpdateSpecs, regexp, Update, versionRegExp } from "./repo.ts";
 
 const repo = "denoland/deno";
 const initial = "v1.26.0";
 const target = "v1.26.1"; // @denopendabot denoland/deno
-const content = `  .version("${initial}") // @denopendabot ${repo}`;
+const content = (version = initial) => `
+Deno version: ${version} <!-- @denopendabot ${repo} -->
+`;
 
 Deno.test("regexp", () => {
-  const matches = content.matchAll(regexp());
-  for (const match of matches) {
-    assertEquals(match[2], "v1.26.0");
-    assertEquals(match[7], "denoland/deno");
-  }
+  const matches = Array.from(content().matchAll(regexp()));
+  assertEquals(matches.length, 1);
+  assertEquals(matches[0][2], "v1.26.0");
+  assertEquals(matches[0][7], "denoland/deno");
 });
 
 Deno.test("versionRegExp", () => {
-  const matches = content.matchAll(
-    versionRegExp(repo),
+  const matches = Array.from(
+    content().matchAll(
+      versionRegExp(repo),
+    ),
   );
-  for (const match of matches) {
-    assert(match);
-    assertEquals(match[0], initial);
-  }
+  assertEquals(matches.length, 1);
+  assertEquals(matches[0][0], initial);
 });
 
 Deno.test("getUpdateSpecs", async () => {
-  const specs = await getUpdateSpecs(content);
+  const specs = await getUpdateSpecs(content());
   assertEquals(specs.length, 1);
   assertEquals(specs[0].name, "denoland/deno");
   assertEquals(specs[0].initial, "v1.26.0");
@@ -37,9 +35,9 @@ Deno.test("getUpdateSpecs", async () => {
 
 Deno.test("Update.content", () => {
   const spec: UpdateSpec = { name: repo, target };
-  const update = new Update("main.ts", spec);
+  const update = new Update("README.md", spec);
   assertEquals(
-    update.content(content),
-    `  .version("${target}") // @denopendabot ${repo}`,
+    update.content(content()),
+    content(target),
   );
 });

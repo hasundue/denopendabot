@@ -6,8 +6,9 @@ import * as repo from "./lib/repo.ts";
 
 interface Options {
   branch?: string;
-  self?: string;
+  release?: string;
   includes?: string[];
+  excludes?: string[];
 }
 
 export async function createPullRequest(
@@ -29,15 +30,20 @@ export async function createPullRequest(
     const content = await github.getBlobContent(repository, entry.sha!);
 
     // TS/JS modules
-    const moduleSpecs = options?.modules ||
-      await module.getUpdateSpecs(content);
+    const moduleSpecs: UpdateSpec[] = options?.release
+      ? [{ name: repository, target: options.release }]
+      : await module.getUpdateSpecs(content);
 
     moduleSpecs.forEach((spec) =>
       updates.push(new module.Update(entry.path!, spec))
     );
 
-    // GitHub Actions
+    // other repositories
     const repoSpecs = await repo.getUpdateSpecs(content);
+
+    repoSpecs.forEach((spec) =>
+      updates.push(new repo.Update(entry.path!, spec))
+    );
   }
 
   if (!updates.length) {

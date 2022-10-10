@@ -38,7 +38,7 @@ Deno.test("createBranch/deleteBranch", async () => {
 });
 
 Deno.test("createPullRequest", async (t) => {
-  const dep = "https://deno.land/std@0.158.0";
+  const name = "https://deno.land/std@0.158.0";
 
   const branch = "test-" + Date.now().valueOf();
   await github.createBranch(repo, branch);
@@ -46,7 +46,7 @@ Deno.test("createPullRequest", async (t) => {
   const target = "0.159.0";
   const content =
     `import { assert } from "https://deno.land/std@0.159.0/testing/mod.ts";`;
-  const spec = { dep, target, content };
+  const spec = { name, target, content };
   const update = new Update("deps.ts", spec);
   const message = update.message();
 

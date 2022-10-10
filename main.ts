@@ -1,5 +1,5 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.2/mod.ts";
-import { update } from "./mod.ts";
+import { createPullRequest } from "./mod.ts";
 
 const { args, options } = await new Command()
   .name("denopendabot")
@@ -11,34 +11,22 @@ const { args, options } = await new Command()
     "Branch to update. (default: main)",
   )
   .option(
+    "-i --include <paths...>",
+    "Files to update. (default: all files)",
+  )
+  .option(
     "-x --exclude <paths...>",
     "Files to exclude.",
   )
   .option(
-    "-m --module <url> <target_version>",
-    "TypeScript/JavaScript module to update.",
-  )
-  .option(
-    "-s --sources <paths...>",
-    "Files to update their dependent modules. (default: *)",
-  )
-  .option(
-    "-w --workflows <paths...>",
-    "GitHub workflows to update. (default: ./github/workflows/*.yml)",
-  )
-  .option(
-    "-a --actions <paths...>",
-    "GitHub actions to update.",
-  )
-  .option(
-    "-d --documents <paths...>",
-    "Markdown documenst to update. (default: *.md)",
+    "-r --release <target_version>",
+    "Bump the repository version for a release.",
   )
   .parse(Deno.args);
 
 const repo = args[0];
 
-await update(repo, options);
+await createPullRequest(repo, options);
 
 // const exclude = options.exclude?.map((glob) => globToRegExp(glob)) ?? [];
 
