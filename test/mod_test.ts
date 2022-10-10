@@ -1,5 +1,6 @@
 import {
   assert,
+  assertArrayIncludes,
   assertEquals,
 } from "https://deno.land/std@0.159.0/testing/asserts.ts";
 import { createPullRequest, getBlobsToUpdate, VERSION } from "../mod.ts";
@@ -14,18 +15,23 @@ Deno.test("getBlobsToUpdate", async () => {
     exclude: ["app.ts"],
   });
   const paths = blobs.map((blob) => blob.path);
-  assertEquals(paths, ["main.ts", "mod.ts", "README.md"]);
+  assertArrayIncludes(paths, ["main.ts", "mod.ts", "README.md"]);
 });
 
 Deno.test("createPullRequest", async () => {
   const branch = "test-" + Date.now().valueOf();
 
-  const result = await createPullRequest(repo, { branch, release: target });
+  const result = await createPullRequest(repo, {
+    branch,
+    release: target,
+    include: ["mod.ts"],
+  });
+
   assert(result);
 
   assertEquals(
     result.title,
-    `docs(deps): bump hasundue/denopendabot from ${VERSION} to ${target}`,
+    `build(deps): bump hasundue/denopendabot from ${VERSION} to ${target}`,
   );
 
   await github.deleteBranch(repo, branch);

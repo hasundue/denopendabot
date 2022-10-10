@@ -2,6 +2,6 @@
   "tasks": {
     "run": "deno run -A main.ts hasundue/denopendabot",
     "test": "deno test --allow-env --allow-net --allow-read",
-    "dev": "deno fmt && deno lint && deno task test --fail-fast"
+    "dev": "deno fmt && deno lint && deno task test"
   }
 }

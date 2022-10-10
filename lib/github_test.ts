@@ -3,7 +3,8 @@ import {
   assertEquals,
 } from "https://deno.land/std@0.159.0/testing/asserts.ts";
 import * as github from "./github.ts";
-import { Update } from "./module.ts";
+import { Update } from "./repo.ts";
+import { VERSION } from "../mod.ts";
 
 const repo = "hasundue/denopendabot";
 
@@ -24,16 +25,17 @@ Deno.test("getCommit", async () => {
 });
 
 Deno.test("createPullRequest", async (t) => {
-  const name = "https://deno.land/std@0.158.0/testing/mod.ts";
-  const target = "0.159.0";
-
   const branch = "test-" + Date.now().valueOf();
 
   await t.step("createBranch", async () => {
     await github.createBranch(repo, branch);
   });
 
-  const update = new Update("deps.ts", { name, target });
+  const update = new Update("mod.ts", {
+    name: "hasundue/denopendabot",
+    initial: VERSION,
+    target: "1.0.0",
+  });
   const message = update.message();
 
   await t.step("createCommit", async () => {

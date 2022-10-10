@@ -1,9 +1,7 @@
-import {
-  groupBy,
-  intersect,
-  withoutAll,
-} from "https://deno.land/std@0.159.0/collections/mod.ts";
-import { pullRequestType, Update, UpdateSpec } from "./lib/common.ts";
+import { groupBy } from "https://deno.land/std@0.159.0/collections/group_by.ts";
+import { intersect } from "https://deno.land/std@0.159.0/collections/intersect.ts";
+import { withoutAll } from "https://deno.land/std@0.159.0/collections/without_all.ts";
+import { pullRequestType, Update } from "./lib/common.ts";
 import * as github from "./lib/github.ts";
 import * as module from "./lib/module.ts";
 import * as repo from "./lib/repo.ts";
@@ -51,16 +49,18 @@ export async function createPullRequest(
     const content = await github.getBlobContent(repository, blob.sha!);
 
     // TS/JS modules
-    const moduleSpecs: UpdateSpec[] = options?.release
-      ? [{ name: repository, target: options.release }]
-      : await module.getUpdateSpecs(content);
+    const moduleSpecs = await module.getUpdateSpecs(content);
 
     moduleSpecs.forEach((spec) =>
       updates.push(new module.Update(blob.path!, spec))
     );
 
     // other repositories
-    const repoSpecs = await repo.getUpdateSpecs(content);
+    const releaseSpec = options?.release
+      ? { name: repository, target: options.release }
+      : undefined;
+
+    const repoSpecs = await repo.getUpdateSpecs(content, releaseSpec);
 
     repoSpecs.forEach((spec) =>
       updates.push(new repo.Update(blob.path!, spec))

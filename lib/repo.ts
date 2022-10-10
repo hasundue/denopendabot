@@ -40,6 +40,7 @@ export class Update extends AbstractUpdate {
 
 export async function getUpdateSpecs(
   input: string,
+  release?: UpdateSpec,
 ): Promise<UpdateSpec[]> {
   const matches = input.matchAll(regexp());
   const specs: UpdateSpec[] = [];
@@ -47,11 +48,13 @@ export async function getUpdateSpecs(
   for (const match of matches) {
     const name = match[7];
 
-    const initial = match[2];
-    const latest = await getLatestRelease(name);
+    if (release && name !== release.name) continue;
 
-    if (latest && gt(latest, initial)) {
-      specs.push({ name, initial, target: latest });
+    const initial = match[2];
+    const target = release?.target || await getLatestRelease(name);
+
+    if (target && gt(target, initial)) {
+      specs.push({ name, initial, target });
     }
   }
 
