@@ -1,4 +1,16 @@
 import { extname } from "https://deno.land/std@0.159.0/path/mod.ts";
+import { minOf } from "https://deno.land/std@0.159.0/collections/mod.ts";
+
+export const semverRegExp = /v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/;
+
+export const CommitType = [
+  "build",
+  "ci",
+  "docs",
+] as const;
+
+export type CommitType = typeof CommitType[number];
+
 export type UpdateSpec = {
   name: string;
   initial?: string;
@@ -8,7 +20,7 @@ export type UpdateSpec = {
 export abstract class Update {
   path: string;
   spec: UpdateSpec;
-  type: "build" | "ci" | "docs";
+  type: CommitType;
 
   constructor(path: string, spec: UpdateSpec) {
     this.path = path;
@@ -26,4 +38,10 @@ export abstract class Update {
   abstract message: () => string;
 }
 
-export const semverRegExp = /v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/;
+export const pullRequestType = (updates: Update[]): CommitType =>
+  CommitType[
+    minOf(
+      updates,
+      (update) => CommitType.findIndex((type) => type === update.type),
+    )!
+  ];

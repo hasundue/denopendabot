@@ -175,12 +175,15 @@ export async function deleteBranch(
 ) {
   const [owner, repo] = repository.split("/");
 
-  await octokit.request(
-    "DELETE /repos/{owner}/{repo}/git/refs/{ref}",
-    { owner, repo, ref: `heads/${branch}` },
-  );
-
-  console.log(`Deleted a branch ${branch}.`);
+  try {
+    await octokit.request(
+      "DELETE /repos/{owner}/{repo}/git/refs/{ref}",
+      { owner, repo, ref: `heads/${branch}` },
+    );
+    console.log(`Deleted a branch ${branch}.`);
+  } catch {
+    console.log(`Branch ${branch} not exist.`);
+  }
 }
 
 export async function createPullRequest(

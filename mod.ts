@@ -1,33 +1,54 @@
-import { groupBy } from "https://deno.land/std@0.159.0/collections/group_by.ts";
-import { Update, UpdateSpec } from "./lib/common.ts";
+import {
+  groupBy,
+  intersect,
+  withoutAll,
+} from "https://deno.land/std@0.159.0/collections/mod.ts";
+import { pullRequestType, Update, UpdateSpec } from "./lib/common.ts";
 import * as github from "./lib/github.ts";
 import * as module from "./lib/module.ts";
 import * as repo from "./lib/repo.ts";
 
+export const VERSION = "0.0.0"; // @denopendabot hasundue/denopendabot
+
 interface Options {
+  base?: string;
   branch?: string;
   release?: string;
-  includes?: string[];
-  excludes?: string[];
+  include?: string[];
+  exclude?: string[];
+}
+
+export async function getBlobsToUpdate(
+  repository: string,
+  options?: Options,
+) {
+  const base = options?.base ?? "main";
+
+  const baseTree = await github.getTree(repository, base);
+
+  const paths = baseTree.map((blob) => blob.path!);
+  const pathsToInclude = options?.include || paths;
+  const pathsToExclude = options?.exclude || [];
+
+  const pathsToUpdate = withoutAll(
+    intersect(paths, pathsToInclude),
+    pathsToExclude,
+  );
+
+  return baseTree.filter((blob) => pathsToUpdate.includes(blob.path!));
 }
 
 export async function createPullRequest(
   repository: string,
   options?: Options,
 ) {
-  const base = options?.branch ?? "main";
-  const baseTree = await github.getTree(repository, base);
+  const base = options?.base ?? "main";
 
-  const targets = options?.includes
-    ? baseTree.filter((blob) =>
-      options?.includes?.find((it) => blob.path?.match(it))
-    )
-    : baseTree;
-
+  const blobs = await getBlobsToUpdate(repository, options);
   const updates: Update[] = [];
 
-  for (const entry of targets) {
-    const content = await github.getBlobContent(repository, entry.sha!);
+  for (const blob of blobs) {
+    const content = await github.getBlobContent(repository, blob.sha!);
 
     // TS/JS modules
     const moduleSpecs: UpdateSpec[] = options?.release
@@ -35,14 +56,14 @@ export async function createPullRequest(
       : await module.getUpdateSpecs(content);
 
     moduleSpecs.forEach((spec) =>
-      updates.push(new module.Update(entry.path!, spec))
+      updates.push(new module.Update(blob.path!, spec))
     );
 
     // other repositories
     const repoSpecs = await repo.getUpdateSpecs(content);
 
     repoSpecs.forEach((spec) =>
-      updates.push(new repo.Update(entry.path!, spec))
+      updates.push(new repo.Update(blob.path!, spec))
     );
   }
 
@@ -51,7 +72,7 @@ export async function createPullRequest(
     return null;
   }
 
-  const branch = "denopendabot";
+  const branch = options?.branch || "denopendabot";
   await github.createBranch(repository, branch, base);
 
   const groupsByDep = groupBy(updates, (it) => it.spec.name);
@@ -64,8 +85,10 @@ export async function createPullRequest(
     await github.createCommit(repository, branch, message, updates);
   }
 
+  const type = pullRequestType(updates);
+
   const title = deps.length > 1
-    ? "build(deps): update dependencies"
+    ? `${type}(deps): update dependencies`
     : updates[0].message();
 
   return await github.createPullRequest(repository, branch, title, base);
