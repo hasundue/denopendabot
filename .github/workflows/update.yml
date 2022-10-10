@@ -19,7 +19,7 @@ jobs:
 
       - name: Run Denopendabot
         run: >
-          deno run --allow-env --allow-net --allow-read
+          deno run -q --allow-env --allow-net --allow-read
           https://pax.deno.dev/hasundue/denopendabot/main.ts
           ${{ github.repository }}
 
