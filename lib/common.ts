@@ -4,18 +4,23 @@ export interface Repository {
   target?: string;
 }
 
-export interface Update {
-  dep: string; // repository or module
-  target: string; // target version
-  initial?: string; // initial version
-}
+export type UpdateSpec = {
+  dep: string;
+  initial?: string;
+  target: string;
+};
 
-export interface UpdateSpec extends Update {
+export abstract class Update {
   path: string;
-}
+  spec: UpdateSpec;
 
-export interface UpdateContent extends UpdateSpec {
-  content: string;
+  constructor(path: string, spec: UpdateSpec) {
+    this.path = path;
+    this.spec = spec;
+  }
+
+  abstract content: (input: string) => string;
+  abstract message: () => string;
 }
 
 export const semverRegExp = /v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/;

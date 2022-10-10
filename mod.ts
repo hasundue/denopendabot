@@ -1,13 +1,13 @@
 import { groupBy } from "https://deno.land/std@0.159.0/collections/group_by.ts";
-import { checkUpdate, getContent } from "./lib/module.ts";
-import { Update, UpdateContent, UpdateSpec } from "./lib/common.ts";
+import { Update, UpdateSpec } from "./lib/common.ts";
+import * as Module from "./lib/module.ts";
 import * as github from "./lib/github.ts";
 
-export async function update(
+export async function createPullRequest(
   repo: string,
   options?: {
     branch?: string;
-    modules?: Update[];
+    modules?: UpdateSpec[];
     sources?: string[];
   },
 ) {
@@ -20,32 +20,41 @@ export async function update(
     )
     : baseTree;
 
-  const specs: UpdateSpec[] = [];
+  const updates: Update[] = [];
 
   for (const entry of targets) {
     const content = await github.getBlobContent(repo, entry.sha!);
-    const updates = options?.modules || await checkUpdate(content);
 
-    specs.concat(updates.map((it) => ({ ...it, path: entry.path! })));
+    // TS/JS modules
+    const moduleSpecs = options?.modules ||
+      await Module.getUpdateSpecs(content);
+
+    moduleSpecs.forEach((spec) =>
+      updates.push(new Module.Update(entry.path!, spec))
+    );
   }
 
-  if (!specs) {
+  if (!updates.length) {
     console.log("No updates found.");
-    return;
+    return null;
   }
 
-  await github.ensureBranch(repo, "denopendabot", base);
+  const branch = "denopendabot";
+  await github.createBranch(repo, branch, base);
 
-  const groupsByDep = groupBy(specs, (it) => it.dep);
+  const groupsByDep = groupBy(updates, (it) => it.spec.dep);
   const deps = Object.keys(groupsByDep);
 
+  // create commits for each updated dependency
   for (const dep of deps) {
-    const specs = groupsByDep[dep]!;
-    const contents: UpdateContent[] = [];
-
-    for (const spec of specs) {
-      const content = await getContent(input, spec);
-      contents.push({ ...spec, content });
-    }
+    const updates = groupsByDep[dep]!;
+    const message = updates[0].message();
+    await github.createCommit(repo, branch, message, updates);
   }
+
+  const title = deps.length > 1
+    ? "build(deps): update dependencies"
+    : updates[0].message();
+
+  return await github.createPullRequest(repo, branch, title, base);
 }

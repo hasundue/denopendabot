@@ -3,14 +3,13 @@ import {
   assertEquals,
 } from "https://deno.land/std@0.159.0/testing/asserts.ts";
 import * as github from "./github.ts";
-import { env } from "./env.ts";
-import { createMessage } from "./module.ts";
+import { Update } from "./module.ts";
 
 const repo = "hasundue/denopendabot-test";
 
 Deno.test("getLatestRelease", async () => {
   const tag = await github.getLatestRelease(repo);
-  assert(tag);
+  assert(!tag);
 });
 
 Deno.test("getBranch", async () => {
@@ -24,10 +23,10 @@ Deno.test("getCommit", async () => {
   assert(commit);
 });
 
-Deno.test("ensureBranch/deleteBranch", async () => {
+Deno.test("createBranch/deleteBranch", async () => {
   const name = "test-" + Date.now().valueOf();
 
-  await github.ensureBranch(repo, name);
+  await github.createBranch(repo, name);
   const branch = await github.getBranch(repo, name);
 
   assert(branch);
@@ -38,21 +37,28 @@ Deno.test("ensureBranch/deleteBranch", async () => {
   assertEquals(await github.getBranch(repo, name), null);
 });
 
-Deno.test("createCommit/updateBranch", async (t) => {
+Deno.test("createPullRequest", async (t) => {
   const dep = "https://deno.land/std@0.158.0";
 
   const branch = "test-" + Date.now().valueOf();
-  await github.ensureBranch(repo, branch);
+  await github.createBranch(repo, branch);
 
   const target = "0.159.0";
   const content =
-    "import { assert } from https://deno.land/std@0.159.0/testing/mod.ts;";
-  const update = { path: "test.ts", dep, target, content };
-  const message = createMessage(update);
+    `import { assert } from "https://deno.land/std@0.159.0/testing/mod.ts";`;
+  const spec = { dep, target, content };
+  const update = new Update("deps.ts", spec);
+  const message = update.message();
 
   await t.step("createCommit", async () => {
     const result = await github.createCommit(repo, branch, message, [update]);
     assertEquals(result.message, message);
+  });
+
+  await t.step("createPullRequest", async () => {
+    await github.createPullRequest(repo, branch, message);
+    const prs = await github.getPullRequests(repo);
+    assertEquals(prs[0].title, message);
   });
 
   await t.step("updateBranch", async () => {
@@ -64,29 +70,6 @@ Deno.test("createCommit/updateBranch", async (t) => {
 
     assertEquals(main.sha, current.sha);
   });
+
+  await github.deleteBranch(repo, branch);
 });
-
-// Deno.test("createPullRequest", { skip: true }, async () => {
-//   const branch = "test-" + Date.now().valueOf();
-//   const url = "https://deno.land/std@0.158.0";
-//   const target = "0.159.0";
-//   const content =
-//     "import { assert } from https://deno.land/std@0.159.0/testing/mod.ts;";
-//   const update = { path: "test.ts", url, target, output: content };
-
-//   await github.ensureBranch(repo, branch);
-
-//   await github.createPullRequest(repo, branch, [update]);
-
-//   const prs = await github.getPullRequests(repo);
-//   const header = env["CI"] ? "[TEST] " : "";
-//   assertEquals(prs[0].title, header + github.createMessage(update));
-
-//   await github.deleteBranch(repo, branch);
-//   assertEquals(await github.getBranch(repo, branch), null);
-// });
-
-// Deno.test("getTree", async () => {
-//   const tree = await github.getTree(repo);
-//   assert(tree);
-// });

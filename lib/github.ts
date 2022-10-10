@@ -1,6 +1,6 @@
 import { decode } from "https://deno.land/std@0.159.0/encoding/base64.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.0.5";
-import { UpdateContent } from "./common.ts";
+import { Update } from "./common.ts";
 import { env } from "./env.ts";
 
 const octokit = new Octokit({
@@ -22,17 +22,6 @@ export async function getLatestRelease(
   }
 }
 
-function createBlobData(path: string, content: string): BlobData {
-  return { path, mode: "100644", type: "blob", content };
-}
-
-interface BlobData {
-  path: string;
-  mode: "100644";
-  type: "blob";
-  content: string;
-}
-
 export async function getBranch(
   repository: string,
   branch: string,
@@ -49,28 +38,48 @@ export async function getBranch(
   }
 }
 
+async function createBlobContents(
+  repository: string,
+  updates: Update[],
+  tree: { path?: string; sha?: string }[],
+): Promise<BlobContent[]> {
+  return await Promise.all(updates.map(async (update) => {
+    const blob = tree.find((it) => it.path === update.path);
+    const content = update.content(
+      await getBlobContent(repository, blob!.sha!),
+    );
+    return { path: update.path, mode: "100644", type: "blob", content };
+  }));
+}
+
+interface BlobContent {
+  path: string;
+  mode: "100644";
+  type: "blob";
+  content: string;
+}
+
 export async function createCommit(
   repository: string,
   branch: string,
   message: string,
-  updates: UpdateContent[],
+  updates: Update[],
 ) {
   const [owner, repo] = repository.split("/");
 
-  // create a tree object for updated files
-  const treeObject: BlobData[] = updates.map((update) =>
-    createBlobData(update.path, update.content)
-  );
-
   // get a reference to the target branch
   const base = await getBranch(repository, branch);
-
   if (!base) throw Error(`Branch ${branch} not found`);
 
+  const baseTree = await getTree(repository, branch);
+
+  // create a tree object for updated files
+  const blobs = await createBlobContents(repository, updates, baseTree);
+
   // create a new tree on the target branch
-  const { data: tree } = await octokit.request(
+  const { data: newTree } = await octokit.request(
     "POST /repos/{owner}/{repo}/git/trees",
-    { owner, repo, tree: treeObject, base_tree: base.commit.sha },
+    { owner, repo, tree: blobs, base_tree: base.commit.sha },
   );
 
   const author = {
@@ -86,7 +95,7 @@ export async function createCommit(
       repo,
       message,
       author,
-      tree: tree.sha,
+      tree: newTree.sha,
       parents: [base.commit.sha],
     },
   );
@@ -116,7 +125,7 @@ export async function getCommit(
   return commit;
 }
 
-export async function ensureBranch(
+export async function createBranch(
   repository: string,
   branch: string,
   base = "main",
@@ -126,8 +135,7 @@ export async function ensureBranch(
   const exists = await getBranch(repository, branch);
 
   if (exists) {
-    console.log(`Branch ${branch} already exists.`);
-    return exists;
+    await deleteBranch(repository, branch);
   }
 
   // get a reference to main branch
@@ -142,7 +150,7 @@ export async function ensureBranch(
     { owner, repo, ref: `refs/heads/${branch}`, sha: data.object.sha },
   );
 
-  console.log(`Created a branch ${result.ref}.`);
+  console.log(`Created a branch ${branch}.`);
   return result;
 }
 
@@ -175,52 +183,36 @@ export async function deleteBranch(
   console.log(`Deleted a branch ${branch}.`);
 }
 
-// export async function createPullRequest(
-//   repository: string,
-//   branch: string,
-//   title: string,
-//   updates: UpdateContent[],
-//   base = "main",
-// ) {
-//   const [owner, repo] = repository.split("/");
+export async function createPullRequest(
+  repository: string,
+  branch: string,
+  title: string,
+  base = "main",
+) {
+  const [owner, repo] = repository.split("/");
 
-//   const groups = groupBy(updates, (update) => update.dep.toString());
-//   const length = Object.keys(groups).length;
+  const { data: result } = await octokit.request(
+    "POST /repos/{owner}/{repo}/pulls",
+    { owner, repo, title, base, head: branch },
+  );
 
-//   if (!length) throw Error("Unable to make a PR with no updates.");
+  console.log(`Created a PR: ${result.title}.`);
 
-//   for (const dep of Object.keys(groups)) {
-//     await createCommit(repository, branch, groups[dep]!);
-//   }
+  return result;
+}
 
-//   const header = env["CI"] ? "[TEST] " : "";
-//   const title = header +
-//     (length > 1
-//       ? "build(deps): update dependencies"
-//       : (await getCommit(repository, branch)).commit.message);
+export async function getPullRequests(
+  repository: string,
+) {
+  const [owner, repo] = repository.split("/");
 
-//   const { data: result } = await octokit.request(
-//     "POST /repos/{owner}/{repo}/pulls",
-//     { owner, repo, title, base, head: branch },
-//   );
+  const { data: results } = await octokit.request(
+    "GET /repos/{owner}/{repo}/pulls",
+    { owner, repo },
+  );
 
-//   console.log(`Created a PR: ${result.title}.`);
-
-//   return result;
-// }
-
-// export async function getPullRequests(
-//   repository: string,
-// ) {
-//   const [owner, repo] = repository.split("/");
-
-//   const { data: results } = await octokit.request(
-//     "GET /repos/{owner}/{repo}/pulls",
-//     { owner, repo },
-//   );
-
-//   return results;
-// }
+  return results;
+}
 
 export async function getTree(
   repository: string,
