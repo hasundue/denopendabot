@@ -70,10 +70,7 @@ export async function createPullRequest(
     );
   }
 
-  if (!updates.length) {
-    console.log("No updates found.");
-    return null;
-  }
+  if (!updates.length) return null;
 
   const branch = options?.branch ?? "denopendabot";
   await github.createBranch(repository, branch, base);

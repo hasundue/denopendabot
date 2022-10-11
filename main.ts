@@ -26,10 +26,17 @@ const { args, options } = await new Command()
     "-r --release <target_version>",
     "Bump the repository version for a release.",
   )
+  .option(
+    "-c --check",
+    "Exits with code=1 if any update is found",
+  )
   .parse(Deno.args);
 
 const repo = args[0];
+const result = await createPullRequest(repo, options);
 
-await createPullRequest(repo, options);
+if (!result) console.log("🎉 Everything is up-to-date!");
+
+if (options.check && result) Deno.exit(1);
 
 Deno.exit(0);
