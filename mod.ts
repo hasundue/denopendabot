@@ -14,13 +14,14 @@ interface Options {
   release?: string;
   include?: string[];
   exclude?: string[];
+  dryRun?: true;
 }
 
-export async function getBlobsToUpdate(
-  github: Client,
+export async function createPullRequest(
   repository: string,
   options?: Options,
 ) {
+  const github = new Client();
   const base = options?.base ?? "main";
 
   const baseTree = await github.getTree(repository, base);
@@ -34,17 +35,7 @@ export async function getBlobsToUpdate(
     pathsToExclude,
   );
 
-  return baseTree.filter((blob) => pathsToUpdate.includes(blob.path!));
-}
-
-export async function createPullRequest(
-  repository: string,
-  options?: Options,
-) {
-  const github = new Client();
-  const base = options?.base ?? "main";
-
-  const blobs = await getBlobsToUpdate(github, repository, options);
+  const blobs = baseTree.filter((blob) => pathsToUpdate.includes(blob.path!));
   const updates: Update[] = [];
 
   for (const blob of blobs) {
@@ -70,7 +61,8 @@ export async function createPullRequest(
     );
   }
 
-  if (!updates.length) return null;
+  // no updates found or a dry-run
+  if (!updates.length || options?.dryRun) return null;
 
   const branch = options?.branch ?? "denopendabot";
   await github.createBranch(repository, branch, base);

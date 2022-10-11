@@ -28,14 +28,20 @@ const { args, options } = await new Command()
   )
   .option(
     "-c --check",
-    "Exits with code=1 if any update is found",
+    "Exit with code=1 if any update is found",
+  )
+  .option(
+    "-d --dry-run",
+    "Will not actually update",
   )
   .parse(Deno.args);
 
 const repo = args[0];
 const result = await createPullRequest(repo, options);
 
-if (!result) console.log("🎉 Everything is up-to-date!");
+if (!options.dryRun && !result) {
+  console.log("🎉 Everything is up-to-date!");
+}
 
 if (options.check && result) Deno.exit(1);
 

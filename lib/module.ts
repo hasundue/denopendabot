@@ -1,11 +1,11 @@
-import { gt } from "https://deno.land/std@0.159.0/semver/mod.ts";
+import {
+  gt,
+  prerelease,
+  valid,
+} from "https://deno.land/std@0.159.0/semver/mod.ts";
 import { lookup, REGISTRIES } from "https://deno.land/x/udd@0.7.5/registry.ts";
 import { importUrls } from "https://deno.land/x/udd@0.7.5/search.ts";
-import {
-  semverRegExp,
-  Update as AbstractUpdate,
-  UpdateSpec,
-} from "./common.ts";
+import { Update as AbstractUpdate, UpdateSpec } from "./common.ts";
 
 const nameToUrl = (name: string) => "https://" + name;
 const urlToName = (url: string) => url.replace("https://", "");
@@ -42,9 +42,9 @@ export async function getUpdateSpecs(
     const all = await registry.all();
 
     // we try to ignore pre-releases
-    const latest = all.find((v) => v.match(semverRegExp));
+    const latest = all.find((v) => !prerelease(v));
 
-    if (latest && gt(latest, initial)) {
+    if (valid(initial) && latest && gt(latest, initial)) {
       console.log(`💡 ${name} => ${latest}`);
       specs.push({ name, target: latest });
     }
