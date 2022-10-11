@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.158.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.159.0/testing/asserts.ts";
 import { pullRequestType } from "./common.ts";
 import { Update } from "./repo.ts";
 
