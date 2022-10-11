@@ -7,7 +7,7 @@ import { getOctokit } from "./lib/app.ts";
 import * as module from "./lib/module.ts";
 import * as repo from "./lib/repo.ts";
 
-export const VERSION = "0.0.0"; // @denopendabot hasundue/denopendabot
+export const VERSION = "0.0.1"; // @denopendabot hasundue/denopendabot
 
 interface Options {
   base?: string;
