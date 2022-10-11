@@ -6,8 +6,6 @@ import {
   UpdateSpec,
 } from "./common.ts";
 
-const github = new Client();
-
 export const regexp = (
   repo = "\\S+/\\S+",
   version = semverRegExp.source,
@@ -41,19 +39,23 @@ export class Update extends AbstractUpdate {
 }
 
 export async function getUpdateSpecs(
+  github: Client,
   input: string,
   release?: UpdateSpec,
 ): Promise<UpdateSpec[]> {
-  const matches = input.matchAll(regexp(release?.name));
+  const matches = input.matchAll(regexp());
   const specs: UpdateSpec[] = [];
 
   for (const match of matches) {
     const name = match[7];
 
     const initial = match[2];
-    const target = release?.target || await github.getLatestRelease(name);
+    const target = (release?.name === name)
+      ? release.target
+      : await github.getLatestRelease(name);
 
     if (target && gt(target, initial)) {
+      console.log(`💡 ${name}@${initial} => ${target}`);
       specs.push({ name, initial, target });
     }
   }

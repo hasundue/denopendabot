@@ -38,6 +38,7 @@ export async function getUpdateSpecs(
     const latest = (await registry.all())[0];
 
     if (valid(latest) && valid(initial) && gt(latest, initial)) {
+      console.log(`💡 ${name} => ${latest}`);
       specs.push({ name, target: latest });
     }
   }

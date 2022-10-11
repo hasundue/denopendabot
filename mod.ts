@@ -3,7 +3,6 @@ import { intersect } from "https://deno.land/std@0.159.0/collections/intersect.t
 import { withoutAll } from "https://deno.land/std@0.159.0/collections/without_all.ts";
 import { pullRequestType, Update } from "./lib/common.ts";
 import { Client } from "./lib/github.ts";
-import { getOctokit } from "./lib/app.ts";
 import * as module from "./lib/module.ts";
 import * as repo from "./lib/repo.ts";
 
@@ -18,10 +17,10 @@ interface Options {
 }
 
 export async function getBlobsToUpdate(
+  github: Client,
   repository: string,
   options?: Options,
 ) {
-  const github = new Client(await getOctokit(repository));
   const base = options?.base ?? "main";
 
   const baseTree = await github.getTree(repository, base);
@@ -42,13 +41,14 @@ export async function createPullRequest(
   repository: string,
   options?: Options,
 ) {
-  const github = new Client(await getOctokit(repository));
+  const github = new Client();
   const base = options?.base ?? "main";
 
-  const blobs = await getBlobsToUpdate(repository, options);
+  const blobs = await getBlobsToUpdate(github, repository, options);
   const updates: Update[] = [];
 
   for (const blob of blobs) {
+    console.log(`🔍 ${blob.path}`);
     const content = await github.getBlobContent(repository, blob.sha!);
 
     // TS/JS modules
@@ -63,7 +63,7 @@ export async function createPullRequest(
       ? { name: repository, target: options.release }
       : undefined;
 
-    const repoSpecs = await repo.getUpdateSpecs(content, releaseSpec);
+    const repoSpecs = await repo.getUpdateSpecs(github, content, releaseSpec);
 
     repoSpecs.forEach((spec) =>
       updates.push(new repo.Update(blob.path!, spec))
@@ -75,7 +75,7 @@ export async function createPullRequest(
     return null;
   }
 
-  const branch = options?.branch || "denopendabot";
+  const branch = options?.branch ?? "denopendabot";
   await github.createBranch(repository, branch, base);
 
   const groupsByDep = groupBy(updates, (it) => it.spec.name);

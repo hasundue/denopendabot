@@ -2,14 +2,12 @@ import {
   assert,
   assertEquals,
 } from "https://deno.land/std@0.159.0/testing/asserts.ts";
-import { getOctokit } from "./app.ts";
 import { Client } from "./github.ts";
 import { Update } from "./repo.ts";
 import { VERSION } from "../mod.ts";
 
 const repo = "hasundue/denopendabot";
-const octokit = await getOctokit(repo);
-const github = new Client(octokit);
+const github = new Client();
 
 Deno.test("getLatestRelease", async () => {
   const tag = await github.getLatestRelease(repo);

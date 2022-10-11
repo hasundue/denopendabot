@@ -1,7 +1,9 @@
 import { assertEquals } from "https://deno.land/std@0.159.0/testing/asserts.ts";
+import { Client } from "./github.ts";
 import { UpdateSpec } from "./common.ts";
 import { getUpdateSpecs, regexp, Update, versionRegExp } from "./repo.ts";
 
+const github = new Client();
 const repo = "denoland/deno";
 const initial = "v1.26.0";
 const target = "v1.26.1"; // @denopendabot denoland/deno
@@ -27,7 +29,7 @@ Deno.test("versionRegExp", () => {
 });
 
 Deno.test("getUpdateSpecs", async () => {
-  const specs = await getUpdateSpecs(content());
+  const specs = await getUpdateSpecs(github, content());
   assertEquals(specs.length, 1);
   assertEquals(specs[0].name, "denoland/deno");
   assertEquals(specs[0].initial, "v1.26.0");

@@ -4,15 +4,14 @@ import {
   assertEquals,
 } from "https://deno.land/std@0.159.0/testing/asserts.ts";
 import { createPullRequest, getBlobsToUpdate, VERSION } from "../mod.ts";
-import { getOctokit } from "../lib/app.ts";
 import { Client } from "../lib/github.ts";
 
 const repo = "hasundue/denopendabot";
 const target = "1.0.0";
-const github = new Client(await getOctokit(repo));
+const github = new Client();
 
 Deno.test("getBlobsToUpdate", async () => {
-  const blobs = await getBlobsToUpdate(repo, {
+  const blobs = await getBlobsToUpdate(github, repo, {
     include: ["main.ts", "mod.ts", "app.ts", "README.md"],
     exclude: ["app.ts"],
   });

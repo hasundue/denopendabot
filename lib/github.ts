@@ -15,7 +15,7 @@ export class Client {
 
   constructor(octokit?: Octokit | null) {
     this.octokit = octokit ?? new Octokit({
-      auth: env["GITHUB_TOKEN"] ?? env["GH_TOKEN"],
+      auth: env["GH_TOKEN"] ?? env["GITHUB_TOKEN"],
     });
   }
 
@@ -111,7 +111,7 @@ export class Client {
       { owner, repo, ref: `heads/${branch}`, sha: commit.sha },
     );
 
-    console.log(`Created a commit: ${commit.message}.`);
+    console.log(`📝 ${commit.message}.`);
 
     return commit;
   }
@@ -140,7 +140,13 @@ export class Client {
     const exists = await this.getBranch(repository, branch);
 
     if (exists) {
-      await this.deleteBranch(repository, branch);
+      // update the ref
+      const baseRef = await this.getCommit(repository, base);
+      await this.octokit.request(
+        "PATCH /repos/{owner}/{repo}/git/refs/{ref}",
+        { owner, repo, ref: `heads/${branch}`, sha: baseRef.sha },
+      );
+      return exists;
     }
 
     // get a reference to main branch
@@ -155,7 +161,7 @@ export class Client {
       { owner, repo, ref: `refs/heads/${branch}`, sha: data.object.sha },
     );
 
-    console.log(`Created a branch ${branch}.`);
+    console.log(`🔨 branch ${branch}.`);
     return result;
   }
 
@@ -185,7 +191,7 @@ export class Client {
         "DELETE /repos/{owner}/{repo}/git/refs/{ref}",
         { owner, repo, ref: `heads/${branch}` },
       );
-      console.log(`Deleted a branch ${branch}.`);
+      console.log(`🗑️ branch ${branch}.`);
     } catch {
       console.log(`Branch ${branch} not exist.`);
     }
@@ -204,7 +210,7 @@ export class Client {
       { owner, repo, title, base, head: branch },
     );
 
-    console.log(`Created a PR: ${result.title}.`);
+    console.log(`🚀 ${result.title}.`);
 
     return result;
   }
