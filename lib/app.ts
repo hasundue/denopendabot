@@ -1,6 +1,6 @@
 import { Redis } from "https://deno.land/x/upstash_redis@v1.14.0/mod.ts";
-import { App } from "https://esm.sh/@octokit/app@14.0.0-beta.1";
-import { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@11.0.0-beta.2";
+import { App } from "https://esm.sh/@octokit/app@13.0.9";
+import { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.2.0";
 import { env } from "./env.ts";
 
 // we need this for some reason
@@ -13,7 +13,17 @@ export const redis = new Redis({
 });
 
 const privateKey: string | null = await redis.get("private_key");
+
 if (!privateKey) throw Error("Private key is not deployed on Upstash Redis.");
+
+export async function uploadPrivateKey(path: string) {
+  try {
+    const value = await Deno.readTextFile(path);
+    await redis.set("private_key", value);
+  } catch {
+    // do nothing
+  }
+}
 
 export const app = new App({
   appId: env["APP_ID"],

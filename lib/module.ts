@@ -1,4 +1,4 @@
-import { gt, valid } from "https://deno.land/std@0.159.0/semver/mod.ts";
+import { gt } from "https://deno.land/std@0.159.0/semver/mod.ts";
 import { lookup, REGISTRIES } from "https://deno.land/x/udd@0.7.5/registry.ts";
 import { importUrls } from "https://deno.land/x/udd@0.7.5/search.ts";
 import {
