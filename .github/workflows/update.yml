@@ -22,6 +22,4 @@ jobs:
           deno run -q --allow-env --allow-net --allow-read
           https://pax.deno.dev/hasundue/denopendabot/main.ts
           ${{ github.repository }}
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
