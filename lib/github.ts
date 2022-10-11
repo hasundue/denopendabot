@@ -111,7 +111,7 @@ export class Client {
       { owner, repo, ref: `heads/${branch}`, sha: commit.sha },
     );
 
-    console.log(`📝 ${commit.message}.`);
+    console.log(`📝 ${commit.message}`);
 
     return commit;
   }
@@ -161,7 +161,7 @@ export class Client {
       { owner, repo, ref: `refs/heads/${branch}`, sha: data.object.sha },
     );
 
-    console.log(`🔨 branch ${branch}.`);
+    console.log(`🔨 branch ${branch}`);
     return result;
   }
 
@@ -210,7 +210,7 @@ export class Client {
       { owner, repo, title, base, head: branch },
     );
 
-    console.log(`🚀 ${result.title}.`);
+    console.log(`🚀 ${result.title}`);
 
     return result;
   }
