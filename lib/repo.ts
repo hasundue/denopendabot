@@ -1,10 +1,12 @@
 import { gt } from "https://deno.land/std@0.159.0/semver/mod.ts";
-import { getLatestRelease } from "./github.ts";
+import { Client } from "./github.ts";
 import {
   semverRegExp,
   Update as AbstractUpdate,
   UpdateSpec,
 } from "./common.ts";
+
+const github = new Client();
 
 export const regexp = (
   repo = "\\S+/\\S+",
@@ -42,16 +44,14 @@ export async function getUpdateSpecs(
   input: string,
   release?: UpdateSpec,
 ): Promise<UpdateSpec[]> {
-  const matches = input.matchAll(regexp());
+  const matches = input.matchAll(regexp(release?.name));
   const specs: UpdateSpec[] = [];
 
   for (const match of matches) {
     const name = match[7];
 
-    if (release && name !== release.name) continue;
-
     const initial = match[2];
-    const target = release?.target || await getLatestRelease(name);
+    const target = release?.target || await github.getLatestRelease(name);
 
     if (target && gt(target, initial)) {
       specs.push({ name, initial, target });

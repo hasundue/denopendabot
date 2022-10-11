@@ -2,7 +2,8 @@ import { groupBy } from "https://deno.land/std@0.159.0/collections/group_by.ts";
 import { intersect } from "https://deno.land/std@0.159.0/collections/intersect.ts";
 import { withoutAll } from "https://deno.land/std@0.159.0/collections/without_all.ts";
 import { pullRequestType, Update } from "./lib/common.ts";
-import * as github from "./lib/github.ts";
+import { Client } from "./lib/github.ts";
+import { getOctokit } from "./lib/app.ts";
 import * as module from "./lib/module.ts";
 import * as repo from "./lib/repo.ts";
 
@@ -20,6 +21,7 @@ export async function getBlobsToUpdate(
   repository: string,
   options?: Options,
 ) {
+  const github = new Client(await getOctokit(repository));
   const base = options?.base ?? "main";
 
   const baseTree = await github.getTree(repository, base);
@@ -40,6 +42,7 @@ export async function createPullRequest(
   repository: string,
   options?: Options,
 ) {
+  const github = new Client(await getOctokit(repository));
   const base = options?.base ?? "main";
 
   const blobs = await getBlobsToUpdate(repository, options);

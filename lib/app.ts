@@ -43,7 +43,7 @@ export async function getInstallationId(repo: string): Promise<number | null> {
 export async function getOctokit(repo: string) {
   const id = await getInstallationId(repo);
   if (id) {
-    return app.getInstallationOctokit(id);
+    return await app.getInstallationOctokit(id);
   } else {
     return null;
   }
