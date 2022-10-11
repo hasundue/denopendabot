@@ -7,6 +7,7 @@ import { createPullRequest, getBlobsToUpdate, VERSION } from "../mod.ts";
 import { Client } from "../lib/github.ts";
 
 const repo = "hasundue/denopendabot";
+const base = "test";
 const target = "1.0.0";
 const github = new Client();
 
@@ -22,7 +23,10 @@ Deno.test("getBlobsToUpdate", async () => {
 Deno.test("createPullRequest", async () => {
   const branch = "test-" + Date.now().valueOf();
 
+  await github.createBranch(repo, base);
+
   const result = await createPullRequest(repo, {
+    base,
     branch,
     release: target,
     include: ["mod.ts"],

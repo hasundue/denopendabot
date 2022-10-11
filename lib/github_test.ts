@@ -7,6 +7,7 @@ import { Update } from "./repo.ts";
 import { VERSION } from "../mod.ts";
 
 const repo = "hasundue/denopendabot";
+const base = "test";
 const github = new Client();
 
 Deno.test("getLatestRelease", async () => {
@@ -25,11 +26,16 @@ Deno.test("getCommit", async () => {
   assert(commit);
 });
 
+Deno.test("createBranch", async () => {
+  const result = await github.createBranch(repo, base);
+  assert(result);
+});
+
 Deno.test("createPullRequest", async (t) => {
   const branch = "test-" + Date.now().valueOf();
 
   await t.step("createBranch", async () => {
-    await github.createBranch(repo, branch);
+    await github.createBranch(repo, branch, base);
   });
 
   const update = new Update("mod.ts", {
@@ -45,19 +51,19 @@ Deno.test("createPullRequest", async (t) => {
   });
 
   await t.step("createPullRequest", async () => {
-    await github.createPullRequest(repo, branch, message);
+    await github.createPullRequest(repo, branch, message, base);
     const prs = await github.getPullRequests(repo);
     assertEquals(prs[0].title, message);
   });
 
   await t.step("updateBranch", async () => {
     // reset to the head of main
-    await github.updateBranch(repo, branch);
+    await github.updateBranch(repo, branch, base);
 
-    const main = await github.getCommit(repo);
-    const current = await github.getCommit(repo, branch);
+    const baseCommit = await github.getCommit(repo, base);
+    const headCommit = await github.getCommit(repo, branch);
 
-    assertEquals(main.sha, current.sha);
+    assertEquals(baseCommit.sha, headCommit.sha);
   });
 
   await t.step("deleteBranch", async () => {
