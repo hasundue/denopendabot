@@ -4,9 +4,8 @@ import {
 } from "https://deno.land/std@0.159.0/testing/asserts.ts";
 import { Client } from "./github.ts";
 import { Update } from "./repo.ts";
-import { VERSION } from "../mod.ts";
 
-const repo = "hasundue/denopendabot";
+const repo = "hasundue/denopendabot-test";
 const base = "test";
 const github = new Client();
 
@@ -38,10 +37,10 @@ Deno.test("createPullRequest", async (t) => {
     await github.createBranch(repo, branch, base);
   });
 
-  const update = new Update("mod.ts", {
-    name: "hasundue/denopendabot",
-    initial: VERSION,
-    target: "1.0.0",
+  const update = new Update("deps.ts", {
+    name: "deno.land/x/udd@0.7.4/mod.ts",
+    initial: "0.7.4",
+    target: "0.7.5",
   });
   const message = update.message();
 

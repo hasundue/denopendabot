@@ -3,21 +3,21 @@ import {
   assertArrayIncludes,
   assertEquals,
 } from "https://deno.land/std@0.159.0/testing/asserts.ts";
-import { createPullRequest, getBlobsToUpdate, VERSION } from "../mod.ts";
+import { createPullRequest, getBlobsToUpdate } from "../mod.ts";
 import { Client } from "../lib/github.ts";
 
-const repo = "hasundue/denopendabot";
+const repo = "hasundue/denopendabot-test";
 const base = "test";
-const target = "1.0.0";
+const target = "0.7.5";
 const github = new Client();
 
 Deno.test("getBlobsToUpdate", async () => {
   const blobs = await getBlobsToUpdate(github, repo, {
-    include: ["main.ts", "mod.ts", "app.ts", "README.md"],
-    exclude: ["app.ts"],
+    include: ["LICENSE", "README.md", "deps.ts"],
+    exclude: ["LICENSE"],
   });
   const paths = blobs.map((blob) => blob.path);
-  assertArrayIncludes(paths, ["main.ts", "mod.ts", "README.md"]);
+  assertArrayIncludes(paths, ["deps.ts", "README.md"]);
 });
 
 Deno.test("createPullRequest", async () => {
@@ -26,17 +26,16 @@ Deno.test("createPullRequest", async () => {
   await github.createBranch(repo, base);
 
   const result = await createPullRequest(repo, {
-    base,
     branch,
     release: target,
-    include: ["mod.ts"],
+    include: ["deps.ts"],
   });
 
   assert(result);
 
   assertEquals(
     result.title,
-    `build(deps): bump hasundue/denopendabot from ${VERSION} to ${target}`,
+    `build(deps): bump deno.land/x/udd@0.7.4/mod.ts to ${target}`,
   );
 
   await github.deleteBranch(repo, branch);
