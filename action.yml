@@ -38,3 +38,7 @@ runs:
         --branch ${{ intputs.working-branch }}
         --token ${{ inputs.token }}
       shell: bash
+
+branding:
+  icon: 'refresh-cw'
+  color: 'gray-dark'
