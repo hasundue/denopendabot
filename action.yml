@@ -1,16 +1,26 @@
 name: Denopendabot
 
-description: Dependabot clone for Deno projects
+description: Keeps your Deno projects up-to-date
 
 inputs:
-  files:
-    description: Files to check including import statements
+  token:
+    description: Personal access token authorized to update workflows
     required: true
-    default: deps.ts
-  workdir:
-    description: Path to run denopendabot in
+
+  repository:
+    description: Repository to update dependencies
     required: true
-    default: ./
+    default: ${{ github.repository }}
+
+  base-branch:
+    description: Branch to update
+    required: true
+    default: main
+
+  working-branch:
+    description: Working branch for Denopendabot
+    required: true
+    default: main
 
 runs:
   using: composite
@@ -19,12 +29,12 @@ runs:
     - name: Setup Deno
       uses: denoland/setup-deno@v1
       with:
-        deno-version: v1.26.0
+        deno-version: v1.26.1 # @denopendabot denoland/deno
 
     - name: Run Denopendabot
       run: >
-        deno run -A --import-map https://pax.deno.dev/hasundue/denopendabot/import_map.json
-        https://pax.deno.dev/hasundue/denopendabot/cli.ts
-        ${{ inputs.files }}
-      working-directory: ${{ inputs.workdir }}
+        deno run -q --allow-env --allow-net ./main.ts ${{ inputs.repository }}
+        --base ${{ intputs.base-branch }}
+        --branch ${{ intputs.working-branch }}
+        --token ${{ inputs.token }}
       shell: bash
