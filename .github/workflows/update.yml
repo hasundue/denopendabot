@@ -21,15 +21,6 @@ jobs:
 
       - name: Run Denopendabot
         run: >
-          deno run -q --allow-env --allow-net
-          https://pax.deno.dev/hasundue/denopendabot/main.ts
+          deno run -q --allow-env --allow-net ./main.ts
           ${{ github.repository }}
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          APP_ID: ${{ secrets.APP_ID }}
-          CLIENT_ID: ${{ secrets.CLIENT_ID }}
-          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
-          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
-          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
-
+          --token ${{ secrets.GH_TOKEN }}
