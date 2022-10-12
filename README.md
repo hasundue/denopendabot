@@ -11,7 +11,8 @@
 `denopendabot` keeps your Deno projects up-to-date.
 
 > **Warning**\
-> Still under development. Many bugs might remain. Any breaking changes may be introduced on each update.
+> Still under development. Many bugs might remain. Any breaking changes may be
+> introduced on each update.
 
 ## :rocket: Features
 
@@ -42,7 +43,8 @@ module update libraries for Deno and supports
 💡 denoland/deno@v1.26.0 => v1.26.1
 ```
 
-Denopendabot update any SemVer in the code specified by a comment of `@denopendabot {owner}/{repo}`.
+Denopendabot update any SemVer in the code specified by a comment of
+`@denopendabot {owner}/{repo}`.
 
 ### Commits and pull requests
 
@@ -56,13 +58,15 @@ See
 
 WIP
 
-## Usage
+## :bulb: Usage
 
 ### GitHub Action
 
-You need a private access token with a `workflow` scope to update workflow definitions (`./github/workflows/*.yml`).
+You need a private access token with a `workflow` scope to update workflow
+definitions (`./github/workflows/*.yml`).
 
-In the examples below, we assume that token added in repository secrets as `GH_TOKEN`.
+In the examples below, we assume that token added in repository secrets as
+`GH_TOKEN`.
 
 #### Predefined workflow (recommended)
 
