@@ -6,7 +6,7 @@ import { Client } from "./lib/github.ts";
 import * as module from "./lib/module.ts";
 import * as repo from "./lib/repo.ts";
 
-export const VERSION = "0.2.0"; // @denopendabot hasundue/denopendabot
+export const VERSION = "0.2.1"; // @denopendabot hasundue/denopendabot
 
 interface Options {
   base?: string;
