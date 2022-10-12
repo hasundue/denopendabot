@@ -82,38 +82,41 @@ export class Client {
     const blobs = await this.createBlobContents(repository, updates, baseTree);
 
     // create a new tree on the target branch
-    const { data: newTree } = await this.octokit.request(
-      "POST /repos/{owner}/{repo}/git/trees",
-      { owner, repo, tree: blobs, base_tree: base.commit.sha },
-    );
+    try {
+      const { data: newTree } = await this.octokit.request(
+        "POST /repos/{owner}/{repo}/git/trees",
+        { owner, repo, tree: blobs, base_tree: base.commit.sha },
+      );
 
-    const author = {
-      name: "denopendabot",
-      email: "denopendabot@gmail.com",
-    };
+      const author = {
+        name: "denopendabot",
+        email: "denopendabot@gmail.com",
+      };
 
-    // create a new tree on the target branch
-    const { data: commit } = await this.octokit.request(
-      "POST /repos/{owner}/{repo}/git/commits",
-      {
-        owner,
-        repo,
-        message,
-        author,
-        tree: newTree.sha,
-        parents: [base.commit.sha],
-      },
-    );
+      // create a new tree on the target branch
+      const tree = newTree.sha;
+      const parents = [base.commit.sha];
 
-    // update ref of the branch to the commit
-    await this.octokit.request(
-      "PATCH /repos/{owner}/{repo}/git/refs/{ref}",
-      { owner, repo, ref: `heads/${branch}`, sha: commit.sha },
-    );
+      const { data: commit } = await this.octokit.request(
+        "POST /repos/{owner}/{repo}/git/commits",
+        { owner, repo, message, author, tree, parents },
+      );
 
-    console.log(`📝 ${commit.message}`);
+      // update ref of the branch to the commit
+      await this.octokit.request(
+        "PATCH /repos/{owner}/{repo}/git/refs/{ref}",
+        { owner, repo, ref: `heads/${branch}`, sha: commit.sha },
+      );
 
-    return commit;
+      console.log(`📝 ${commit.message}`);
+
+      return commit;
+    } catch (error) {
+      if (updates.find((update) => update.isWorkflow())) {
+        throw Error("❗ Unauthorized to update workflows");
+      }
+      throw error;
+    }
   }
 
   async getCommit(

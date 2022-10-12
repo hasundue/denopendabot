@@ -1,6 +1,7 @@
 import { groupBy } from "https://deno.land/std@0.159.0/collections/group_by.ts";
 import { intersect } from "https://deno.land/std@0.159.0/collections/intersect.ts";
 import { withoutAll } from "https://deno.land/std@0.159.0/collections/without_all.ts";
+import { env } from "./lib/env.ts";
 import { pullRequestType, Update } from "./lib/common.ts";
 import { Client } from "./lib/github.ts";
 import * as module from "./lib/module.ts";
@@ -22,9 +23,12 @@ export async function createPullRequest(
   repository: string,
   options?: Options,
 ) {
+  if (!options?.token && !env.GH_TOKEN && !env.GITHUB_TOKEN) {
+    throw Error("❗ Access token not provided");
+  }
   const github = new Client(options?.token);
-  const base = options?.base ?? "main";
 
+  const base = options?.base ?? "main";
   const baseTree = await github.getTree(repository, base);
 
   const paths = baseTree.map((blob) => blob.path!);
@@ -65,10 +69,18 @@ export async function createPullRequest(
   // no updates found or a dry-run
   if (!updates.length || options?.dryRun) return null;
 
+  // check if we are authoried to update workflows
+  const unauthorized = !options?.token && !env.GH_TOKEN;
+
+  // filter out workflows if we are not authorized to update them
+  const updatables = unauthorized
+    ? updates.filter((update) => !update.isWorkflow())
+    : updates;
+
   const branch = options?.branch ?? "denopendabot";
   await github.createBranch(repository, branch, base);
 
-  const groupsByDep = groupBy(updates, (it) => it.spec.name);
+  const groupsByDep = groupBy(updatables, (it) => it.spec.name);
   const deps = Object.keys(groupsByDep);
 
   // create commits for each updated dependency
@@ -76,6 +88,12 @@ export async function createPullRequest(
     const updates = groupsByDep[dep]!;
     const message = updates[0].message();
     await github.createCommit(repository, branch, message, updates);
+  }
+
+  if (unauthorized) {
+    console.log(
+      "📣 Skipped the workflow files since we are not authorized to update them.",
+    );
   }
 
   const type = pullRequestType(updates);

@@ -34,6 +34,8 @@ export abstract class Update {
       : "build";
   }
 
+  isWorkflow = () => this.path.startsWith(".github/workflows/");
+
   abstract content: (input: string) => string;
   abstract message: () => string;
 }
