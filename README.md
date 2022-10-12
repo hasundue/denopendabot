@@ -19,7 +19,7 @@
 ### Update Deno modules automatically
 
 ```typescript
-import { assert } from "https://deno.land/std@0.158.0/testing/mod.ts";
+import { assert } from "https://deno.land/std@0.159.0/testing/mod.ts";
 ```
 
 ```sh
