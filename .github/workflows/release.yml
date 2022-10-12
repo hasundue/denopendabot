@@ -23,9 +23,8 @@ jobs:
       - name: Semantic Release
         run: >
           deno run -q --allow-env --allow-net --allow-read
-          https://deno.land/x/denomantic_release@0.4.1/main.ts
+          https://deno.land/x/denomantic_release@0.5.0/main.ts
           ${{ github.repository }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          --token ${{ secrets.GITHUB_TOKEN }}
+          --user-token ${{ secrets.GH_TOKEN }}
 
