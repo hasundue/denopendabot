@@ -15,13 +15,14 @@ interface Options {
   include?: string[];
   exclude?: string[];
   dryRun?: true;
+  token?: string;
 }
 
 export async function createPullRequest(
   repository: string,
   options?: Options,
 ) {
-  const github = new Client();
+  const github = new Client(options?.token);
   const base = options?.base ?? "main";
 
   const baseTree = await github.getTree(repository, base);

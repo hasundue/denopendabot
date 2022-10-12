@@ -13,9 +13,9 @@ interface BlobContent {
 export class Client {
   private octokit: Octokit;
 
-  constructor(octokit?: Octokit | null) {
-    this.octokit = octokit ?? new Octokit({
-      auth: env["GH_TOKEN"] ?? env["GITHUB_TOKEN"],
+  constructor(token?: string) {
+    this.octokit = new Octokit({
+      auth: token ?? env["GH_TOKEN"] ?? env["GITHUB_TOKEN"],
     });
   }
 

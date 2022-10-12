@@ -34,6 +34,10 @@ const { args, options } = await new Command()
     "-d --dry-run",
     "Will not actually update",
   )
+  .option(
+    "-t --token <token>",
+    "Private access token for the repository.",
+  )
   .parse(Deno.args);
 
 const repo = args[0];
