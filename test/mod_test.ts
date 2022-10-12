@@ -7,7 +7,7 @@ import { Client } from "../lib/github.ts";
 
 const repo = "hasundue/denopendabot-test";
 const base = "test";
-const target = "0.7.5";
+const target = "0.8.0"; // @denopendabot yad/deno-udd
 const github = new Client();
 
 Deno.test("createPullRequest", async () => {
