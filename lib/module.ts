@@ -33,7 +33,7 @@ export function removeIgnore(
 ) {
   const start = "<!-- denopendabot-ignore-start -->";
   const end = "<!-- denopendabot-ignore-end -->";
-  const regexp = RegExp(start + ".*" + end);
+  const regexp = RegExp(start + ".*" + end, "mg");
   return input.replace(regexp, "");
 }
 
