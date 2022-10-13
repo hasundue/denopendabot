@@ -49,10 +49,14 @@ Deno.test("createPullRequest", async (t) => {
     assertEquals(result.message, message);
   });
 
-  await t.step("createPullRequest", async () => {
-    await github.createPullRequest(repo, branch, message, base);
-    const prs = await github.getPullRequests(repo);
-    assertEquals(prs[0].title, message);
+  await t.step("createPullRequest (new)", async () => {
+    const result = await github.createPullRequest(repo, branch, message, base);
+    assertEquals(result.title, message);
+  });
+
+  await t.step("createPullRequest (update)", async () => {
+    const result = await github.createPullRequest(repo, branch, message, base);
+    assertEquals(result.title, message);
   });
 
   await t.step("updateBranch", async () => {
