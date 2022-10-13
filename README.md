@@ -12,7 +12,7 @@
 
 > **Warning**\
 > Still under development. Many bugs might remain. Any breaking changes may be
-> introduced on each update.
+> introduced on each Feature release.
 
 ## :rocket: Features
 
@@ -38,7 +38,7 @@ module update libraries for Deno and supports
 ```yaml
 - uses: denoland/setup-deno@v1
   with:
-    deno-version: v1.26.1 # @denopendabot denoland/deno
+    deno-version: v1.26.0 # @denopendabot denoland/deno
 ```
 
 ```sh

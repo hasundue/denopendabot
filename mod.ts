@@ -18,6 +18,7 @@ interface Options {
   dryRun?: true;
   token?: string;
   userToken?: string;
+  isTest?: boolean;
 }
 
 export async function createPullRequest(
@@ -115,7 +116,7 @@ export async function createPullRequest(
     );
   }
 
-  const header = env.CI ? "[TEST] " : "";
+  const header = options?.isTest ? "[TEST] " : "";
   const type = pullRequestType(updates);
 
   const title = deps.length > 1
