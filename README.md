@@ -108,7 +108,7 @@ jobs:
       - name: Run Denopendabot
         run: >
           deno run -q --allow-env --allow-net
-          https://deno.land/x/denopendabot@0.3.0/main.ts
+          https://deno.land/x/denopendabot@0.4.3/main.ts
           ${{ github.repository }}
           --token ${{ secrets.GH_TOKEN }}
 ```
