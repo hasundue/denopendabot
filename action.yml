@@ -20,7 +20,7 @@ inputs:
   working-branch:
     description: Working branch for Denopendabot
     required: true
-    default: main
+    default: denopendabot
 
 runs:
   using: composite
