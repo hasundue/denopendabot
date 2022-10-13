@@ -33,7 +33,9 @@ runs:
 
     - name: Run Denopendabot
       run: >
-        deno run -q --allow-env --allow-net ./main.ts ${{ inputs.repository }}
+        deno run -q --allow-env --allow-net
+        https://deno.land/x/denopendabot@0.4.1/main.ts
+        ${{ inputs.repository }}
         --base ${{ inputs.base-branch }}
         --branch ${{ inputs.working-branch }}
         --token ${{ inputs.token }}
