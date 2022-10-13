@@ -33,6 +33,7 @@ jobs:
       - name: Test
         run: deno task test -q --coverage=./coverage
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           APP_ID: ${{ secrets.APP_ID }}
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
