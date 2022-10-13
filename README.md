@@ -29,8 +29,8 @@ import { assert } from "https://deno.land/std@0.158.0/testing/asserts.ts";
 ```
 
 Denopendabot takes advantage of the core engine of
-[udd](https://github.com/hayd/deno-udd), which is one of the most widely used
-module update libraries for Deno and supports
+[udd](https://github.com/hayd/deno-udd), one of the most widely used module
+update libraries for Deno, which supports
 [many registry domains](https://github.com/hayd/deno-udd#supported-domains).
 
 ### Update any SemVer
