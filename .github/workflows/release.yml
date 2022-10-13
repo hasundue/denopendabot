@@ -20,10 +20,10 @@ jobs:
         with:
           deno-version: v1.26.1 # @denopendabot denoland/deno
 
-      - name: Semantic Release
+      - name: Run denomantic-release
         run: >
-          deno run -q --allow-env --allow-net --allow-read
-          https://deno.land/x/denomantic_release@0.5.1/main.ts
+          deno run -q --allow-env --allow-net
+          https://pax.deno.dev/hasundue/denomantic-release/main.ts
           ${{ github.repository }}
           --token ${{ secrets.GITHUB_TOKEN }}
           --user-token ${{ secrets.GH_TOKEN }}
