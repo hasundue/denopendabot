@@ -51,8 +51,9 @@ export async function createPullRequest(
     const content = await actor.getBlobContent(repository, blob.sha!);
 
     // TS/JS modules
+    const moduleName = repository.split("/")[1].replaceAll("-", "_");
     const moduleReleaseSpec = options?.release
-      ? { name: `https://deno.land/x/${repository}`, target: options.release }
+      ? { name: `https://deno.land/x/${moduleName}`, target: options.release }
       : undefined;
 
     const moduleSpecs = await module.getUpdateSpecs(content, moduleReleaseSpec);
@@ -109,11 +110,12 @@ export async function createPullRequest(
     );
   }
 
+  const header = env.CI ? "[TEST] " : "";
   const type = pullRequestType(updates);
 
   const title = deps.length > 1
-    ? `${type}(deps): update dependencies`
-    : updates[0].message();
+    ? header + `${type}(deps): update dependencies`
+    : header + updates[0].message();
 
   return await actor.createPullRequest(repository, branch, title, base);
 }

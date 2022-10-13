@@ -77,11 +77,13 @@ Deno.test("getUpdateSpec (release)", async () => {
     `;
 
   const specs = await getUpdateSpecs(input, {
-    name: "hasundue/denopendabot",
+    name: "deno.land/x/denopendabot",
     target: "1.0.0",
   });
 
   assertEquals(specs.length, 2);
+  assertEquals(specs[0].name, `deno.land/std@${initial}/testing/mod.ts`);
   assertEquals(specs[0].target, target);
+  assertEquals(specs[1].name, `deno.land/x/denopendabot@0.1.0/main.ts`);
   assertEquals(specs[1].target, "1.0.0");
 });

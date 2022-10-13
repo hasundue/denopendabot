@@ -66,7 +66,7 @@ export async function getUpdateSpecs(
     const name = urlToName(registry.url);
     const initial = registry.version();
 
-    const latest = (release && name.match(release.name.split("/")[1]))
+    const latest = (release && name.includes(release.name))
       ? release.target
       : (await registry.all()).find((v) => !prerelease(v));
 
