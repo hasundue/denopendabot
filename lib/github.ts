@@ -147,7 +147,7 @@ export class Client {
       const baseRef = await this.getCommit(repository, base);
       await this.octokit.request(
         "PATCH /repos/{owner}/{repo}/git/refs/{ref}",
-        { owner, repo, ref: `heads/${branch}`, sha: baseRef.sha },
+        { owner, repo, ref: `heads/${branch}`, sha: baseRef.sha, force: true },
       );
       return exists;
     }
