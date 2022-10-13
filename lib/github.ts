@@ -15,7 +15,7 @@ export class Client {
 
   constructor(token?: string) {
     this.octokit = new Octokit({
-      auth: token ?? env["GH_TOKEN"] ?? env["GITHUB_TOKEN"],
+      auth: token ?? env["GITHUB_TOKEN"] ?? env["GH_TOKEN"],
     });
   }
 

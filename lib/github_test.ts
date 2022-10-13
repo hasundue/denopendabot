@@ -2,12 +2,13 @@ import {
   assert,
   assertEquals,
 } from "https://deno.land/std@0.159.0/testing/asserts.ts";
+import { env } from "./env.ts";
 import { Client } from "./github.ts";
 import { Update } from "./repo.ts";
 
 const repo = "hasundue/denopendabot-test";
 const base = "test";
-const github = new Client();
+const github = new Client(env.GITHUB_TOKEN);
 
 Deno.test("getLatestRelease", async () => {
   const tag = await github.getLatestRelease(repo);

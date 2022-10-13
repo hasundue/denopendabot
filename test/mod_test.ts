@@ -3,12 +3,13 @@ import {
   assertEquals,
 } from "https://deno.land/std@0.159.0/testing/asserts.ts";
 import { createPullRequest } from "../mod.ts";
+import { env } from "../lib/env.ts";
 import { Client } from "../lib/github.ts";
 
 const repo = "hasundue/denopendabot-test";
 const base = "test";
 const target = "0.8.0"; // @denopendabot yad/deno-udd
-const github = new Client();
+const github = new Client(env.GITHUB_TOKEN);
 
 Deno.test("createPullRequest", async () => {
   const branch = "test-" + Date.now().valueOf();

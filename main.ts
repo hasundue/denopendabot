@@ -36,7 +36,11 @@ const { args, options } = await new Command()
   )
   .option(
     "-t --token <token>",
-    "Private access token for the repository.",
+    "Private access token associated with GitHub Action. (default: GITHUB_TOKEN)",
+  )
+  .option(
+    "-u --user-token <token>",
+    "Private access token authorized to update workflows. (default: GH_TOKEN)",
   )
   .parse(Deno.args);
 

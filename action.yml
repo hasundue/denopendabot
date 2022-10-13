@@ -4,8 +4,13 @@ description: Keeps your Deno projects up-to-date
 
 inputs:
   token:
-    description: Personal access token authorized to update workflows
+    description: Access token authorized to run workflows
     required: true
+    default: ${{ secrets.GITHUB_TOKEN }}
+
+  user-token:
+    description: Personal access token authorized to update workflows
+    required: false
 
   repository:
     description: Repository to update dependencies
@@ -39,6 +44,7 @@ runs:
         --base ${{ inputs.base-branch }}
         --branch ${{ inputs.working-branch }}
         --token ${{ inputs.token }}
+        --user-token ${{ intpus.user-token }}
       shell: bash
 
 branding:

@@ -21,7 +21,7 @@
 <!-- denopendabot-ignore-start -->
 
 ```typescript
-import { assert } from "https://deno.land/std@0.158.0/testing/mod.ts";
+import { assert } from "https://deno.land/std@0.158.0/testing/asserts.ts";
 ```
 
 ```sh
@@ -38,7 +38,7 @@ module update libraries for Deno and supports
 ```yaml
 - uses: denoland/setup-deno@v1
   with:
-    deno-version: v1.26.1 # @denopendabot denoland/deno
+    deno-version: v1.26.0 # @denopendabot denoland/deno
 ```
 
 ```sh
@@ -66,7 +66,7 @@ WIP
 
 ### GitHub Action
 
-You need a private access token with a `workflow` scope to update workflow
+You need a private access token with the `workflow` scope to update workflow
 definitions (`./github/workflows/*.yml`).
 
 In the examples below, we assume the token is added in repository secrets as
@@ -86,7 +86,7 @@ jobs:
     steps:
       - uses: hasundue/denopendabot@0.5.2 # @denopendabot hasundue/denopendabot
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          user-token: ${{ secrets.GH_TOKEN }}
 ```
 
 See [action.yml](./action.yml) for other options.
@@ -112,7 +112,7 @@ jobs:
           deno run -q --allow-env --allow-net
           https://deno.land/x/denopendabot@0.5.2/main.ts
           ${{ github.repository }}
-          --token ${{ secrets.GH_TOKEN }}
+          --user-token ${{ secrets.GH_TOKEN }}
 ```
 
 ### GitHub App

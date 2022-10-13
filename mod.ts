@@ -17,19 +17,22 @@ interface Options {
   exclude?: string[];
   dryRun?: true;
   token?: string;
+  userToken?: string;
 }
 
 export async function createPullRequest(
   repository: string,
   options?: Options,
 ) {
-  if (!options?.token && !env.GH_TOKEN && !env.GITHUB_TOKEN) {
+  const actionToken = options?.token ?? env.GITHUB_TOKEN;
+  if (!actionToken) {
     throw Error("❗ Access token not provided");
   }
-  const github = new Client(options?.token);
+  // github client to run the workflow
+  const actor = new Client(actionToken);
 
   const base = options?.base ?? "main";
-  const baseTree = await github.getTree(repository, base);
+  const baseTree = await actor.getTree(repository, base);
 
   const paths = baseTree.map((blob) => blob.path!);
   const pathsToInclude = options?.include || paths;
@@ -45,7 +48,7 @@ export async function createPullRequest(
 
   for (const blob of blobs) {
     console.log(`🔍 ${blob.path}`);
-    const content = await github.getBlobContent(repository, blob.sha!);
+    const content = await actor.getBlobContent(repository, blob.sha!);
 
     // TS/JS modules
     const moduleSpecs = await module.getUpdateSpecs(content);
@@ -59,7 +62,7 @@ export async function createPullRequest(
       ? { name: repository, target: options.release }
       : undefined;
 
-    const repoSpecs = await repo.getUpdateSpecs(github, content, releaseSpec);
+    const repoSpecs = await repo.getUpdateSpecs(actor, content, releaseSpec);
 
     repoSpecs.forEach((spec) =>
       updates.push(new repo.Update(blob.path!, spec))
@@ -70,27 +73,29 @@ export async function createPullRequest(
   if (!updates.length || options?.dryRun) return null;
 
   // check if we are authoried to update workflows
-  const unauthorized = !options?.token && !env.GH_TOKEN;
+  const userToken = options?.userToken ?? env.GH_TOKEN;
 
   // filter out workflows if we are not authorized to update them
-  const updatables = unauthorized
+  const updatables = userToken
     ? updates.filter((update) => !update.isWorkflow())
     : updates;
 
   const branch = options?.branch ?? "denopendabot";
-  await github.createBranch(repository, branch, base);
+  await actor.createBranch(repository, branch, base);
 
   const groupsByDep = groupBy(updatables, (it) => it.spec.name);
   const deps = Object.keys(groupsByDep);
+
+  const commiter = userToken ? new Client(userToken) : actor;
 
   // create commits for each updated dependency
   for (const dep of deps) {
     const updates = groupsByDep[dep]!;
     const message = updates[0].message();
-    await github.createCommit(repository, branch, message, updates);
+    await commiter.createCommit(repository, branch, message, updates);
   }
 
-  if (unauthorized) {
+  if (!userToken) {
     console.log(
       "📣 Skipped the workflow files since we are not authorized to update them.",
     );
@@ -102,5 +107,5 @@ export async function createPullRequest(
     ? `${type}(deps): update dependencies`
     : updates[0].message();
 
-  return await github.createPullRequest(repository, branch, title, base);
+  return await actor.createPullRequest(repository, branch, title, base);
 }
