@@ -38,12 +38,14 @@ module update libraries for Deno and supports
 ```yaml
 - uses: denoland/setup-deno@v1
   with:
-    deno-version: v1.26.1 # @denopendabot denoland/deno
+    deno-version: v1.26.0 # @denopendabot denoland/deno
 ```
 
 ```sh
 💡 denoland/deno@v1.26.0 => v1.26.1
 ```
+
+<!-- denopendabot-ignore-end -->
 
 Denopendabot update any SemVer in the code specified by a comment of
 `@denopendabot {owner}/{repo}`.
@@ -112,8 +114,6 @@ jobs:
           ${{ github.repository }}
           --token ${{ secrets.GH_TOKEN }}
 ```
-
-<!-- denopendabot-ignore-end -->
 
 ### GitHub App
 
