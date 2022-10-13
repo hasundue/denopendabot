@@ -30,7 +30,7 @@ Deno.test({
 
     assertEquals(
       result.title,
-      `build(deps): bump hasundue/denopendabot from ${initial} to ${target}`,
+      `[TEST] build(deps): bump hasundue/denopendabot from ${initial} to ${target}`,
     );
 
     await github.deleteBranch(repo, branch);
