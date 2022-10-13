@@ -1,5 +1,5 @@
 import { decode } from "https://deno.land/std@0.159.0/encoding/base64.ts";
-import { Octokit } from "https://esm.sh/@octokit/core@4.0.5";
+import { Octokit } from "https://esm.sh/@octokit/core@4.1.0";
 import { Update } from "./common.ts";
 
 interface BlobContent {
