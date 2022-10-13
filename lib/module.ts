@@ -28,35 +28,11 @@ export class Update extends AbstractUpdate {
   };
 }
 
-export function removeIgnore(input: string) {
-  const fns = [
-    // ignore sections in markdown (denopendabot-ignore-start/end)
-    (input: string) => {
-      const start = "<!\\-\\- denopendabot\\-ignore\\-start \\-\\->";
-      const end = "<!\\-\\- denopendabot\\-ignore\\-end \\-\\->";
-      const regexp = RegExp("^\\s*" + start + ".*" + end + "\\s*$", "gms");
-      return input.replaceAll(regexp, "");
-    },
-    // ignore a single line (@denopendabot ignore)
-    (input: string) => {
-      const regexp = /^.*@denopendabot ignore.*$/gm;
-      return input.replaceAll(regexp, "");
-    },
-  ];
-
-  let output = input;
-  fns.forEach((fn) => output = fn(output));
-
-  return output;
-}
-
 export async function getUpdateSpecs(
   input: string,
   release?: UpdateSpec,
 ): Promise<UpdateSpec[]> {
-  const updatable = removeIgnore(input);
-
-  const urls = importUrls(updatable, REGISTRIES);
+  const urls = importUrls(input, REGISTRIES);
   const registries = urls.map((url) => lookup(url, REGISTRIES));
   const specs: UpdateSpec[] = [];
 

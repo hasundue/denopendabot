@@ -2,7 +2,7 @@ import { groupBy } from "https://deno.land/std@0.159.0/collections/group_by.ts";
 import { intersect } from "https://deno.land/std@0.159.0/collections/intersect.ts";
 import { withoutAll } from "https://deno.land/std@0.159.0/collections/without_all.ts";
 import { env } from "./lib/env.ts";
-import { pullRequestType, Update } from "./lib/common.ts";
+import { pullRequestType, removeIgnore, Update } from "./lib/common.ts";
 import { Client } from "./lib/github.ts";
 import * as module from "./lib/module.ts";
 import * as repo from "./lib/repo.ts";
@@ -48,7 +48,9 @@ export async function createPullRequest(
 
   for (const blob of blobs) {
     console.log(`🔍 ${blob.path}`);
+
     const content = await actor.getBlobContent(repository, blob.sha!);
+    const contentToUpdate = removeIgnore(content);
 
     // TS/JS modules
     const moduleName = repository.split("/")[1].replaceAll("-", "_");
@@ -56,7 +58,10 @@ export async function createPullRequest(
       ? { name: `https://deno.land/x/${moduleName}`, target: options.release }
       : undefined;
 
-    const moduleSpecs = await module.getUpdateSpecs(content, moduleReleaseSpec);
+    const moduleSpecs = await module.getUpdateSpecs(
+      contentToUpdate,
+      moduleReleaseSpec,
+    );
 
     moduleSpecs.forEach((spec) =>
       updates.push(new module.Update(blob.path!, spec))
@@ -69,7 +74,7 @@ export async function createPullRequest(
 
     const repoSpecs = await repo.getUpdateSpecs(
       actor,
-      content,
+      contentToUpdate,
       repoReleaseSpec,
     );
 

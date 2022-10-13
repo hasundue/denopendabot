@@ -1,45 +1,9 @@
 import { assertEquals } from "https://deno.land/std@0.159.0/testing/asserts.ts";
-import { getUpdateSpecs, removeIgnore, Update } from "./module.ts";
+import { getUpdateSpecs, Update } from "./module.ts";
 import { VERSION } from "../mod.ts";
 
 const initial = "0.158.0";
 const target = "0.159.0"; // @denopendabot denoland/deno_std
-
-Deno.test("removeIgnore (line)", () => {
-  const input = `
-    Do not ignore this
-    Ignore this // @denopendabot ignore
-    Do not ignore this`;
-
-  const output = removeIgnore(input);
-
-  assertEquals(
-    output,
-    `
-    Do not ignore this
-
-    Do not ignore this`,
-  );
-});
-
-Deno.test("removeIgnore (.md section)", () => {
-  const input = `
-    Do not ignore this
-    <!-- denopendabot-ignore-start -->
-    Ignore this
-    <!-- denopendabot-ignore-end -->
-    Do not ignore this`;
-
-  const output = removeIgnore(input);
-
-  assertEquals(
-    output,
-    `
-    Do not ignore this
-
-    Do not ignore this`,
-  );
-});
 
 Deno.test("getUpdateSpec/Update", async () => {
   const input = `

@@ -47,3 +47,25 @@ export const pullRequestType = (updates: Update[]): CommitType =>
       (update) => CommitType.findIndex((type) => type === update.type),
     )!
   ];
+
+export function removeIgnore(input: string) {
+  const fns = [
+    // ignore sections in markdown (denopendabot-ignore-start/end)
+    (input: string) => {
+      const start = "<!\\-\\- denopendabot\\-ignore\\-start \\-\\->";
+      const end = "<!\\-\\- denopendabot\\-ignore\\-end \\-\\->";
+      const regexp = RegExp("^\\s*" + start + ".*" + end + "\\s*$", "gms");
+      return input.replaceAll(regexp, "");
+    },
+    // ignore a single line (@denopendabot ignore)
+    (input: string) => {
+      const regexp = /^.*@denopendabot ignore.*$/gm;
+      return input.replaceAll(regexp, "");
+    },
+  ];
+
+  let output = input;
+  fns.forEach((fn) => output = fn(output));
+
+  return output;
+}
