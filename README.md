@@ -18,6 +18,8 @@
 
 ### Update Deno modules automatically
 
+<!-- denopendabot-ignore-start -->
+
 ```typescript
 import { assert } from "https://deno.land/std@0.158.0/testing/mod.ts";
 ```
@@ -110,6 +112,8 @@ jobs:
           ${{ github.repository }}
           --token ${{ secrets.GH_TOKEN }}
 ```
+
+<!-- denopendabot-ignore-end -->
 
 ### GitHub App
 

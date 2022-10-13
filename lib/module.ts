@@ -28,10 +28,21 @@ export class Update extends AbstractUpdate {
   };
 }
 
+export function removeIgnore(
+  input: string,
+) {
+  const start = "<!-- denopendabot-ignore-start -->";
+  const end = "<!-- denopendabot-ignore-end -->";
+  const regexp = RegExp(start + ".*" + end);
+  return input.replace(regexp, "");
+}
+
 export async function getUpdateSpecs(
   input: string,
 ): Promise<UpdateSpec[]> {
-  const urls = importUrls(input, REGISTRIES);
+  const updatable = removeIgnore(input);
+
+  const urls = importUrls(updatable, REGISTRIES);
   const registries = urls.map((url) => lookup(url, REGISTRIES));
   const specs: UpdateSpec[] = [];
 
