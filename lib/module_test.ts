@@ -1,5 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.159.0/testing/asserts.ts";
 import { getUpdateSpecs, removeIgnore, Update } from "./module.ts";
+import { VERSION } from "../mod.ts";
 
 const initial = "0.158.0";
 const target = "0.159.0"; // @denopendabot denoland/deno_std
@@ -73,7 +74,7 @@ Deno.test("getUpdateSpec/Update", async () => {
 Deno.test("getUpdateSpec (release)", async () => {
   const input = `
     const url1 = "https://deno.land/std@${initial}/testing/mod.ts";
-    const url2 = "https://deno.land/x/denopendabot@0.1.0/main.ts";
+    const url2 = "https://deno.land/x/denopendabot@${VERSION}/main.ts";
     `;
 
   const specs = await getUpdateSpecs(input, {
@@ -84,6 +85,6 @@ Deno.test("getUpdateSpec (release)", async () => {
   assertEquals(specs.length, 2);
   assertEquals(specs[0].name, `deno.land/std@${initial}/testing/mod.ts`);
   assertEquals(specs[0].target, target);
-  assertEquals(specs[1].name, `deno.land/x/denopendabot@0.1.0/main.ts`);
+  assertEquals(specs[1].name, `deno.land/x/denopendabot@${VERSION}/main.ts`);
   assertEquals(specs[1].target, "1.0.0");
 });
