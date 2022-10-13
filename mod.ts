@@ -26,7 +26,7 @@ export async function createPullRequest(
 ) {
   const actionToken = options?.token ?? env.GITHUB_TOKEN;
   if (!actionToken) {
-    throw Error("❗ Access token not provided");
+    console.log("📣 Access token not provided. Switch to dry-run mode.");
   }
   // github client to run the workflow
   const actor = new Client(actionToken);
