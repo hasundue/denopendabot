@@ -39,7 +39,7 @@ runs:
     - name: Run Denopendabot
       run: >
         deno run -q --allow-env --allow-net
-        https://deno.land/x/denopendabot@0.5.3/main.ts # @denopendabot hasundue/denopendabot
+        https://deno.land/x/denopendabot@0.5.3/main.ts
         ${{ inputs.repository }}
         --base ${{ inputs.base-branch }}
         --branch ${{ inputs.working-branch }}
