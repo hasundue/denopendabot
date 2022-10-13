@@ -38,7 +38,7 @@ module update libraries for Deno and supports
 ```yaml
 - uses: denoland/setup-deno@v1
   with:
-    deno-version: v1.26.0 # @denopendabot denoland/deno
+    deno-version: v1.26.1 # @denopendabot denoland/deno
 ```
 
 ```sh
@@ -110,7 +110,7 @@ jobs:
       - name: Run Denopendabot
         run: >
           deno run -q --allow-env --allow-net
-          https://deno.land/x/denopendabot@0.3.0/main.ts
+          https://deno.land/x/denopendabot@0.5.1/main.ts
           ${{ github.repository }}
           --token ${{ secrets.GH_TOKEN }}
 ```
