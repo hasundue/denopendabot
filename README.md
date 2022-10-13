@@ -38,7 +38,7 @@ module update libraries for Deno and supports
 ```yaml
 - uses: denoland/setup-deno@v1
   with:
-    deno-version: v1.26.0 # @denopendabot denoland/deno
+    deno-version: v1.26.1 # @denopendabot denoland/deno
 ```
 
 ```sh
@@ -84,7 +84,7 @@ jobs:
     name: Update
     runs-on: ubuntu-latest
     steps:
-      - uses: hasundue/denopendabot@0.5.2 # @denopendabot hasundue/denopendabot
+      - uses: hasundue/denopendabot@0.5.3 # @denopendabot hasundue/denopendabot
         with:
           user-token: ${{ secrets.GH_TOKEN }}
 ```
