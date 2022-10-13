@@ -21,6 +21,7 @@ Deno.test({
     await github.createBranch(repo, base);
 
     const result = await createPullRequest(repo, {
+      base,
       branch,
       release: target,
       include: ["mod.ts"],
