@@ -52,6 +52,7 @@ export function removeIgnore(input: string) {
 
 export async function getUpdateSpecs(
   input: string,
+  release?: UpdateSpec,
 ): Promise<UpdateSpec[]> {
   const updatable = removeIgnore(input);
 
@@ -64,10 +65,10 @@ export async function getUpdateSpecs(
 
     const name = urlToName(registry.url);
     const initial = registry.version();
-    const all = await registry.all();
 
-    // we try to ignore pre-releases
-    const latest = all.find((v) => !prerelease(v));
+    const latest = (release && name.match(release.name.split("/")[1]))
+      ? release.target
+      : (await registry.all()).find((v) => !prerelease(v));
 
     if (valid(initial) && latest && gt(latest, initial)) {
       console.log(`💡 ${name} => ${latest}`);

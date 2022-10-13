@@ -51,18 +51,26 @@ export async function createPullRequest(
     const content = await actor.getBlobContent(repository, blob.sha!);
 
     // TS/JS modules
-    const moduleSpecs = await module.getUpdateSpecs(content);
+    const moduleReleaseSpec = options?.release
+      ? { name: `https://deno.land/x/${repository}`, target: options.release }
+      : undefined;
+
+    const moduleSpecs = await module.getUpdateSpecs(content, moduleReleaseSpec);
 
     moduleSpecs.forEach((spec) =>
       updates.push(new module.Update(blob.path!, spec))
     );
 
     // other repositories
-    const releaseSpec = options?.release
+    const repoReleaseSpec = options?.release
       ? { name: repository, target: options.release }
       : undefined;
 
-    const repoSpecs = await repo.getUpdateSpecs(actor, content, releaseSpec);
+    const repoSpecs = await repo.getUpdateSpecs(
+      actor,
+      content,
+      repoReleaseSpec,
+    );
 
     repoSpecs.forEach((spec) =>
       updates.push(new repo.Update(blob.path!, spec))
