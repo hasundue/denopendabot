@@ -47,7 +47,7 @@ Deno.test({
 
     const update = new Update("mod.ts", {
       name: "hasundue/denopendabot",
-      initial: "0.5.4", // @denopendabot hasundue/denopendabot
+      initial: "0.5.5", // @denopendabot hasundue/denopendabot
       target: "1.0.0",
     });
     const message = update.message();
