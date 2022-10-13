@@ -27,5 +27,3 @@ jobs:
           ${{ github.repository }}
           --token ${{ secrets.GITHUB_TOKEN }}
           --user-token ${{ secrets.GH_TOKEN }}
-          --no-check
-
