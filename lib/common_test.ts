@@ -10,7 +10,7 @@ Deno.test("pullRequestType", () => {
     "build",
   );
   assertEquals(
-    pullRequestType([new Update("ci.yml", spec)]),
+    pullRequestType([new Update(".github/workflows/ci.yml", spec)]),
     "ci",
   );
   assertEquals(
@@ -18,8 +18,12 @@ Deno.test("pullRequestType", () => {
     "docs",
   );
   assertEquals(
+    pullRequestType([new Update("action.yml", spec)]),
+    "build",
+  );
+  assertEquals(
     pullRequestType([
-      new Update("ci.yml", spec),
+      new Update(".github/workflows/ci.yml", spec),
       new Update("README.md", spec),
     ]),
     "ci",
@@ -27,7 +31,7 @@ Deno.test("pullRequestType", () => {
   assertEquals(
     pullRequestType([
       new Update("deps.ts", spec),
-      new Update("ci.yml", spec),
+      new Update(".github/workflows/ci.yml", spec),
       new Update("README.md", spec),
     ]),
     "build",

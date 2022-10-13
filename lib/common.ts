@@ -26,14 +26,10 @@ export abstract class Update {
     this.path = path;
     this.spec = spec;
 
-    const ext = extname(this.path);
-    this.type = (ext === ".md")
-      ? "docs"
-      : (ext === ".yml" || ext === ".yaml")
-      ? "ci"
-      : "build";
+    this.type = this.isDocument() ? "docs" : this.isWorkflow() ? "ci" : "build";
   }
 
+  isDocument = () => extname(this.path).match(/\.md|\.txt/) !== null;
   isWorkflow = () => this.path.startsWith(".github/workflows/");
 
   abstract content: (input: string) => string;
