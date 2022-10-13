@@ -1,5 +1,5 @@
 import { groupBy } from "https://deno.land/std@1.0.0/collections/group_by.ts";
-import { intersect } from "https://deno.land/std@0.159.0/collections/intersect.ts";
+import { intersect } from "https://deno.land/std@1.0.0/collections/intersect.ts";
 import { withoutAll } from "https://deno.land/std@0.159.0/collections/without_all.ts";
 import { env } from "./lib/env.ts";
 import { pullRequestType, Update } from "./lib/common.ts";
