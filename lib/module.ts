@@ -28,24 +28,25 @@ export class Update extends AbstractUpdate {
   };
 }
 
-export function removeMarkdownIgnoreSection(input: string) {
-  const start = "<!\\-\\- denopendabot\\-ignore\\-start \\-\\->";
-  const end = "<!\\-\\- denopendabot\\-ignore\\-end \\-\\->";
-  const regexp = RegExp("^\\s*" + start + ".*" + end + "\\s*$", "gms");
-  return input.replaceAll(regexp, "");
-}
-
-export function removeLineToIgnore(input: string) {
-  const regexp = /^.*@denopendabot ignore.*$/gm;
-  return input.replaceAll(regexp, "");
-}
-
 export function removeIgnore(input: string) {
   const fns = [
-    removeMarkdownIgnoreSection,
+    // ignore sections in markdown (denopendabot-ignore-start/end)
+    (input: string) => {
+      const start = "<!\\-\\- denopendabot\\-ignore\\-start \\-\\->";
+      const end = "<!\\-\\- denopendabot\\-ignore\\-end \\-\\->";
+      const regexp = RegExp("^\\s*" + start + ".*" + end + "\\s*$", "gms");
+      return input.replaceAll(regexp, "");
+    },
+    // ignore a single line (@denopendabot ignore)
+    (input: string) => {
+      const regexp = /^.*@denopendabot ignore.*$/gm;
+      return input.replaceAll(regexp, "");
+    },
   ];
+
   let output = input;
   fns.forEach((fn) => output = fn(output));
+
   return output;
 }
 

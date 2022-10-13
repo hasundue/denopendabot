@@ -1,22 +1,16 @@
 import { assertEquals } from "https://deno.land/std@0.159.0/testing/asserts.ts";
-import {
-  getUpdateSpecs,
-  removeIgnore,
-  removeLineToIgnore,
-  removeMarkdownIgnoreSection,
-  Update,
-} from "./module.ts";
+import { getUpdateSpecs, removeIgnore, Update } from "./module.ts";
 
 const initial = "0.158.0";
 const target = "0.159.0"; // @denopendabot denoland/deno_std
 
-Deno.test("removeLineToIgnore", () => {
+Deno.test("removeIgnore (line)", () => {
   const input = `
     Do not ignore this
     Ignore this // @denopendabot ignore
     Do not ignore this`;
 
-  const output = removeLineToIgnore(input);
+  const output = removeIgnore(input);
 
   assertEquals(
     output,
@@ -27,26 +21,7 @@ Deno.test("removeLineToIgnore", () => {
   );
 });
 
-Deno.test("removeIgnoreMarkdownSection", () => {
-  const input = `
-    Do not ignore this
-    <!-- denopendabot-ignore-start -->
-    Ignore this
-    <!-- denopendabot-ignore-end -->
-    Do not ignore this`;
-
-  const output = removeMarkdownIgnoreSection(input);
-
-  assertEquals(
-    output,
-    `
-    Do not ignore this
-
-    Do not ignore this`,
-  );
-});
-
-Deno.test("removeIgnore", () => {
+Deno.test("removeIgnore (.md section)", () => {
   const input = `
     Do not ignore this
     <!-- denopendabot-ignore-start -->
