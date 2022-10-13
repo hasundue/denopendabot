@@ -50,7 +50,7 @@ Deno.test({
       initial: "0.5.7", // @denopendabot hasundue/denopendabot
       target: "1.0.0",
     });
-    const message = update.message();
+    const message = "[TEST] " + update.message();
 
     await t.step("createCommit", async () => {
       const result = await github.createCommit(repo, branch, message, [update]);
