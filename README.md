@@ -67,7 +67,7 @@ WIP
 You need a private access token with a `workflow` scope to update workflow
 definitions (`./github/workflows/*.yml`).
 
-In the examples below, we assume that token added in repository secrets as
+In the examples below, we assume the token is added in repository secrets as
 `GH_TOKEN`.
 
 #### Predefined workflow (recommended)
