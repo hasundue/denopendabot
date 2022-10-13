@@ -3,8 +3,8 @@ import {
   prerelease,
   valid,
 } from "https://deno.land/std@0.159.0/semver/mod.ts";
-import { lookup, REGISTRIES } from "https://deno.land/x/udd@0.7.5/registry.ts";
-import { importUrls } from "https://deno.land/x/udd@0.7.5/search.ts";
+import { lookup, REGISTRIES } from "https://deno.land/x/udd@0.8.0/registry.ts";
+import { importUrls } from "https://deno.land/x/udd@0.8.0/search.ts";
 import { Update as AbstractUpdate, UpdateSpec } from "./common.ts";
 
 const nameToUrl = (name: string) => "https://" + name;
