@@ -6,28 +6,33 @@ import { createPullRequest } from "../mod.ts";
 import { env } from "../lib/env.ts";
 import { Client } from "../lib/github.ts";
 
-const repo = "hasundue/denopendabot-test";
+const repo = "hasundue/denopendabot";
 const base = "test";
-const target = "0.8.0"; // @denopendabot yad/deno-udd
+const initial = "0.5.2"; // @denopendabot hasundue/denopendabot
+const target = "1.0.0";
 const github = new Client(env.GITHUB_TOKEN);
 
-Deno.test("createPullRequest", async () => {
-  const branch = "test-" + Date.now().valueOf();
+Deno.test({
+  name: "createPullRequest",
+  ignore: !env.CI,
+  fn: async () => {
+    const branch = "test-" + Date.now().valueOf();
 
-  await github.createBranch(repo, base);
+    await github.createBranch(repo, base);
 
-  const result = await createPullRequest(repo, {
-    branch,
-    release: target,
-    include: ["deps.ts"],
-  });
+    const result = await createPullRequest(repo, {
+      branch,
+      release: target,
+      include: ["mod.ts"],
+    });
 
-  assert(result);
+    assert(result);
 
-  assertEquals(
-    result.title,
-    `build(deps): bump deno.land/x/udd@0.7.4/mod.ts to ${target}`,
-  );
+    assertEquals(
+      result.title,
+      `build(deps): bump hasundue/denopendabot@${initial} to ${target}`,
+    );
 
-  await github.deleteBranch(repo, branch);
+    await github.deleteBranch(repo, branch);
+  },
 });

@@ -1,7 +1,6 @@
 import { decode } from "https://deno.land/std@0.159.0/encoding/base64.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.0.5";
 import { Update } from "./common.ts";
-import { env } from "./env.ts";
 
 interface BlobContent {
   path: string;
@@ -14,9 +13,7 @@ export class Client {
   private octokit: Octokit;
 
   constructor(token?: string) {
-    this.octokit = new Octokit({
-      auth: token ?? env["GITHUB_TOKEN"] ?? env["GH_TOKEN"],
-    });
+    this.octokit = new Octokit({ auth: token });
   }
 
   async getLatestRelease(
