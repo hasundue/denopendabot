@@ -23,7 +23,7 @@ export class Update extends AbstractUpdate {
   };
   message = () => {
     const { name, target } = this.spec;
-    const head = name.split("\s")[0];
+    const head = name.split(/\s/)[0];
     return `${this.type}(deps): bump ${head} to ${target}`;
   };
 }

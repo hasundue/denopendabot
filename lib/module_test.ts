@@ -8,7 +8,7 @@ const target = "0.159.0"; // @denopendabot denoland/deno_std
 Deno.test("getUpdateSpec/Update", async () => {
   const input = `
     const url1 = "https://deno.land/std@${initial}/testing/mod.ts";
-    const url2 = "https://deno.land/std@${initial}/testing/assert.ts";
+    const url2 = "https://deno.land/std@${initial}/testing/asserts.ts";
     `;
 
   const specs = await getUpdateSpecs(input);
@@ -20,17 +20,25 @@ Deno.test("getUpdateSpec/Update", async () => {
   const updates = specs.map((it) => new Update("deps.ts", it));
 
   assertEquals(
+    updates[0].spec.name,
+    `deno.land/std@${initial}/testing/mod.ts`,
+  );
+  assertEquals(
     updates[0].content(input),
     `
     const url1 = "https://deno.land/std@${target}/testing/mod.ts";
-    const url2 = "https://deno.land/std@${initial}/testing/assert.ts";
+    const url2 = "https://deno.land/std@${initial}/testing/asserts.ts";
     `,
+  );
+  assertEquals(
+    updates[1].spec.name,
+    `deno.land/std@${initial}/testing/asserts.ts`,
   );
   assertEquals(
     updates[1].content(input),
     `
     const url1 = "https://deno.land/std@${initial}/testing/mod.ts";
-    const url2 = "https://deno.land/std@${target}/testing/assert.ts";
+    const url2 = "https://deno.land/std@${target}/testing/asserts.ts";
     `,
   );
 });
