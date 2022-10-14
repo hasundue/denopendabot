@@ -43,7 +43,7 @@ runs:
         --base ${{ inputs.base-branch }}
         --branch ${{ inputs.working-branch }}
         --token ${{ inputs.token }}
-        --user-token ${{ intpus.user-token }}
+        --user-token ${{ inputs.user-token }}
       shell: bash
 
 branding:
