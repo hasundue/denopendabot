@@ -1,4 +1,4 @@
-import { Redis } from "https://deno.land/x/upstash_redis@v1.14.0/mod.ts";
+import { Redis } from "https://deno.land/x/upstash_redis@v1.15.0/mod.ts";
 import { App } from "https://esm.sh/@octokit/app@13.0.10";
 import { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.2.0";
 import { env } from "./env.ts";
