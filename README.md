@@ -66,11 +66,12 @@ WIP
 
 ### GitHub Action
 
-You need a private access token with the `workflow` scope to update workflow
-definitions (`./github/workflows/*.yml`).
+You need a GitHub access token authorized to run workflows. In most cases,
+`secrets.GITHUB_TOKEN` should work fine.
 
-In the examples below, we assume the token is added in repository secrets as
-`GH_TOKEN`.
+If you want to update workflow files (`./github/workflows/*.yml`), you also need
+a private access token with the `workflow` scope. In the examples below, we
+assume the token is added in repository secrets as `GH_TOKEN`.
 
 #### Predefined workflow (recommended)
 
@@ -78,7 +79,7 @@ In the examples below, we assume the token is added in repository secrets as
 name: Denopendabot
 on:
   schedule:
-    - cron: "1 0 * * *" # modify to your convinient time
+    - cron: "0 0 * * *" # modify to your convinient time
 jobs:
   update:
     name: Update
@@ -86,6 +87,7 @@ jobs:
     steps:
       - uses: hasundue/denopendabot@0.5.7 # @denopendabot hasundue/denopendabot
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           user-token: ${{ secrets.GH_TOKEN }}
 ```
 
@@ -97,7 +99,7 @@ See [action.yml](./action.yml) for other options.
 name: Denopendabot
 on:
   schedule:
-    - cron: "1 0 * * *" # modify to your convinient time
+    - cron: "0 0 * * *" # modify to your convinient time
 jobs:
   update:
     name: Update
@@ -112,6 +114,7 @@ jobs:
           deno run -q --allow-env --allow-net
           https://deno.land/x/denopendabot@0.5.6/main.ts
           ${{ github.repository }}
+          --token ${{ secrets.GITHUB_TOKEN }}
           --user-token ${{ secrets.GH_TOKEN }}
 ```
 

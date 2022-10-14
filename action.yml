@@ -6,7 +6,6 @@ inputs:
   token:
     description: Access token authorized to run workflows
     required: true
-    default: ${{ secrets.GITHUB_TOKEN }}
 
   user-token:
     description: Personal access token authorized to update workflows
