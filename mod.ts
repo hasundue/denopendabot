@@ -56,7 +56,7 @@ export async function createPullRequest(
     // TS/JS modules
     const moduleName = repository.split("/")[1].replaceAll("-", "_");
     const moduleReleaseSpec = options?.release
-      ? { name: `https://deno.land/x/${moduleName}`, target: options.release }
+      ? { name: `deno.land/x/${moduleName}`, target: options.release }
       : undefined;
 
     const moduleSpecs = await module.getUpdateSpecs(
