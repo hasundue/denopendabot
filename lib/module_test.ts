@@ -21,23 +21,23 @@ Deno.test("getUpdateSpec/Update", async () => {
 
   assertEquals(
     updates[0].spec.name,
-    `deno.land/std@${initial}/testing/mod.ts`,
+    `deno.land/std@${initial}`,
   );
   assertEquals(
     updates[0].content(input),
     `
     const url1 = "https://deno.land/std@${target}/testing/mod.ts";
-    const url2 = "https://deno.land/std@${initial}/testing/asserts.ts";
+    const url2 = "https://deno.land/std@${target}/testing/asserts.ts";
     `,
   );
   assertEquals(
     updates[1].spec.name,
-    `deno.land/std@${initial}/testing/asserts.ts`,
+    `deno.land/std@${initial}`,
   );
   assertEquals(
     updates[1].content(input),
     `
-    const url1 = "https://deno.land/std@${initial}/testing/mod.ts";
+    const url1 = "https://deno.land/std@${target}/testing/mod.ts";
     const url2 = "https://deno.land/std@${target}/testing/asserts.ts";
     `,
   );
@@ -55,8 +55,8 @@ Deno.test("getUpdateSpec (release)", async () => {
   });
 
   assertEquals(specs.length, 2);
-  assertEquals(specs[0].name, `deno.land/std@${initial}/testing/mod.ts`);
+  assertEquals(specs[0].name, `deno.land/std@${initial}`);
   assertEquals(specs[0].target, target);
-  assertEquals(specs[1].name, `deno.land/x/denopendabot@${VERSION}/main.ts`);
+  assertEquals(specs[1].name, `deno.land/x/denopendabot@${VERSION}`);
   assertEquals(specs[1].target, "1.0.0");
 });

@@ -5,10 +5,15 @@ import {
 } from "https://deno.land/std@0.159.0/semver/mod.ts";
 import { lookup, REGISTRIES } from "https://deno.land/x/udd@0.8.0/registry.ts";
 import { importUrls } from "https://deno.land/x/udd@0.8.0/search.ts";
-import { Update as AbstractUpdate, UpdateSpec } from "./common.ts";
+import {
+  semverRegExp,
+  Update as AbstractUpdate,
+  UpdateSpec,
+} from "./common.ts";
 
 const nameToUrl = (name: string) => "https://" + name;
-const urlToName = (url: string) => url.replace("https://", "");
+const urlToName = (url: string) =>
+  url.match(RegExp("(?<=^https?://).*" + semverRegExp.source))![0];
 
 export class Update extends AbstractUpdate {
   content = (input: string) => {
@@ -16,15 +21,14 @@ export class Update extends AbstractUpdate {
     if (!registry) {
       throw Error(`Module ${this.spec.name} not found in the registry`);
     }
-    return input.replace(
-      nameToUrl(this.spec.name),
-      registry.at(this.spec.target).url,
+    return input.replaceAll(
+      this.spec.name,
+      urlToName(registry.at(this.spec.target).url),
     );
   };
   message = () => {
     const { name, target } = this.spec;
-    const head = name.split(/\s/)[0];
-    return `${this.type}(deps): bump ${head} to ${target}`;
+    return `${this.type}(deps): bump ${name} to ${target}`;
   };
 }
 
