@@ -85,7 +85,7 @@ jobs:
     name: Update
     runs-on: ubuntu-latest
     steps:
-      - uses: hasundue/denopendabot@0.5.9 # @denopendabot hasundue/denopendabot
+      - uses: hasundue/denopendabot@0.5.10 # @denopendabot hasundue/denopendabot
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           user-token: ${{ secrets.GH_TOKEN }}
@@ -112,7 +112,7 @@ jobs:
       - name: Run Denopendabot
         run: >
           deno run -q --allow-env --allow-net
-          https://deno.land/x/denopendabot@0.5.8/main.ts
+          https://deno.land/x/denopendabot@0.5.9/main.ts
           ${{ github.repository }}
           --token ${{ secrets.GITHUB_TOKEN }}
           --user-token ${{ secrets.GH_TOKEN }}
