@@ -93,7 +93,7 @@ export async function createPullRequest(
   const userToken = envUserToken || rawUserToken;
 
   // filter out workflows if we are not authorized to update them
-  const updatables = userToken
+  const updatables = !userToken
     ? updates.filter((update) => !update.isWorkflow())
     : updates;
 
