@@ -23,7 +23,7 @@ jobs:
       - name: Run denomantic-release
         run: >
           deno run -q --allow-env --allow-net
-          https://pax.deno.dev/hasundue/denomantic-release/main.ts
+          https://pax.deno.dev/hasundue/denomantic-release@dev/main.ts
           ${{ github.repository }}
           --token ${{ secrets.GITHUB_TOKEN }}
           --user-token ${{ secrets.GH_TOKEN }}
