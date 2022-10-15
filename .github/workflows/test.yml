@@ -4,8 +4,6 @@ on:
   pull_request_target:
     branches: 
       - main
-    paths-ignore:
-      - '**.md'
   workflow_call:
   workflow_dispatch:
 
