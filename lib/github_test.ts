@@ -4,7 +4,7 @@ import {
 } from "https://deno.land/std@0.159.0/testing/asserts.ts";
 import { env } from "./env.ts";
 import { Client } from "./github.ts";
-import { Update } from "./repo.ts";
+import { RepoUpdate } from "./repo.ts";
 
 const repo = "hasundue/denopendabot";
 const base = "test";
@@ -45,7 +45,7 @@ Deno.test({
       await github.createBranch(repo, branch, base);
     });
 
-    const update = new Update("mod.ts", {
+    const update = new RepoUpdate("mod.ts", {
       name: "hasundue/denopendabot",
       initial: "0.5.12", // @denopendabot hasundue/denopendabot
       target: "1.0.0",

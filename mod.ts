@@ -4,8 +4,8 @@ import { withoutAll } from "https://deno.land/std@0.159.0/collections/without_al
 import { env } from "./lib/env.ts";
 import { pullRequestType, removeIgnore, Update } from "./lib/common.ts";
 import { Client } from "./lib/github.ts";
-import * as module from "./lib/module.ts";
-import * as repo from "./lib/repo.ts";
+import { getModuleUpdateSpecs, ModuleUpdate } from "./lib/module.ts";
+import { getRepoUpdateSpecs, RepoUpdate } from "./lib/repo.ts";
 
 export const VERSION = "0.5.12"; // @denopendabot hasundue/denopendabot
 
@@ -59,13 +59,13 @@ export async function createPullRequest(
       ? { name: `deno.land/x/${moduleName}`, target: options.release }
       : undefined;
 
-    const moduleSpecs = await module.getUpdateSpecs(
+    const moduleSpecs = await getModuleUpdateSpecs(
       contentToUpdate,
       moduleReleaseSpec,
     );
 
     moduleSpecs.forEach((spec) =>
-      updates.push(new module.Update(blob.path!, spec))
+      updates.push(new ModuleUpdate(blob.path!, spec))
     );
 
     // other repositories
@@ -73,15 +73,13 @@ export async function createPullRequest(
       ? { name: repository, target: options.release }
       : undefined;
 
-    const repoSpecs = await repo.getUpdateSpecs(
+    const repoSpecs = await getRepoUpdateSpecs(
       actor,
       contentToUpdate,
       repoReleaseSpec,
     );
 
-    repoSpecs.forEach((spec) =>
-      updates.push(new repo.Update(blob.path!, spec))
-    );
+    repoSpecs.forEach((spec) => updates.push(new RepoUpdate(blob.path!, spec)));
   }
 
   // no updates found or a dry-run

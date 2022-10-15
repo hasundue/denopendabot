@@ -5,54 +5,58 @@ import {
 } from "https://deno.land/std@0.159.0/semver/mod.ts";
 import { lookup, REGISTRIES } from "https://deno.land/x/udd@0.8.0/registry.ts";
 import { importUrls } from "https://deno.land/x/udd@0.8.0/search.ts";
-import {
-  semverRegExp,
-  Update as AbstractUpdate,
-  UpdateSpec,
-} from "./common.ts";
+import { semverRegExp, Update, UpdateSpec } from "./common.ts";
 
-const nameToUrl = (name: string) => "https://" + name;
-const urlToName = (url: string) =>
-  url.match(RegExp("(?<=^https?://).*" + semverRegExp.source))![0];
+function parseUrl(url: string): { name: string; version: string } {
+  const regexp = RegExp(
+    "(?<=^https?://)(\\S+)@(" + semverRegExp.source + ")?",
+  );
+  const match = url.match(regexp);
+  if (!match) throw Error(`Invalid url: ${url}`);
+  return { name: match[1], version: match[2] };
+}
 
-export class Update extends AbstractUpdate {
+export class ModuleUpdate extends Update {
+  declare spec: ModuleUpdateSpec;
+
+  constructor(path: string, spec: ModuleUpdateSpec) {
+    super(path, spec);
+  }
+
   content = (input: string) => {
-    const registry = lookup(nameToUrl(this.spec.name), REGISTRIES);
+    const { url, name, target } = this.spec;
+    const registry = lookup(url, REGISTRIES);
     if (!registry) {
-      throw Error(`Module ${this.spec.name} not found in the registry`);
+      throw Error(`Module ${name} not found in the registry`);
     }
-    return input.replaceAll(
-      this.spec.name,
-      urlToName(registry.at(this.spec.target).url),
-    );
-  };
-  message = () => {
-    const { name, target } = this.spec;
-    return `${this.type}(deps): bump ${name} to ${target}`;
+    return input.replaceAll(url, registry.at(target).url);
   };
 }
 
-export async function getUpdateSpecs(
+type ModuleUpdateSpec = UpdateSpec & {
+  url: string;
+};
+
+export async function getModuleUpdateSpecs(
   input: string,
   release?: UpdateSpec,
-): Promise<UpdateSpec[]> {
+): Promise<ModuleUpdateSpec[]> {
   const urls = importUrls(input, REGISTRIES);
   const registries = urls.map((url) => lookup(url, REGISTRIES));
-  const specs: UpdateSpec[] = [];
+  const specs: ModuleUpdateSpec[] = [];
 
   for (const registry of registries) {
     if (!registry) continue;
 
-    const name = urlToName(registry.url);
-    const initial = registry.version();
+    const { name, version: initial } = parseUrl(registry.url);
 
     const latest = (release && name.includes(release.name))
       ? release.target
       : (await registry.all()).find((v) => !prerelease(v));
 
     if (valid(initial) && latest && gt(latest, initial)) {
-      console.log(`💡 ${name} => ${latest}`);
-      specs.push({ name, target: latest });
+      console.log(`💡 ${name} ${initial} => ${latest}`);
+      specs.push({ url: registry.url, name, initial, target: latest });
     }
   }
 

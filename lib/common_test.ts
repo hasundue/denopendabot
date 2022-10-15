@@ -1,6 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.159.0/testing/asserts.ts";
 import { pullRequestType, removeIgnore } from "./common.ts";
-import { Update } from "./repo.ts";
+import { RepoUpdate as Update } from "./repo.ts";
 
 Deno.test("pullRequestType", () => {
   const spec = { name: "denoland/deno", target: "v1.26.1" };

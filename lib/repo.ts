@@ -1,10 +1,6 @@
 import { gt } from "https://deno.land/std@0.159.0/semver/mod.ts";
 import { Client } from "./github.ts";
-import {
-  semverRegExp,
-  Update as AbstractUpdate,
-  UpdateSpec,
-} from "./common.ts";
+import { semverRegExp, Update, UpdateSpec } from "./common.ts";
 
 export const regexp = (
   repo = "\\S+/\\S+",
@@ -26,19 +22,15 @@ export const versionRegExp = (
     "mg",
   );
 
-export class Update extends AbstractUpdate {
+export class RepoUpdate extends Update {
   content = (input: string) =>
     input.replaceAll(
       versionRegExp(this.spec.name, this.spec.initial),
       this.spec.target,
     );
-  message = () => {
-    const { name, initial, target } = this.spec;
-    return `${this.type}(deps): bump ${name} from ${initial} to ${target}`;
-  };
 }
 
-export async function getUpdateSpecs(
+export async function getRepoUpdateSpecs(
   github: Client,
   input: string,
   release?: UpdateSpec,
@@ -55,7 +47,7 @@ export async function getUpdateSpecs(
       : await github.getLatestRelease(name);
 
     if (target && gt(target, initial)) {
-      console.log(`💡 ${name}@${initial} => ${target}`);
+      console.log(`💡 ${name} ${initial} => ${target}`);
       specs.push({ name, initial, target });
     }
   }

@@ -32,8 +32,13 @@ export abstract class Update {
   isDocument = () => extname(this.path).match(/\.md|\.txt/) !== null;
   isWorkflow = () => this.path.startsWith(".github/workflows/");
 
+  message = () => {
+    const { name, initial, target } = this.spec;
+    const str = initial ? ` from ${initial} ` : " ";
+    return `${this.type}(deps): bump ${name}` + str + `to ${target}`;
+  };
+
   abstract content: (input: string) => string;
-  abstract message: () => string;
 }
 
 export const pullRequestType = (updates: Update[]): CommitType =>
