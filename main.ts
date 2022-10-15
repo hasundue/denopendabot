@@ -40,7 +40,7 @@ const { args, options } = await new Command()
   )
   .option(
     "-u --user-token <token>",
-    "Private access token authorized to update workflows. (default: GH_TOKEN)",
+    "Private access token authorized to update workflows.",
   )
   .parse(Deno.args);
 

@@ -25,7 +25,9 @@ export async function createPullRequest(
   repository: string,
   options?: Options,
 ) {
-  const actionToken = options?.token ?? env.GITHUB_TOKEN;
+  const envToken = options?.token && env.get(options?.token);
+  const rawToken = !envToken ? options?.token : undefined;
+  const actionToken = (envToken || rawToken) ?? env.GITHUB_TOKEN;
   if (!actionToken) {
     console.log("📣 Access token not provided. Switch to dry-run mode.");
   }
@@ -86,7 +88,9 @@ export async function createPullRequest(
   if (!updates.length || options?.dryRun) return null;
 
   // check if we are authoried to update workflows
-  const userToken = options?.userToken ?? env.GH_TOKEN;
+  const envUserToken = options?.userToken && env.get(options?.userToken);
+  const rawUserToken = !envUserToken ? options?.userToken : undefined;
+  const userToken = envUserToken || rawUserToken;
 
   // filter out workflows if we are not authorized to update them
   const updatables = userToken

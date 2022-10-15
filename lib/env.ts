@@ -2,10 +2,9 @@ import { configSync } from "https://deno.land/std@0.159.0/dotenv/mod.ts";
 
 type Env = {
   CI?: string;
-  DENO_DEPLOYMENT_ID?: string;
-
-  GH_TOKEN?: string;
   GITHUB_TOKEN?: string;
+
+  DENO_DEPLOYMENT_ID?: string;
 
   APP_ID: string;
   CLIENT_ID: string;
@@ -16,14 +15,19 @@ type Env = {
   UPSTASH_REDIS_REST_TOKEN: string;
 };
 
-const ENV = Deno.env.toObject();
+type EnvKey = keyof Env;
 
-function getEnv() {
-  if (ENV["CI"] || ENV["DENO_DEPLOYMENT_ID"]) {
-    return ENV;
+const getEnv = () => {
+  if (Deno.env.get("CI") || Deno.env.get("DENO_DEPLOYMENT_ID")) {
+    return Deno.env.toObject() as Env;
   } else {
-    return configSync();
+    return configSync() as Env;
   }
-}
+};
 
-export const env = getEnv() as Env;
+const ENV = getEnv();
+
+export const env = {
+  ...ENV,
+  get: (key: string) => ENV[key as EnvKey],
+};
