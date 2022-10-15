@@ -7,7 +7,7 @@ import { Client } from "./lib/github.ts";
 import { getModuleUpdateSpecs, ModuleUpdate } from "./lib/module.ts";
 import { getRepoUpdateSpecs, RepoUpdate } from "./lib/repo.ts";
 
-export const VERSION = "0.6.0"; // @denopendabot hasundue/denopendabot
+export const VERSION = "1.0.0"; // @denopendabot hasundue/denopendabot
 
 interface Options {
   base?: string;
