@@ -8,7 +8,7 @@ import { Client } from "../lib/github.ts";
 
 const repo = "hasundue/denopendabot";
 const base = "test";
-const initial = "0.6.0"; // @denopendabot hasundue/denopendabot
+const initial = "0.6.1"; // @denopendabot hasundue/denopendabot
 const target = "1.0.0";
 const github = new Client(env.GITHUB_TOKEN);
 
