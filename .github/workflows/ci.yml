@@ -71,6 +71,23 @@ jobs:
           working-branch: test-action
           options: --dry-run
 
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Needed for auth with Deno Deploy
+      contents: read # Needed to clone the repository
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3.0.1
+
+      - name: Upload to Deno Deploy
+        uses: denoland/deployctl@v1
+        with:
+          project: denopendabot
+          entrypoint: ./app.ts
+
   release:
     name: Release
     needs: 
@@ -78,7 +95,10 @@ jobs:
       - test-action
     runs-on: ubuntu-latest
 
-    if: ${{ github.event_name == 'push' && github.repository_owner == 'hasundue' }}
+    if: >-
+      github.repository_owner == 'hasundue' &&
+      github.event_name == 'push' &&
+      github.ref_name == 'main'
 
     steps:
       - name: Checkout
