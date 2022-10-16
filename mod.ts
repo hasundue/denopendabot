@@ -51,6 +51,9 @@ export async function createPullRequest(
   const blobs = baseTree.filter((blob) => pathsToUpdate.includes(blob.path!));
   const updates: Update[] = [];
 
+  // name of the released module of this repository
+  const moduleName = repository.split("/")[1].replaceAll("-", "_");
+
   for (const blob of blobs) {
     console.log(`🔍 ${blob.path}`);
 
@@ -58,30 +61,23 @@ export async function createPullRequest(
     const contentToUpdate = removeIgnore(content);
 
     // TS/JS modules
-    const moduleName = repository.split("/")[1].replaceAll("-", "_");
-    const moduleReleaseSpec = options?.release
-      ? { name: `deno.land/x/${moduleName}`, target: options.release }
-      : undefined;
-
-    const moduleSpecs = await getModuleUpdateSpecs(
-      contentToUpdate,
-      moduleReleaseSpec,
-    );
+    const moduleSpecs = options?.release
+      ? [{
+        url: `https://deno.land/x/${moduleName}`,
+        name: `deno.land/x/${moduleName}`,
+        initial: version,
+        target: options.release,
+      }]
+      : await getModuleUpdateSpecs(contentToUpdate);
 
     moduleSpecs.forEach((spec) =>
       updates.push(new ModuleUpdate(blob.path!, spec))
     );
 
     // other repositories
-    const repoReleaseSpec = options?.release
-      ? { name: repository, target: options.release }
-      : undefined;
-
-    const repoSpecs = await getRepoUpdateSpecs(
-      actor,
-      contentToUpdate,
-      repoReleaseSpec,
-    );
+    const repoSpecs = options?.release
+      ? [{ name: repository, initial: version, target: options.release }]
+      : await getRepoUpdateSpecs(actor, contentToUpdate);
 
     repoSpecs.forEach((spec) => updates.push(new RepoUpdate(blob.path!, spec)));
   }
