@@ -3,10 +3,6 @@ import { App } from "https://esm.sh/@octokit/app@13.0.11";
 import { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.3.0";
 import { env } from "./env.ts";
 
-// we need this for some reason
-type InvalidEventName = "pull_request.dequeued" | "pull_request.queued";
-type EventName = Exclude<EmitterWebhookEventName, InvalidEventName>;
-
 export const redis = new Redis({
   url: env["UPSTASH_REDIS_REST_URL"],
   token: env["UPSTASH_REDIS_REST_TOKEN"],
@@ -69,7 +65,7 @@ export const handler = async (request: Request): Promise<Response> => {
     signature: (request.headers.get("x-hub-signature-256")!)
       .replace(/sha256=/, ""),
     payload: await request.json(),
-    name: request.headers.get("x-github-event") as EventName,
+    name: request.headers.get("x-github-event") as EmitterWebhookEventName,
   });
   return new Response(null, { status: 200 });
 };
