@@ -7,16 +7,14 @@ const app = new Hono();
 
 app.use("*", logger());
 
-// transfer all requests to the test deploy
-app.use("/api/github/webhooks", async (context, next) => {
+app.get("/", (context) => context.text("Hello, I'm Denopendabot!"));
+
+app.post("/api/github/webhooks", async (context) => {
+  // transfer all requests to the test deploy
   const isProduction = !(await isPreview());
   if (isProduction) {
     await fetch(await getPreviewURL(), context.req);
   }
-  next();
-});
-
-app.post("/api/github/webhooks", async (context) => {
   await handler(context.req);
 });
 

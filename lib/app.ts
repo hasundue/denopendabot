@@ -27,10 +27,8 @@ export async function getPreviewURL() {
   return url;
 }
 
-export async function isPreview() {
-  const id = await redis.get<string>("preview-id");
-  return env["DENO_DEPLOYMENT_ID"] === id;
-}
+export const isPreview = async () =>
+  env["DENO_DEPLOYMENT_ID"] === await redis.get<string>("preview-id");
 
 export const app = new App({
   appId: env["APP_ID"],
