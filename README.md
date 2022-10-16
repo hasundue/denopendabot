@@ -25,7 +25,7 @@ import { assert } from "https://deno.land/std@0.158.0/testing/asserts.ts";
 ```
 
 ```sh
-💡 deno.land/std@0.158.0/testing/mod.ts => 0.159.0
+💡 deno.land/std from 0.158.0 to 0.159.0
 ```
 
 Denopendabot takes advantage of the core engine of
@@ -42,7 +42,7 @@ update libraries for Deno, which supports
 ```
 
 ```sh
-💡 denoland/deno@v1.26.0 => v1.26.1
+💡 denoland/deno from v1.26.0 to v1.26.1
 ```
 
 <!-- denopendabot-ignore-end -->
