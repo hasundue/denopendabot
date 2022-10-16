@@ -62,9 +62,8 @@ app.webhooks.on("check_run.completed", ({ payload }) => {
 export const handler = async (request: Request): Promise<Response> => {
   await app.webhooks.verifyAndReceive({
     id: request.headers.get("x-github-delivery")!,
-    signature: (request.headers.get("x-hub-signature-256")!)
-      .replace(/sha256=/, ""),
-    payload: await request.json(),
+    signature: (request.headers.get("x-hub-signature-256")!),
+    payload: await request.text(),
     name: request.headers.get("x-github-event") as EmitterWebhookEventName,
   });
   return new Response(null, { status: 200 });
