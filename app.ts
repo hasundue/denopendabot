@@ -13,7 +13,8 @@ app.post("/api/github/webhooks", async (context) => {
   // transfer all requests to the test deploy
   const isProduction = !(await isPreview());
   if (isProduction) {
-    await fetch(await getPreviewURL(), context.req);
+    const previewURL = await getPreviewURL();
+    await fetch(previewURL + "api/github/webhooks", context.req);
   }
   await handler(context.req);
 });
