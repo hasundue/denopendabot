@@ -55,7 +55,7 @@ export async function getOctokit(repo: string) {
   }
 }
 
-app.webhooks.on("check_run.completed", ({ payload }) => {
+app.webhooks.onAny(({ payload }) => {
   console.log(payload);
 });
 
