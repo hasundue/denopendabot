@@ -118,12 +118,16 @@ export async function createPullRequest(
     );
   }
 
+  // create a title
   const header = options?.isTest ? "[TEST] " : "";
   const type = pullRequestType(updates);
 
-  const title = deps.length > 1
-    ? header + `${type}(deps): update dependencies`
-    : header + updates[0].message();
+  const title = header +
+    (options?.release
+      ? "build(version): bump the version for release"
+      : (deps.length > 1
+        ? `${type}(deps): update dependencies`
+        : updates[0].message()));
 
   return await actor.createPullRequest(repository, branch, title, base);
 }
