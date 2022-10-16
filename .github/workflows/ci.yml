@@ -2,8 +2,6 @@ name: CI
 
 on:
   push:
-    branches: 
-      - main
   pull_request:
     branches: 
       - main
@@ -23,6 +21,8 @@ jobs:
   test-module:
     name: Test module
     runs-on: ubuntu-latest
+
+    if: github.ref_name == 'main'
 
     steps:
       - name: Checkout
@@ -54,6 +54,8 @@ jobs:
     name: Test action
     runs-on: ubuntu-latest
 
+    if: github.ref_name == 'main'
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3.1.0
@@ -71,6 +73,39 @@ jobs:
           working-branch: test-action
           options: --dry-run
 
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    if: github.event_name == 'push'
+
+    permissions:
+      id-token: write # Needed for auth with Deno Deploy
+      contents: read # Needed to clone the repository
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3.0.1
+
+      - name: Upload to Deno Deploy
+        id: deploy
+        uses: denoland/deployctl@v1
+        with:
+          project: denopendabot
+          entrypoint: ./app.ts
+
+      - name: Set the deployment ID on Upstash
+        run: >
+          curl -X POST -d '${{ steps.deploy.outputs.deployment-id }}'
+          ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/staging-id
+          -H "Authorization: Bearer ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}"
+
+      - name: Set the deployment URL on Upstash
+        run: >
+          curl -X POST -d '${{ steps.deploy.outputs.url }}'
+          ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/staging-url
+          -H "Authorization: Bearer ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}"
+
   release:
     name: Release
     needs: 
@@ -78,7 +113,10 @@ jobs:
       - test-action
     runs-on: ubuntu-latest
 
-    if: ${{ github.event_name == 'push' && github.repository_owner == 'hasundue' }}
+    if: >-
+      github.repository_owner == 'hasundue' &&
+      github.event_name == 'push' &&
+      github.ref_name == 'main'
 
     steps:
       - name: Checkout

@@ -8,8 +8,7 @@ export const redis = new Redis({
   token: env["UPSTASH_REDIS_REST_TOKEN"],
 });
 
-const privateKey: string | null = await redis.get("private_key");
-
+const privateKey = await redis.get<string>("private_key");
 if (!privateKey) throw Error("Private key is not deployed on Upstash Redis.");
 
 export async function uploadPrivateKey(path: string) {
@@ -21,7 +20,28 @@ export async function uploadPrivateKey(path: string) {
   }
 }
 
-export const app = new App({
+export type Deployment = "production" | "staging" | "preview";
+
+export const deployment = async (): Promise<Deployment> => {
+  const id = env["DENO_DEPLOYMENT_ID"];
+  if (id === await redis.get<string>("production-id")) {
+    return "production";
+  } else if (id === await redis.get<string>("staging-id")) {
+    return "staging";
+  } else {
+    return "preview";
+  }
+};
+
+export const location = async (deploy: "production" | "staging") => {
+  const url = await redis.get<string>(`${deploy}-url`);
+  if (!url) {
+    throw Error(`key ${deploy}-id is not found on Upstash`);
+  }
+  return url;
+};
+
+const app = new App({
   appId: env["APP_ID"],
   privateKey,
   oauth: {
@@ -33,39 +53,63 @@ export const app = new App({
   },
 });
 
-export async function getInstallationId(repo: string): Promise<number | null> {
-  let id: number | null = null;
-  await app.eachInstallation(async ({ installation }) => {
-    const installationId = installation.id;
-    await app.eachRepository({ installationId }, ({ repository }) => {
-      if (`${repository.owner.login}/${repository.name}` === repo) {
-        id = installation.id;
-      }
-    });
-  });
-  return id;
-}
+const home = env["APP_REPO"];
 
-export async function getOctokit(repo: string) {
-  const id = await getInstallationId(repo);
-  if (id) {
-    return await app.getInstallationOctokit(id);
-  } else {
-    return null;
-  }
-}
+type PayLoadWithRepository = {
+  repository: {
+    name: string;
+    owner: {
+      login: string;
+    };
+  };
+};
+
+const beforeEach = async (
+  payload: PayLoadWithRepository,
+  branch: string | null,
+) => {
+  const owner = payload.repository.owner.login;
+  const repo = payload.repository.name;
+  const repository = `${owner}/${repo}`;
+
+  console.log(`repository: ${repository}`);
+  console.log(`branch: ${branch}`);
+  console.log(payload);
+
+  const deploy = await deployment();
+  const isTest = branch !== null && repository === home &&
+    branch.startsWith("test");
+  const relevant = deploy === "staging" ? isTest : !isTest;
+
+  return { owner, repo, relevant };
+};
 
 app.webhooks.onAny(({ name }) => {
-  console.log(name, "event received");
+  console.log(`event: ${name}`);
 });
 
-export const handler = async (request: Request): Promise<Response> => {
+app.webhooks.on("check_suite.completed", async ({ octokit, payload }) => {
+  const branch = payload.check_suite.head_branch;
+  const { owner, repo, relevant } = await beforeEach(payload, branch);
+
+  if (!relevant || payload.check_suite.conclusion !== "success") return;
+
+  for (const { number } of payload.check_suite.pull_requests) {
+    const { data: pr } = await octokit.request(
+      "GET /repos/{owner}/{repo}/pulls/{pull_number}",
+      { owner, repo, pull_number: number },
+    );
+    console.log(pr);
+  }
+});
+
+app.webhooks.on;
+
+export const handler = async (request: Request) => {
   await app.webhooks.verifyAndReceive({
     id: request.headers.get("x-github-delivery")!,
-    signature: (request.headers.get("x-hub-signature-256")!)
-      .replace(/sha256=/, ""),
-    payload: await request.json(),
+    signature: (request.headers.get("x-hub-signature-256")!),
+    payload: await request.text(),
     name: request.headers.get("x-github-event") as EmitterWebhookEventName,
   });
-  return new Response(null, { status: 200 });
 };

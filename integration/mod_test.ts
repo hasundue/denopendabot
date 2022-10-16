@@ -12,29 +12,25 @@ const initial = "0.6.2"; // @denopendabot hasundue/denopendabot
 const target = "1.0.0";
 const github = new Client(env.GITHUB_TOKEN);
 
-Deno.test({
-  name: "createPullRequest",
-  ignore: !env.CI,
-  fn: async () => {
-    const branch = "test-" + Date.now().valueOf();
+Deno.test("createPullRequest", async () => {
+  const branch = "test-" + Date.now().valueOf();
 
-    await github.createBranch(repo, base);
+  await github.createBranch(repo, base);
 
-    const result = await createPullRequest(repo, {
-      base,
-      branch,
-      release: target,
-      include: ["mod.ts"],
-      test: true,
-    });
+  const result = await createPullRequest(repo, {
+    base,
+    branch,
+    release: target,
+    include: ["mod.ts"],
+    test: true,
+  });
 
-    assert(result);
+  assert(result);
 
-    assertEquals(
-      result.title,
-      `[TEST] build(version): bump the version from ${initial} to ${target}`,
-    );
+  assertEquals(
+    result.title,
+    `[TEST] build(version): bump the version from ${initial} to ${target}`,
+  );
 
-    await github.deleteBranch(repo, branch);
-  },
+  await github.deleteBranch(repo, branch);
 });
