@@ -56,9 +56,7 @@ Deno.test("getUpdateSpec (release)", async () => {
     target: "1.0.0",
   });
 
-  assertEquals(specs.length, 2);
-  assertEquals(specs[0].name, `deno.land/std`);
-  assertEquals(specs[0].target, target);
-  assertEquals(specs[1].name, `deno.land/x/denopendabot`);
-  assertEquals(specs[1].target, "1.0.0");
+  assertEquals(specs.length, 1);
+  assertEquals(specs[0].name, `deno.land/x/denopendabot`);
+  assertEquals(specs[0].target, "1.0.0");
 });
