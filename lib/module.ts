@@ -49,8 +49,9 @@ export async function getModuleUpdateSpecs(
     if (!registry) continue;
 
     const { name, version: initial } = parseUrl(registry.url);
+    if (release && !name.startsWith(release.name)) continue;
 
-    const latest = (release && name.includes(release.name))
+    const latest = release
       ? release.target
       : (await registry.all()).find((v) => !prerelease(v));
 

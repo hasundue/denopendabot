@@ -35,7 +35,7 @@ export async function getRepoUpdateSpecs(
   input: string,
   release?: UpdateSpec,
 ): Promise<UpdateSpec[]> {
-  const matches = input.matchAll(regexp());
+  const matches = input.matchAll(regexp(release?.name));
   const specs: UpdateSpec[] = [];
 
   for (const match of matches) {
