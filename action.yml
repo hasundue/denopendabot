@@ -6,6 +6,7 @@ inputs:
   token:
     description: Access token authorized to run workflows
     required: true
+    default: ${{ github.token }}
 
   user-token:
     description: Personal access token authorized to update workflows
@@ -25,6 +26,10 @@ inputs:
     description: Working branch for Denopendabot
     required: true
     default: denopendabot
+  
+  options:
+    description: Other options passed to the CLI
+    required: false
 
 runs:
   using: composite
@@ -42,8 +47,9 @@ runs:
         ${{ inputs.repository }}
         --base ${{ inputs.base-branch }}
         --branch ${{ inputs.working-branch }}
-        --token ${{ inputs.token }}
+        ${{ inputs.token && format('--token {0}', inputs.token) }}
         ${{ inputs.user-token && format('--user-token {0}', inputs.user-token) }}
+        ${{ inputs.options }}
       shell: bash
 
 branding:

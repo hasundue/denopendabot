@@ -8,15 +8,17 @@ const { args, options } = await new Command()
   .arguments("<repository:string>")
   .option(
     "--base <name>",
-    "Branch to update. (default: main)",
+    "Branch to update.",
+    { default: "main" },
   )
   .option(
     "--branch <name>",
-    "Working branch. (default: denopendabot)",
+    "Working branch.",
+    { default: "denopendabot" },
   )
   .option(
     "-i --include <paths...>",
-    "Files to update. (default: all files)",
+    "Specify files to update.",
   )
   .option(
     "-x --exclude <paths...>",
@@ -36,7 +38,8 @@ const { args, options } = await new Command()
   )
   .option(
     "-t --token <token>",
-    "Private access token associated with GitHub Action. (default: GITHUB_TOKEN)",
+    "Access token associated with GitHub Action.",
+    { default: "GITHUB_TOKEN" },
   )
   .option(
     "-u --user-token <token>",

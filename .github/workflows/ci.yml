@@ -4,6 +4,10 @@ on:
   push:
     branches: 
       - main
+  pull_request:
+    branches: 
+      - main
+  workflow_dispatch:
 
 env:
   APP_ID: ${{ secrets.APP_ID }}
@@ -14,13 +18,79 @@ env:
   UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
 
 jobs:
-  test:
-    name: Test
-    uses: ./.github/workflows/test.yml
-    secrets: inherit
+  test-module:
+    name: Test module
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.26.1 # @denopendabot denoland/deno
+
+      - name: Format
+        run: deno fmt --check
+
+      - name: Lint
+        run: deno lint
+
+      - name: Test
+        run: deno task test -q --coverage=./coverage lib/ integration/
+
+      - name: Create coverage report
+        run: deno coverage ./coverage --lcov > ./coverage.lcov
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.lcov
+
+  test-action:
+    name: Test action
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+
+      - name: Create test action
+        run: |
+          cp action.yml integration/action.yml
+          sed -i -e 's/https:\/\/deno.land\/x\/denopendabot@[0-9]*\.[0-9]*\.[0-9]*/\./' integration/action.yml
+
+      - name: Run action
+        uses: ./integration
+        with:
+          repository: hasundue/denopendabot
+          base-branch: test
+          working-branch: test-action
+          options: --dry-run
 
   release:
     name: Release
-    needs: test
-    uses: ./.github/workflows/release.yml
-    secrets: inherit
+    needs: 
+      - test-module
+      - test-action
+    runs-on: ubuntu-latest
+
+    if: ${{ github.event_name == 'push' && github.repository_owner == 'hasundue' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.26.1 # @denopendabot denoland/deno
+
+      - name: Run denomantic-release
+        run: >
+          deno run -q --allow-env --allow-net
+          https://pax.deno.dev/hasundue/denomantic-release@dev/main.ts
+          ${{ github.repository }}
+          --token ${{ secrets.GITHUB_TOKEN }}
+          --user-token ${{ secrets.GH_TOKEN }}

@@ -66,10 +66,10 @@ WIP
 
 ### GitHub Action
 
-You need a GitHub access token authorized to run workflows. In most cases,
-`secrets.GITHUB_TOKEN` should work fine.
+Denopendabot needs a GitHub access token authorized to run workflows.
+`secrets.GITHUB_TOKEN` is used by default and it works fine in most cases.
 
-If you want to update workflow files (`./github/workflows/*.yml`), you also need
+If you want to update workflow files (`./github/workflows/*.yml`), it also needs
 a private access token with the `workflow` scope. In the examples below, we
 assume the token is added in repository secrets as `GH_TOKEN`.
 
@@ -87,7 +87,6 @@ jobs:
     steps:
       - uses: hasundue/denopendabot@0.6.1 # @denopendabot hasundue/denopendabot
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           user-token: ${{ secrets.GH_TOKEN }}
 ```
 
