@@ -9,7 +9,8 @@ app.use("*", logger());
 
 // transfer all requests to the test deploy
 app.use("/api/github/webhooks", async (context, next) => {
-  if (await isPreview()) {
+  const isProduction = !(await isPreview());
+  if (isProduction) {
     await fetch(await getPreviewURL(), context.req);
   }
   next();
