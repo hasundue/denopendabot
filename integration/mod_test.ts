@@ -32,7 +32,7 @@ Deno.test({
 
     assertEquals(
       result.title,
-      `[TEST] build(version): bump the version for release`,
+      `[TEST] build(version): bump the version from ${initial} to ${target}`,
     );
 
     await github.deleteBranch(repo, branch);
