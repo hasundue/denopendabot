@@ -49,7 +49,7 @@ app.webhooks.onAny(async ({ name }) => {
   console.log(`Event: ${name}`);
 });
 
-app.webhooks.on("check_suite", async ({ payload }) => {
+app.webhooks.on("check_suite", ({ payload }) => {
   const repo = payload.repository.full_name;
   const branch = payload.check_suite.head_branch;
 
