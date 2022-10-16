@@ -91,14 +91,12 @@ jobs:
 
       - name: Set ID of the preview deployment
         run: >
-          curl ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/preview-id/
-          ${{ steps.deploy.outputs.deployment-id }}
+          curl ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/preview-id/${{ steps.deploy.outputs.deployment-id }}
           -H "Authorization: Bearer ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}"
 
       - name: Set URL of the preview deployment
         run: >
-          curl ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/preview-url/
-          ${{ steps.deploy.outputs.url }}
+          curl ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/preview-url/${{ steps.deploy.outputs.url }}
           -H "Authorization: Bearer ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}"
 
   release:
