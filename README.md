@@ -16,7 +16,7 @@
 
 ## :rocket: Features
 
-### Update Deno modules automatically
+### Update Deno modules
 
 <!-- denopendabot-ignore-start -->
 
@@ -25,7 +25,7 @@ import { assert } from "https://deno.land/std@0.158.0/testing/asserts.ts";
 ```
 
 ```sh
-💡 deno.land/std from 0.158.0 to 0.159.0
+💡 deno.land/std 0.158.0 => 0.159.0
 ```
 
 Denopendabot takes advantage of the core engine of
@@ -33,7 +33,7 @@ Denopendabot takes advantage of the core engine of
 update libraries for Deno, which supports
 [many registry domains](https://github.com/hayd/deno-udd#supported-domains).
 
-### Update any SemVer
+### Update GitHub repositories
 
 ```yaml
 - uses: denoland/setup-deno@v1
@@ -42,13 +42,13 @@ update libraries for Deno, which supports
 ```
 
 ```sh
-💡 denoland/deno from v1.26.0 to v1.26.1
+💡 denoland/deno v1.26.0 => v1.26.1
 ```
 
 <!-- denopendabot-ignore-end -->
 
-Denopendabot update any SemVer in the code specified by a comment of
-`@denopendabot {owner}/{repo}`.
+Denopendabot update any SemVer related to a GitHub repository, specified by a
+comment of `@denopendabot {owner}/{repo}`.
 
 ### Commits and pull requests
 
