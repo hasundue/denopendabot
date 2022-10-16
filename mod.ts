@@ -18,7 +18,7 @@ interface Options {
   dryRun?: true;
   token?: string;
   userToken?: string;
-  isTest?: boolean;
+  test?: boolean;
 }
 
 export async function createPullRequest(
@@ -121,7 +121,7 @@ export async function createPullRequest(
   }
 
   // create a title
-  let title = options?.isTest ? "[TEST] " : "";
+  let title = options?.test ? "[TEST] " : "";
 
   if (options?.release) {
     title += "build(version): bump the version";

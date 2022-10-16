@@ -25,7 +25,7 @@ Deno.test({
       branch,
       release: target,
       include: ["mod.ts"],
-      isTest: true,
+      test: true,
     });
 
     assert(result);
