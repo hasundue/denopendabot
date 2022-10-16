@@ -34,6 +34,8 @@ export async function createPullRequest(
   // github client to run the workflow
   const actor = new Client(actionToken);
 
+  const version = await actor.getLatestRelease(repository);
+
   const base = options?.base ?? "main";
   const baseTree = await actor.getTree(repository, base);
 
@@ -119,15 +121,20 @@ export async function createPullRequest(
   }
 
   // create a title
-  const header = options?.isTest ? "[TEST] " : "";
-  const type = pullRequestType(updates);
+  let title = options?.isTest ? "[TEST] " : "";
 
-  const title = header +
-    (options?.release
-      ? "build(version): bump the version for release"
-      : (deps.length > 1
-        ? `${type}(deps): update dependencies`
-        : updates[0].message()));
+  if (options?.release) {
+    title += "build(version): bump the version";
+    title += version ? ` from ${version}` : "";
+    title += ` to ${updates[0].spec.name}`;
+  } else {
+    if (deps.length > 1) {
+      const type = pullRequestType(updates);
+      title += `${type}(deps): update dependencies`;
+    } else {
+      title += updates[0].message();
+    }
+  }
 
   return await actor.createPullRequest(repository, branch, title, base);
 }

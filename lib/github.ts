@@ -18,7 +18,7 @@ export class Client {
 
   async getLatestRelease(
     repository: string,
-  ): Promise<string | null> {
+  ) {
     const [owner, repo] = repository.split("/");
     try {
       const { data: release } = await this.octokit.request(
@@ -27,7 +27,7 @@ export class Client {
       );
       return release.tag_name;
     } catch {
-      return null;
+      return undefined;
     }
   }
 
