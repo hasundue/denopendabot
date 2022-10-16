@@ -8,7 +8,7 @@ export const redis = new Redis({
   token: env["UPSTASH_REDIS_REST_TOKEN"],
 });
 
-const privateKey: string | null = await redis.get("private_key");
+const privateKey = await redis.get<string>("private_key");
 
 if (!privateKey) throw Error("Private key is not deployed on Upstash Redis.");
 
@@ -21,6 +21,17 @@ export async function uploadPrivateKey(path: string) {
   }
 }
 
+export async function getPreviewURL() {
+  const url = await redis.get<string>("preview-url");
+  if (!url) throw Error("URL of preview deploy not found");
+  return url;
+}
+
+export async function isPreview() {
+  const id = await redis.get<string>("preview-id");
+  return env["DENO_DEPLOYMENT_ID"] === id;
+}
+
 export const app = new App({
   appId: env["APP_ID"],
   privateKey,
@@ -31,6 +42,20 @@ export const app = new App({
   webhooks: {
     secret: env["WEBHOOK_SECRET"],
   },
+});
+
+app.webhooks.onAny(async ({ name }) => {
+  if (await isPreview()) {
+    console.log("[Preview Deploy]");
+  }
+  console.log(`Event: ${name}`);
+});
+
+app.webhooks.on("check_suite", async ({ payload }) => {
+  const repo = payload.repository.full_name;
+  const branch = payload.check_suite.head_branch;
+
+  console.log(`Repository: ${repo}@${branch}`);
 });
 
 export async function getInstallationId(repo: string): Promise<number | null> {
@@ -55,16 +80,11 @@ export async function getOctokit(repo: string) {
   }
 }
 
-app.webhooks.onAny(({ payload }) => {
-  console.log(payload);
-});
-
-export const handler = async (request: Request): Promise<Response> => {
+export const handler = async (request: Request) => {
   await app.webhooks.verifyAndReceive({
     id: request.headers.get("x-github-delivery")!,
     signature: (request.headers.get("x-hub-signature-256")!),
     payload: await request.text(),
     name: request.headers.get("x-github-event") as EmitterWebhookEventName,
   });
-  return new Response(null, { status: 200 });
 };

@@ -83,10 +83,23 @@ jobs:
         uses: actions/checkout@v3.0.1
 
       - name: Upload to Deno Deploy
+        id: deploy
         uses: denoland/deployctl@v1
         with:
           project: denopendabot
           entrypoint: ./app.ts
+
+      - name: Set ID of the preview deployment
+        run: >
+          curl ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/preview-id/
+          ${{ steps.deploy.outputs.deployment-id }}
+          -H "Authorization: Bearer ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}"
+
+      - name: Set URL of the preview deployment
+        run: >
+          curl ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/preview-url/
+          ${{ steps.deploy.outputs.url }}
+          -H "Authorization: Bearer ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}"
 
   release:
     name: Release
