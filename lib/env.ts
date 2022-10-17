@@ -6,6 +6,7 @@ type Env = {
 
   DENO_DEPLOYMENT_ID?: string;
 
+  APP_REPO: string;
   APP_ID: string;
   CLIENT_ID: string;
   CLIENT_SECRET: string;
