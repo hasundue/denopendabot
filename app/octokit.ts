@@ -1,5 +1,5 @@
 import { App } from "https://esm.sh/@octokit/app@13.0.11";
-import { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.3.0";
+import type { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.3.0";
 import { env } from "./env.ts";
 import { privateKey } from "./redis.ts";
 import { deployment } from "./deploy.ts";
@@ -20,7 +20,7 @@ const app = new App({
 
 const home = env["APP_REPO"];
 
-type PayLoadWithRepository = {
+export type PayLoadWithRepository = {
   repository: {
     name: string;
     owner: {
@@ -36,7 +36,7 @@ const beforeEach = (payload: PayLoadWithRepository) => {
   return { owner, repo };
 };
 
-const isRelevant = async (
+const associated = async (
   owner: string,
   repo: string,
   branch: string | null,
@@ -53,13 +53,19 @@ app.webhooks.onAny(({ name }) => {
 
 app.webhooks.on("check_suite.completed", async ({ octokit, payload }) => {
   const { owner, repo } = beforeEach(payload);
-  if (payload.check_suite.conclusion !== "success") return;
 
   const branch = payload.check_suite.head_branch;
   console.log(`branch: ${branch}`);
 
-  if (!isRelevant(owner, repo, branch)) return;
+  // skip if the check suite is not associated with the deployment
+  if (!(await associated(owner, repo, branch))) return;
 
+  // skip if the conclusion is not success
+  const conclusion = payload.check_suite.conclusion;
+  if (conclusion !== "success") {
+    console.log(`conclusion: ${conclusion}`);
+    return;
+  }
   console.log(payload);
 
   for (const { number } of payload.check_suite.pull_requests) {
@@ -69,6 +75,24 @@ app.webhooks.on("check_suite.completed", async ({ octokit, payload }) => {
     );
     console.log(pr);
   }
+});
+
+app.webhooks.on("push", async ({ payload }) => {
+  const { owner, repo } = beforeEach(payload);
+
+  const branch = payload.ref.split("/").pop()!;
+  console.log(`branch: ${branch}`);
+
+  // skip if the push is not associated with the deployment
+  if (!(await associated(owner, repo, branch))) return;
+
+  // skip if the comitter is not Denopendabot
+  if (!(await associated(owner, repo, branch))) return;
+  const comitter = payload.head_commit?.author.name;
+  console.log(`comitter: ${comitter}`);
+  if (comitter !== "denopendabot") return;
+
+  console.log(payload);
 });
 
 export const handler = async (request: Request) => {
