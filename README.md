@@ -107,7 +107,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.26.1 # @denopendabot denoland/deno
+          deno-version: v1.26.2 # @denopendabot denoland/deno
       - name: Run Denopendabot
         run: >
           deno run -q --allow-env --allow-net

@@ -11,7 +11,7 @@ import {
 const github = new Client();
 const repo = "denoland/deno";
 const initial = "v1.26.0";
-const target = "v1.26.1"; // @denopendabot denoland/deno
+const target = "v1.26.2"; // @denopendabot denoland/deno
 const content = (version = initial) => `
 deno version: ${version} <!-- @denopendabot ${repo} -->
 deno_std version: 0.158.0 <!-- @denopendabot ${repo}_std -->
