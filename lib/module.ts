@@ -3,7 +3,7 @@ import {
   prerelease,
   valid,
 } from "https://deno.land/std@0.160.0/semver/mod.ts";
-import { lookup, REGISTRIES } from "https://deno.land/x/udd@0.8.0/registry.ts";
+import { lookup, REGISTRIES } from "https://deno.land/x/udd@0.8.1/registry.ts";
 import { importUrls } from "https://deno.land/x/udd@0.8.1/search.ts";
 import { semverRegExp, Update, UpdateSpec } from "./common.ts";
 
