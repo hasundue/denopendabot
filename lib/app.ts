@@ -20,17 +20,12 @@ export async function uploadPrivateKey(path: string) {
   }
 }
 
-export type Deployment = "production" | "staging" | "preview";
+export type Deployment = "production" | "staging";
 
 export const deployment = async (): Promise<Deployment> => {
   const id = env["DENO_DEPLOYMENT_ID"];
-  if (id === await redis.get<string>("production-id")) {
-    return "production";
-  } else if (id === await redis.get<string>("staging-id")) {
-    return "staging";
-  } else {
-    return "preview";
-  }
+  const staging = await redis.get<string>("staging-id");
+  return id === staging ? "staging" : "production";
 };
 
 export const location = async (deploy: "production" | "staging") => {
@@ -64,13 +59,10 @@ type PayLoadWithRepository = {
   };
 };
 
-const beforeEach = async (payload: PayLoadWithRepository) => {
+const beforeEach = (payload: PayLoadWithRepository) => {
   const owner = payload.repository.owner.login;
   const repo = payload.repository.name;
-
   console.log(`repository: ${owner}/${repo}`);
-  console.log(payload);
-
   return { owner, repo };
 };
 
@@ -80,8 +72,8 @@ const isRelevant = async (
   branch: string | null,
 ) => {
   const deploy = await deployment();
-  const isTest = branch !== null && `${owner}/${repo}` === home &&
-    branch.startsWith("test");
+  const isTest = `${owner}/${repo}` === home && branch !== null &&
+    branch?.startsWith("test");
   return deploy === "staging" ? isTest : !isTest;
 };
 
@@ -90,13 +82,15 @@ app.webhooks.onAny(({ name }) => {
 });
 
 app.webhooks.on("check_suite.completed", async ({ octokit, payload }) => {
-  const { owner, repo } = await beforeEach(payload);
+  const { owner, repo } = beforeEach(payload);
   if (payload.check_suite.conclusion !== "success") return;
 
   const branch = payload.check_suite.head_branch;
   console.log(`branch: ${branch}`);
 
   if (!isRelevant(owner, repo, branch)) return;
+
+  console.log(payload);
 
   for (const { number } of payload.check_suite.pull_requests) {
     const { data: pr } = await octokit.request(

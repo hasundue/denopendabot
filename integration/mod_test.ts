@@ -31,6 +31,4 @@ Deno.test("createPullRequest", async () => {
     result.title,
     `[TEST] build(version): bump the version from ${initial} to ${target}`,
   );
-
-  await github.deleteBranch(repo, branch);
 });

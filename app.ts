@@ -14,7 +14,7 @@ hono.post("/api/github/webhooks", async (context) => {
   console.log(`deployment: ${deploy}`);
 
   // copy and transfer all requests to the staging deployment
-  if (deploy !== "staging") {
+  if (deploy === "production") {
     const staging = await app.location("staging");
     await fetch(staging + "api/github/webhooks", context.req.clone());
     console.log(`transfered the request to ${staging}`);
