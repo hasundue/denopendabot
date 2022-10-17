@@ -45,3 +45,4 @@ jobs:
           repository: hasundue/denopendabot
           base-branch: test
           working-branch: test-action
+          options: --dry-run
