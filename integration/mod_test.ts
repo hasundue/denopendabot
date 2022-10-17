@@ -1,7 +1,7 @@
 import {
   assert,
   assertEquals,
-} from "https://deno.land/std@0.159.0/testing/asserts.ts";
+} from "https://deno.land/std@0.160.0/testing/asserts.ts";
 import { createPullRequest } from "../mod.ts";
 import { env } from "../lib/env.ts";
 import { Client } from "../lib/github.ts";

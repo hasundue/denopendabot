@@ -1,6 +1,6 @@
 import { groupBy } from "https://deno.land/std@0.159.0/collections/group_by.ts";
 import { intersect } from "https://deno.land/std@0.159.0/collections/intersect.ts";
-import { withoutAll } from "https://deno.land/std@0.159.0/collections/without_all.ts";
+import { withoutAll } from "https://deno.land/std@0.160.0/collections/without_all.ts";
 import { env } from "./lib/env.ts";
 import { pullRequestType, removeIgnore, Update } from "./lib/common.ts";
 import { Client } from "./lib/github.ts";
