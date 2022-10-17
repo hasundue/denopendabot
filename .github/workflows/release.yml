@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.26.1 # @denopendabot denoland/deno
+
+      - name: Run denomantic-release
+        run: >
+          deno run -q --allow-env --allow-net
+          https://pax.deno.dev/hasundue/denomantic-release@dev/main.ts
+          ${{ github.repository }}
+          --token ${{ secrets.GITHUB_TOKEN }}
+          --user-token ${{ secrets.GH_TOKEN }}

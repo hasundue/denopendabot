@@ -1,0 +1,47 @@
+name: Integration
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  module:
+    name: Module
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.26.1 # @denopendabot denoland/deno
+
+      - name: Test
+        run: deno task test -q integration/mod_test.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  action:
+    name: Action
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+
+      - name: Create test action
+        run: |
+          cp action.yml integration/action.yml
+          sed -i -e 's/https:\/\/deno.land\/x\/denopendabot@[0-9]*\.[0-9]*\.[0-9]*/\./' integration/action.yml
+
+      - name: Run action
+        uses: ./integration
+        with:
+          repository: hasundue/denopendabot
+          base-branch: test
+          working-branch: test-integration
