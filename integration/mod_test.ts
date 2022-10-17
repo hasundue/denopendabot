@@ -7,13 +7,13 @@ import { env } from "../lib/env.ts";
 import { Client } from "../lib/github.ts";
 
 const repo = "hasundue/denopendabot";
-const base = "test-module";
+const base = "test";
 const initial = "0.6.2"; // @denopendabot hasundue/denopendabot
 const target = "1.0.0";
 const github = new Client(env.GITHUB_TOKEN);
 
 Deno.test("createPullRequest", async () => {
-  const branch = "test-" + Date.now().valueOf();
+  const branch = "test-module";
 
   await github.createBranch(repo, base);
 

@@ -8,6 +8,7 @@ import { RepoUpdate } from "./repo.ts";
 
 const repo = "hasundue/denopendabot";
 const base = "test";
+const branch = "test-github";
 const github = new Client(env.GITHUB_TOKEN);
 
 Deno.test("getLatestRelease", async () => {
@@ -39,8 +40,6 @@ Deno.test({
   name: "createPullRequest",
   ignore: !env.CI,
   fn: async (t) => {
-    const branch = "test-" + Date.now().valueOf();
-
     await t.step("createBranch", async () => {
       await github.createBranch(repo, branch, base);
     });
@@ -75,20 +74,6 @@ Deno.test({
         base,
       );
       assertEquals(result.title, message);
-    });
-
-    await t.step("updateBranch", async () => {
-      // reset to the head of main
-      await github.updateBranch(repo, branch, base);
-
-      const baseCommit = await github.getCommit(repo, base);
-      const headCommit = await github.getCommit(repo, branch);
-
-      assertEquals(baseCommit.sha, headCommit.sha);
-    });
-
-    await t.step("deleteBranch", async () => {
-      await github.deleteBranch(repo, branch);
     });
   },
 });
