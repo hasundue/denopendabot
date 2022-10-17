@@ -1,6 +1,9 @@
 name: Test
 
 on:
+  pull_request:
+    branches:
+      - test-module
   workflow_call:
   workflow_dispatch:
 

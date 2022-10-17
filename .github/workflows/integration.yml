@@ -44,4 +44,4 @@ jobs:
         with:
           repository: hasundue/denopendabot
           base-branch: test
-          working-branch: test-integration
+          working-branch: test-action

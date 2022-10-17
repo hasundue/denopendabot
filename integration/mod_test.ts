@@ -7,7 +7,7 @@ import { env } from "../lib/env.ts";
 import { Client } from "../lib/github.ts";
 
 const repo = "hasundue/denopendabot";
-const base = "test";
+const base = "test-module";
 const initial = "0.6.2"; // @denopendabot hasundue/denopendabot
 const target = "1.0.0";
 const github = new Client(env.GITHUB_TOKEN);

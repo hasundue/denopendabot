@@ -64,24 +64,25 @@ type PayLoadWithRepository = {
   };
 };
 
-const beforeEach = async (
-  payload: PayLoadWithRepository,
-  branch: string | null,
-) => {
+const beforeEach = async (payload: PayLoadWithRepository) => {
   const owner = payload.repository.owner.login;
   const repo = payload.repository.name;
-  const repository = `${owner}/${repo}`;
 
-  console.log(`repository: ${repository}`);
-  console.log(`branch: ${branch}`);
+  console.log(`repository: ${owner}/${repo}`);
   console.log(payload);
 
-  const deploy = await deployment();
-  const isTest = branch !== null && repository === home &&
-    branch.startsWith("test");
-  const relevant = deploy === "staging" ? isTest : !isTest;
+  return { owner, repo };
+};
 
-  return { owner, repo, relevant };
+const isRelevant = async (
+  owner: string,
+  repo: string,
+  branch: string | null,
+) => {
+  const deploy = await deployment();
+  const isTest = branch !== null && `${owner}/${repo}` === home &&
+    branch.startsWith("test");
+  return deploy === "staging" ? isTest : !isTest;
 };
 
 app.webhooks.onAny(({ name }) => {
@@ -89,10 +90,13 @@ app.webhooks.onAny(({ name }) => {
 });
 
 app.webhooks.on("check_suite.completed", async ({ octokit, payload }) => {
-  const branch = payload.check_suite.head_branch;
-  const { owner, repo, relevant } = await beforeEach(payload, branch);
+  const { owner, repo } = await beforeEach(payload);
+  if (payload.check_suite.conclusion !== "success") return;
 
-  if (!relevant || payload.check_suite.conclusion !== "success") return;
+  const branch = payload.check_suite.head_branch;
+  console.log(`branch: ${branch}`);
+
+  if (!isRelevant(owner, repo, branch)) return;
 
   for (const { number } of payload.check_suite.pull_requests) {
     const { data: pr } = await octokit.request(
@@ -102,8 +106,6 @@ app.webhooks.on("check_suite.completed", async ({ octokit, payload }) => {
     console.log(pr);
   }
 });
-
-app.webhooks.on;
 
 export const handler = async (request: Request) => {
   await app.webhooks.verifyAndReceive({
