@@ -1,7 +1,7 @@
-name: CI
+name: CD
 
 on:
-  pull_request:
+  push:
     branches: 
       - main
   workflow_dispatch:
@@ -23,3 +23,11 @@ jobs:
     uses: ./.github/workflows/integration.yml
     needs: deploy
     secrets: inherit
+
+  release:
+    name: Release
+    uses:  ./.github/workflows/release.yml
+    needs: integration
+    secrets: inherit
+    if: github.repository_owner == 'hasundue'
+

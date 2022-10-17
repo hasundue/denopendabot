@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy
+    name: Deno Deploy
     runs-on: ubuntu-latest
 
     permissions:
