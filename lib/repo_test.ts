@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.159.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.160.0/testing/asserts.ts";
 import { Client } from "./github.ts";
 import { UpdateSpec } from "./common.ts";
 import {
@@ -11,7 +11,7 @@ import {
 const github = new Client();
 const repo = "denoland/deno";
 const initial = "v1.26.0";
-const target = "v1.26.1"; // @denopendabot denoland/deno
+const target = "v1.26.2"; // @denopendabot denoland/deno
 const content = (version = initial) => `
 deno version: ${version} <!-- @denopendabot ${repo} -->
 deno_std version: 0.158.0 <!-- @denopendabot ${repo}_std -->

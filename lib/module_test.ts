@@ -1,9 +1,9 @@
-import { assertEquals } from "https://deno.land/std@0.159.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.160.0/testing/asserts.ts";
 import { getModuleUpdateSpecs, ModuleUpdate } from "./module.ts";
 import { VERSION } from "../mod.ts";
 
 const initial = "0.158.0";
-const target = "0.159.0"; // @denopendabot denoland/deno_std
+const target = "0.160.0"; // @denopendabot denoland/deno_std
 
 Deno.test("getUpdateSpec/Update", async () => {
   const input = `

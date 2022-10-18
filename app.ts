@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.159.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.160.0/http/server.ts";
 import { Hono } from "https://deno.land/x/hono@v2.2.5/mod.ts";
 import { logger } from "https://deno.land/x/hono@v2.2.5/middleware.ts";
 import * as app from "./lib/app.ts";

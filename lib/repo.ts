@@ -1,4 +1,4 @@
-import { gt } from "https://deno.land/std@0.159.0/semver/mod.ts";
+import { gt } from "https://deno.land/std@0.160.0/semver/mod.ts";
 import { Client } from "./github.ts";
 import { semverRegExp, Update, UpdateSpec } from "./common.ts";
 
