@@ -28,7 +28,7 @@ jobs:
         run: deno lint
 
       - name: Test
-        run: deno task test -q --coverage=./coverage lib/
+        run: deno task test -q --coverage=./coverage mod/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -2,7 +2,7 @@
   "tasks": {
     "run": "deno run --allow-env --allow-net --allow-read main.ts",
     "test": "deno test --allow-env --allow-net --allow-read",
-    "dev": "deno fmt && deno lint && deno task test lib/ --fail-fast",
+    "dev": "deno fmt && deno lint && deno task test mod/ --fail-fast",
     "test-action": "act -j test-action"
   }
 }

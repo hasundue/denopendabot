@@ -2,8 +2,6 @@ import { configSync } from "https://deno.land/std@0.160.0/dotenv/mod.ts";
 
 type Env = {
   CI?: string;
-  GITHUB_TOKEN?: string;
-
   DENO_DEPLOYMENT_ID?: string;
 
   APP_REPO: string;

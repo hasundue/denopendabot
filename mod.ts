@@ -1,11 +1,11 @@
 import { groupBy } from "https://deno.land/std@0.159.0/collections/group_by.ts";
 import { intersect } from "https://deno.land/std@0.159.0/collections/intersect.ts";
 import { withoutAll } from "https://deno.land/std@0.160.0/collections/without_all.ts";
-import { env } from "./lib/env.ts";
-import { pullRequestType, removeIgnore, Update } from "./lib/common.ts";
-import { Client } from "./lib/github.ts";
-import { getModuleUpdateSpecs, ModuleUpdate } from "./lib/module.ts";
-import { getRepoUpdateSpecs, RepoUpdate } from "./lib/repo.ts";
+import { env } from "./mod/env.ts";
+import { pullRequestType, removeIgnore, Update } from "./mod/common.ts";
+import { Client } from "./mod/github.ts";
+import { getModuleUpdateSpecs, ModuleUpdate } from "./mod/module.ts";
+import { getRepoUpdateSpecs, RepoUpdate } from "./mod/repo.ts";
 
 export const VERSION = "0.6.2"; // @denopendabot hasundue/denopendabot
 
