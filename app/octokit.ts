@@ -86,11 +86,10 @@ app.webhooks.on("push", async ({ payload }) => {
   // skip if the push is not associated with the deployment
   if (!(await associated(owner, repo, branch))) return;
 
-  // skip if the comitter is not Denopendabot
-  if (!(await associated(owner, repo, branch))) return;
-  const comitter = payload.head_commit?.author.name;
-  console.log(`comitter: ${comitter}`);
-  if (comitter !== "denopendabot") return;
+  // skip if the committer is not denopendabot
+  const committer = payload.head_commit?.author.name;
+  console.log(`comitter: ${committer}`);
+  if (committer !== "denopendabot") return;
 
   console.log(payload);
 });

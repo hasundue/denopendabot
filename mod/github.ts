@@ -86,7 +86,7 @@ export class Client {
       );
 
       const author = {
-        name: "denopendabot",
+        name: "denopendabot-action",
         email: "denopendabot@gmail.com",
       };
 
