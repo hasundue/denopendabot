@@ -89,7 +89,7 @@ app.webhooks.on("push", async ({ payload }) => {
   // skip if the committer is not denopendabot
   const committer = payload.head_commit?.author.name;
   console.log(`comitter: ${committer}`);
-  if (committer !== "denopendabot") return;
+  if (committer !== "denopendabot-action") return;
 
   console.log(payload);
 });
