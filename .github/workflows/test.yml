@@ -34,11 +34,14 @@ jobs:
         run: deno task test --coverage=./coverage mod/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TEST_APP: ${{ github.event_name == 'pull_request' }}
 
       - name: Create coverage report
+        if: ${{ github.event_name != 'pull_request' }}
         run: deno coverage ./coverage --lcov > ./coverage.lcov
 
       - name: Upload to Codecov
+        if: ${{ github.event_name != 'pull_request' }}
         uses: codecov/codecov-action@v3
         with:
           file: ./coverage.lcov

@@ -34,7 +34,7 @@ Deno.test("compareBranches", async () => {
 
 Deno.test({
   name: "createBranch",
-  ignore: !env.CI,
+  ignore: !env.CI || env.TEST_APP,
   fn: async () => {
     const result = await github.createBranch(repo, base);
     assert(result);
@@ -43,7 +43,7 @@ Deno.test({
 
 Deno.test({
   name: "createPullRequest",
-  ignore: !env.CI,
+  ignore: !env.CI || env.TEST_APP,
   fn: async (t) => {
     await t.step("createBranch", async () => {
       await github.createBranch(repo, branch, base);
