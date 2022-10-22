@@ -170,7 +170,7 @@ export async function createPullRequest(
   const scope = options?.release ? "version" : "deps";
   const body = options?.release
     ? `bump the version from ${version} to ${options.release}`
-    : "update dependency";
+    : "update dependencies";
   const title = `${type}(${scope}): ${body}`;
   const labels = options?.test ? ["test"] : [];
 
