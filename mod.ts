@@ -144,7 +144,7 @@ export async function createPullRequest(
   // github client to run the workflow
   const github = new GitHubClient(options?.octokit ?? getActionToken(options));
 
-  const base = options?.branch ?? "main";
+  const base = options?.base ?? "main";
   const branch = options?.branch ?? "denopendabot";
   const version = await github.getLatestRelease(repository);
 
