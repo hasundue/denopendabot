@@ -21,5 +21,5 @@ const ENV = getEnv();
 
 export const env = {
   ...ENV,
-  get: (key: string) => ENV[key as EnvKey],
+  get: (key: string) => ENV[key as EnvKey] as string,
 };
