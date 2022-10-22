@@ -3,7 +3,7 @@ name: Test
 on:
   pull_request:
     branches:
-      - test-app
+      - test
   workflow_call:
   workflow_dispatch:
 
@@ -34,15 +34,15 @@ jobs:
         run: deno task test --coverage=./coverage mod/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HEAD_BRANCH: ${{ github.ref_name }}
-          TEST_APP: ${{ github.event_name == 'pull_request' }}
+          HEAD_BRANCH: ${{ github.head_ref }}
+          TEST: ${{ github.base_ref == 'test' }}
 
       - name: Create coverage report
-        if: ${{ github.event_name != 'pull_request' }}
+        if: ${{ github.base_ref != 'test' }}
         run: deno coverage ./coverage --lcov > ./coverage.lcov
 
       - name: Upload to Codecov
-        if: ${{ github.event_name != 'pull_request' }}
+        if: ${{ github.base_ref != 'test' }}
         uses: codecov/codecov-action@v3
         with:
           file: ./coverage.lcov

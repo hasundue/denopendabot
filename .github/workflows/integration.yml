@@ -24,11 +24,12 @@ jobs:
       - name: Cache dependencies
         run: deno cache integration/mod_test.ts
 
-      - name: Test
+      - name: Run Test
         run: deno task test --coverage=./coverage integration/mod_test.ts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HEAD_BRANCH: ${{ github.ref_name }}
+          HEAD_BRANCH: ${{ github.head_ref }}
+          TEST: true
 
       - name: Create coverage report
         run: deno coverage ./coverage --lcov > ./coverage.lcov
@@ -75,7 +76,9 @@ jobs:
       - name: Cache dependencies
         run: deno cache integration/app_test.ts
 
-      - name: Test
+      - name: Run Test
         run: deno task test integration/app_test.ts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_BRANCH: ${{ github.head_ref }}
+          TEST: true
