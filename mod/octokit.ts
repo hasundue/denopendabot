@@ -234,7 +234,7 @@ export class GitHubClient {
     base: string,
     branch: string,
     title: string,
-    label?: string,
+    labels = ["dependencies"],
   ) {
     const [owner, repo] = repository.split("/");
 
@@ -250,8 +250,14 @@ export class GitHubClient {
       // create a new pull request
       : await this.octokit.request(
         "POST /repos/{owner}/{repo}/pulls",
-        { owner, repo, title, base, head: branch, label },
+        { owner, repo, title, base, head: branch },
       );
+
+    // add a label if given
+    await this.octokit.request(
+      "POST /repos/{owner}/{repo}/issues/{issue_number}/labels",
+      { owner, repo, issue_number: result.number, labels },
+    );
 
     console.log(`🚀 ${result.title}`);
 

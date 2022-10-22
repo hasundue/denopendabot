@@ -67,7 +67,7 @@ Deno.test({
         base,
         branch,
         message,
-        "test",
+        ["test"],
       );
       assertEquals(result.title, message);
     });
@@ -78,7 +78,7 @@ Deno.test({
         base,
         branch,
         message,
-        "test",
+        ["test"],
       );
       assertEquals(result.title, message);
     });

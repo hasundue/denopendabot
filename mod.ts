@@ -172,8 +172,13 @@ export async function createPullRequest(
     ? `bump the version from ${version} to ${options.release}`
     : "update dependency";
   const title = `${type}(${scope}): ${body}`;
+  const labels = options?.test ? ["test"] : [];
 
-  const label = options?.test ? "test" : undefined;
-
-  return await github.createPullRequest(repository, base, branch, title, label);
+  return await github.createPullRequest(
+    repository,
+    base,
+    branch,
+    title,
+    labels,
+  );
 }
