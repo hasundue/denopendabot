@@ -239,15 +239,15 @@ export class GitHubClient {
     const [owner, repo] = repository.split("/");
 
     const prs = await this.getPullRequests(repository);
-    const relevant = prs.find((pr) => pr.head.ref === branch);
+    const relevant = prs.find((pr) =>
+      pr.head.ref === branch && pr.state === "open"
+    );
 
     const { data: result } = relevant
-      // pull request by denopendabot already exists
       ? await this.octokit.request(
         "PATCH /repos/{owner}/{repo}/pulls/{pull_number}",
         { owner, repo, pull_number: relevant.number, title },
       )
-      // create a new pull request
       : await this.octokit.request(
         "POST /repos/{owner}/{repo}/pulls",
         { owner, repo, title, base, head: branch },
