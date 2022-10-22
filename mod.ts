@@ -144,7 +144,7 @@ export async function createPullRequest(
   // github client to run the workflow
   const github = new GitHubClient(options?.octokit ?? getActionToken(options));
 
-  const base = options?.branch ?? "main";
+  const base = options?.base ?? "main";
   const branch = options?.branch ?? "denopendabot";
   const version = await github.getLatestRelease(repository);
 
@@ -170,10 +170,15 @@ export async function createPullRequest(
   const scope = options?.release ? "version" : "deps";
   const body = options?.release
     ? `bump the version from ${version} to ${options.release}`
-    : "update dependency";
+    : "update dependencies";
   const title = `${type}(${scope}): ${body}`;
+  const labels = options?.test ? ["test"] : [];
 
-  const label = options?.test ? "test" : undefined;
-
-  return await github.createPullRequest(repository, base, branch, title, label);
+  return await github.createPullRequest(
+    repository,
+    base,
+    branch,
+    title,
+    labels,
+  );
 }

@@ -34,11 +34,15 @@ jobs:
         run: deno task test --coverage=./coverage mod/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_BRANCH: ${{ github.head_ref }}
+          TEST: ${{ github.base_ref == 'test' }}
 
       - name: Create coverage report
+        if: ${{ github.base_ref != 'test' }}
         run: deno coverage ./coverage --lcov > ./coverage.lcov
 
       - name: Upload to Codecov
+        if: ${{ github.base_ref != 'test' }}
         uses: codecov/codecov-action@v3
         with:
           file: ./coverage.lcov

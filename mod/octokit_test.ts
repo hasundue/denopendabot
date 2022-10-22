@@ -34,16 +34,16 @@ Deno.test("compareBranches", async () => {
 
 Deno.test({
   name: "createBranch",
-  ignore: !env.CI,
+  ignore: !env.CI || env.TEST === "true",
   fn: async () => {
-    const result = await github.createBranch(repo, base);
+    const result = await github.createBranch(repo, base, env.HEAD_BRANCH);
     assert(result);
   },
 });
 
 Deno.test({
   name: "createPullRequest",
-  ignore: !env.CI,
+  ignore: !env.CI || env.TEST === "true",
   fn: async (t) => {
     await t.step("createBranch", async () => {
       await github.createBranch(repo, branch, base);
@@ -54,7 +54,7 @@ Deno.test({
       initial: "0.6.2", // @denopendabot hasundue/denopendabot
       target: "1.0.0",
     });
-    const message = "[TEST] " + update.message();
+    const message = update.message();
 
     await t.step("createCommit", async () => {
       const result = await github.createCommit(repo, branch, message, [update]);
@@ -67,6 +67,7 @@ Deno.test({
         base,
         branch,
         message,
+        ["test"],
       );
       assertEquals(result.title, message);
     });
@@ -77,6 +78,7 @@ Deno.test({
         base,
         branch,
         message,
+        ["test"],
       );
       assertEquals(result.title, message);
     });

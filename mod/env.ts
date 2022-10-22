@@ -2,8 +2,10 @@ import { configSync } from "https://deno.land/std@0.159.0/dotenv/mod.ts";
 
 type Env = {
   GITHUB_TOKEN?: string;
-  CI?: string;
+  CI?: "true";
   DENO_DEPLOYMENT_ID?: string;
+  HEAD_BRANCH?: string;
+  TEST?: "true" | "false";
 };
 
 type EnvKey = keyof Env;
@@ -20,5 +22,5 @@ const ENV = getEnv();
 
 export const env = {
   ...ENV,
-  get: (key: string) => ENV[key as EnvKey],
+  get: (key: string) => ENV[key as EnvKey] as string,
 };

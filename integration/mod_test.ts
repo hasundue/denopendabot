@@ -23,7 +23,7 @@ Deno.test("integration (module)", async () => {
     test: true,
   };
 
-  await github.createBranch(repo, base);
+  await github.createBranch(repo, base, env.HEAD_BRANCH);
 
   const updates = await getUpdates(repo, options);
 
@@ -36,8 +36,9 @@ Deno.test("integration (module)", async () => {
   const result = await createPullRequest(repo, options);
 
   assert(result);
+
   assertEquals(
     result.title,
-    `[TEST] build(version): bump the version from ${initial} to ${target}`,
+    `build(version): bump the version from ${initial} to ${target}`,
   );
 });
