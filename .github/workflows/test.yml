@@ -27,8 +27,11 @@ jobs:
       - name: Lint
         run: deno lint
 
+      - name: Cache dependencies
+        run: deno cache mod/*.ts
+
       - name: Test
-        run: deno task test -q --coverage=./coverage mod/
+        run: deno task test --coverage=./coverage mod/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

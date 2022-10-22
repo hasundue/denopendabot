@@ -21,8 +21,11 @@ jobs:
         with:
           deno-version: v1.26.2 # @denopendabot denoland/deno
 
+      - name: Cache dependencies
+        run: deno cache integration/mod_test.ts
+
       - name: Test
-        run: deno task test -q --coverage=./coverage integration/mod_test.ts
+        run: deno task test --coverage=./coverage integration/mod_test.ts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
