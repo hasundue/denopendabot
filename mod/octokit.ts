@@ -238,10 +238,8 @@ export class GitHubClient {
   ) {
     const [owner, repo] = repository.split("/");
 
-    const prs = await this.getPullRequests(repository);
-    const relevant = prs.find((pr) =>
-      pr.head.ref === branch && pr.state === "open"
-    );
+    const prs = await this.getPullRequests(repository, "open");
+    const relevant = prs.find((pr) => pr.head.ref === branch);
 
     const { data: result } = relevant
       ? await this.octokit.request(
@@ -259,19 +257,20 @@ export class GitHubClient {
       { owner, repo, issue_number: result.number, labels },
     );
 
-    console.log(`🚀 ${result.title}`);
+    console.log(`🚀 Created a pull request "${result.title}"`);
 
     return result;
   }
 
   async getPullRequests(
     repository: string,
+    state: "open" | "closed" | "all" = "open",
   ) {
     const [owner, repo] = repository.split("/");
 
     const { data: results } = await this.octokit.request(
       "GET /repos/{owner}/{repo}/pulls",
-      { owner, repo },
+      { owner, repo, state },
     );
 
     return results;

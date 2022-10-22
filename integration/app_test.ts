@@ -34,7 +34,7 @@ Deno.test("integration (app)", async () => {
   // wait for a minute until the app completes merging the pull request
   await delay(60 * 1000);
 
-  const prs = await github.getPullRequests(repo);
+  const prs = await github.getPullRequests(repo, "closed");
   const merged = prs.find((pr) =>
     pr.user?.login === "denopendabot[bot]" &&
     new Date(pr.created_at) > created &&
