@@ -70,6 +70,7 @@ Deno.test({
         ["test"],
       );
       assertEquals(result.title, message);
+      assertEquals(result.labels[0].name, "test");
     });
 
     await t.step("createPullRequest (update)", async () => {
@@ -81,6 +82,7 @@ Deno.test({
         ["test"],
       );
       assertEquals(result.title, message);
+      assertEquals(result.labels[0].name, "test");
     });
   },
 });

@@ -36,6 +36,11 @@ Deno.test("integration (module)", async () => {
   const result = await createPullRequest(repo, options);
 
   assert(result);
+
+  assertEquals(
+    result.labels[0].name,
+    "test",
+  );
   assertEquals(
     result.title,
     `build(version): bump the version from ${initial} to ${target}`,
