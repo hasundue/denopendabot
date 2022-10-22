@@ -38,6 +38,6 @@ Deno.test("integration (module)", async () => {
   assert(result);
   assertEquals(
     result.title,
-    `[TEST] build(version): bump the version from ${initial} to ${target}`,
+    `build(version): bump the version from ${initial} to ${target}`,
   );
 });
