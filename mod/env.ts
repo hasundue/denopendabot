@@ -5,7 +5,7 @@ type Env = {
   CI?: "true";
   DENO_DEPLOYMENT_ID?: string;
   HEAD_BRANCH?: string;
-  TEST_APP?: boolean;
+  TEST?: "true" | "false";
 };
 
 type EnvKey = keyof Env;

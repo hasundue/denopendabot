@@ -48,7 +48,7 @@ Deno.test("getUpdateSpec/Update", async () => {
 
 Deno.test({
   name: "getUpdateSpec (release)",
-  ignore: env.TEST_APP,
+  ignore: env.TEST === "true",
   fn: async () => {
     const input = `
     const url1 = "https://deno.land/std@${initial}/testing/mod.ts";
