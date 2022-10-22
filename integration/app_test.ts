@@ -27,10 +27,11 @@ Deno.test("integration (app)", async () => {
   };
 
   const updates = await getUpdates(repo, options);
+
+  const created = new Date();
   await createCommits(repo, updates, options);
 
   // wait for a minute until the app completes merging the pull request
-  const created = new Date();
   await delay(60 * 1000);
 
   const prs = await github.getPullRequests(repo);
