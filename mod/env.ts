@@ -4,6 +4,7 @@ type Env = {
   GITHUB_TOKEN?: string;
   CI?: "true";
   DENO_DEPLOYMENT_ID?: string;
+  HEAD_BRANCH?: string;
   TEST_APP?: boolean;
 };
 

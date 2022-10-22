@@ -36,7 +36,7 @@ Deno.test({
   name: "createBranch",
   ignore: !env.CI || env.TEST_APP,
   fn: async () => {
-    const result = await github.createBranch(repo, base);
+    const result = await github.createBranch(repo, base, env.HEAD_BRANCH);
     assert(result);
   },
 });

@@ -23,7 +23,7 @@ Deno.test("integration (module)", async () => {
     test: true,
   };
 
-  await github.createBranch(repo, base);
+  await github.createBranch(repo, base, env.HEAD_BRANCH);
 
   const updates = await getUpdates(repo, options);
 

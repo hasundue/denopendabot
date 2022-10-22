@@ -3,7 +3,7 @@ name: Test
 on:
   pull_request:
     branches:
-      - test
+      - test-app
   workflow_call:
   workflow_dispatch:
 
@@ -34,6 +34,7 @@ jobs:
         run: deno task test --coverage=./coverage mod/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_BRANCH: ${{ github.ref_name }}
           TEST_APP: ${{ github.event_name == 'pull_request' }}
 
       - name: Create coverage report

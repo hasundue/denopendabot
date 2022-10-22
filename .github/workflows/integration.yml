@@ -28,6 +28,7 @@ jobs:
         run: deno task test --coverage=./coverage integration/mod_test.ts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_BRANCH: ${{ github.ref_name }}
 
       - name: Create coverage report
         run: deno coverage ./coverage --lcov > ./coverage.lcov
