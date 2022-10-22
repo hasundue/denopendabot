@@ -2,7 +2,8 @@ import { App } from "https://esm.sh/@octokit/app@13.0.11";
 import type { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.3.0";
 import { env } from "./env.ts";
 import { privateKey } from "./redis.ts";
-import { deployment } from "./deploy.ts";
+import { Deployment, deployment } from "./deploy.ts";
+import { createPullRequest } from "../mod.ts";
 
 if (!privateKey) throw Error("Private key is not deployed on Upstash Redis.");
 
@@ -29,22 +30,24 @@ export type PayLoadWithRepository = {
   };
 };
 
-const beforeEach = (payload: PayLoadWithRepository) => {
+const getContext = async (payload: PayLoadWithRepository) => {
+  const deploy = await deployment();
   const owner = payload.repository.owner.login;
   const repo = payload.repository.name;
-  console.log(`repository: ${owner}/${repo}`);
-  return { owner, repo };
+  const repository = `${owner}/${repo}`;
+  console.log(`repository: ${repository}`);
+  return { deploy, repository, owner, repo };
 };
 
-const associated = async (
+const associated = (
+  deploy: Deployment,
   owner: string,
   repo: string,
   branch: string | null,
 ) => {
-  const deploy = await deployment();
   const isTest = `${owner}/${repo}` === home && branch !== null &&
-    branch?.startsWith("test");
-  return deploy === "staging" ? isTest : !isTest;
+    branch === "test-app";
+  return deploy === "staging" ? isTest : repo === "denopendabot";
 };
 
 app.webhooks.onAny(({ name }) => {
@@ -52,13 +55,13 @@ app.webhooks.onAny(({ name }) => {
 });
 
 app.webhooks.on("check_suite.completed", async ({ octokit, payload }) => {
-  const { owner, repo } = beforeEach(payload);
+  const { deploy, owner, repo } = await getContext(payload);
 
   const branch = payload.check_suite.head_branch;
   console.log(`branch: ${branch}`);
 
   // skip if the check suite is not associated with the deployment
-  if (!(await associated(owner, repo, branch))) return;
+  if (!associated(deploy, owner, repo, branch)) return;
 
   // skip if the conclusion is not success
   const conclusion = payload.check_suite.conclusion;
@@ -77,14 +80,14 @@ app.webhooks.on("check_suite.completed", async ({ octokit, payload }) => {
   }
 });
 
-app.webhooks.on("push", async ({ payload }) => {
-  const { owner, repo } = beforeEach(payload);
+app.webhooks.on("push", async ({ octokit, payload }) => {
+  const { repository, deploy, owner, repo } = await getContext(payload);
 
   const branch = payload.ref.split("/").pop()!;
   console.log(`branch: ${branch}`);
 
   // skip if the push is not associated with the deployment
-  if (!(await associated(owner, repo, branch))) return;
+  if (!associated(deploy, owner, repo, branch)) return;
 
   // skip if the committer is not denopendabot
   const committer = payload.head_commit?.author.name;
@@ -92,6 +95,19 @@ app.webhooks.on("push", async ({ payload }) => {
   if (committer !== "denopendabot-action") return;
 
   console.log(payload);
+
+  // get default branch name
+  const { data } = await octokit.request(
+    "GET /repos/{owner}/{repo}",
+    { owner, repo },
+  );
+
+  await createPullRequest(repository, {
+    base: deploy === "staging" ? "test" : data.default_branch,
+    branch,
+    octokit,
+    test: deploy === "staging",
+  });
 });
 
 export const handler = async (request: Request) => {

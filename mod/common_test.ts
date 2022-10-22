@@ -1,39 +1,25 @@
 import { assertEquals } from "https://deno.land/std@0.160.0/testing/asserts.ts";
 import { pullRequestType, removeIgnore } from "./common.ts";
-import { RepoUpdate as Update } from "./repo.ts";
 
 Deno.test("pullRequestType", () => {
-  const spec = { name: "denoland/deno", target: "v1.26.1" };
-
   assertEquals(
-    pullRequestType([new Update("deps.ts", spec)]),
+    pullRequestType(["build"]),
     "build",
   );
   assertEquals(
-    pullRequestType([new Update(".github/workflows/ci.yml", spec)]),
+    pullRequestType(["ci"]),
     "ci",
   );
   assertEquals(
-    pullRequestType([new Update("README.md", spec)]),
+    pullRequestType(["docs"]),
     "docs",
   );
   assertEquals(
-    pullRequestType([new Update("action.yml", spec)]),
-    "build",
-  );
-  assertEquals(
-    pullRequestType([
-      new Update(".github/workflows/ci.yml", spec),
-      new Update("README.md", spec),
-    ]),
+    pullRequestType(["ci", "docs"]),
     "ci",
   );
   assertEquals(
-    pullRequestType([
-      new Update("deps.ts", spec),
-      new Update(".github/workflows/ci.yml", spec),
-      new Update("README.md", spec),
-    ]),
+    pullRequestType(["build", "ci", "docs"]),
     "build",
   );
 });

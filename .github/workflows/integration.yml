@@ -22,9 +22,17 @@ jobs:
           deno-version: v1.26.2 # @denopendabot denoland/deno
 
       - name: Test
-        run: deno task test -q integration/mod_test.ts
+        run: deno task test -q --coverage=./coverage integration/mod_test.ts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create coverage report
+        run: deno coverage ./coverage --lcov > ./coverage.lcov
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.lcov
 
   action:
     name: Action
