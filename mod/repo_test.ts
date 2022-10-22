@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.160.0/testing/asserts.ts";
-import { Client } from "./github.ts";
+import { GitHubClient } from "./octokit.ts";
 import { UpdateSpec } from "./common.ts";
 import {
   getRepoUpdateSpecs,
@@ -8,7 +8,7 @@ import {
   versionRegExp,
 } from "./repo.ts";
 
-const github = new Client();
+const github = new GitHubClient();
 const repo = "denoland/deno";
 const initial = "v1.26.0";
 const target = "v1.26.2"; // @denopendabot denoland/deno

@@ -3,13 +3,13 @@ import {
   assertEquals,
 } from "https://deno.land/std@0.160.0/testing/asserts.ts";
 import { env } from "./env.ts";
-import { Client } from "./github.ts";
+import { GitHubClient } from "./octokit.ts";
 import { RepoUpdate } from "./repo.ts";
 
 const repo = "hasundue/denopendabot";
 const base = "test";
 const branch = "test-github";
-const github = new Client(env.GITHUB_TOKEN);
+const github = new GitHubClient(env.GITHUB_TOKEN);
 
 Deno.test("getLatestRelease", async () => {
   const tag = await github.getLatestRelease(repo);
@@ -22,9 +22,14 @@ Deno.test("getBranch", async () => {
   assertEquals(branch.name, "main");
 });
 
-Deno.test("getCommit", async () => {
-  const commit = await github.getCommit(repo, "main");
+Deno.test("getLatestCommit", async () => {
+  const commit = await github.getLatestCommit(repo, "main");
   assert(commit);
+});
+
+Deno.test("compareBranches", async () => {
+  const commits = await github.compareBranches(repo, "main", "test");
+  assert(commits);
 });
 
 Deno.test({

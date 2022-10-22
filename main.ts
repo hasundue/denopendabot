@@ -1,5 +1,10 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.2/mod.ts";
-import { createPullRequest, VERSION } from "./mod.ts";
+import {
+  createCommits,
+  createPullRequest,
+  getUpdates,
+  VERSION,
+} from "./mod.ts";
 
 const { args, options } = await new Command()
   .name("denopendabot")
@@ -48,12 +53,21 @@ const { args, options } = await new Command()
   .parse(Deno.args);
 
 const repo = args[0];
-const result = await createPullRequest(repo, options);
+const updates = await getUpdates(repo, options);
 
-if (!options.dryRun && !result) {
+if (!updates.length) {
   console.log("🎉 Everything is up-to-date!");
 }
 
-if (options.check && result) Deno.exit(1);
+if (options.check && updates.length) {
+  Deno.exit(1);
+}
+
+if (options.dryRun) {
+  Deno.exit(0);
+}
+
+await createCommits(repo, updates, options);
+await createPullRequest(repo, options);
 
 Deno.exit(0);
