@@ -64,9 +64,9 @@ Deno.test({
     await t.step("createPullRequest (new)", async () => {
       const result = await github.createPullRequest(
         repo,
+        base,
         branch,
         message,
-        base,
       );
       assertEquals(result.title, message);
     });
@@ -74,9 +74,9 @@ Deno.test({
     await t.step("createPullRequest (update)", async () => {
       const result = await github.createPullRequest(
         repo,
+        base,
         branch,
         message,
-        base,
       );
       assertEquals(result.title, message);
     });
