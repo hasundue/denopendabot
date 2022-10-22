@@ -71,12 +71,24 @@ app.webhooks.on("check_suite.completed", async ({ octokit, payload }) => {
   }
   console.log(payload);
 
+  // merge pull requests if the status is success
   for (const { number } of payload.check_suite.pull_requests) {
     const { data: pr } = await octokit.request(
       "GET /repos/{owner}/{repo}/pulls/{pull_number}",
       { owner, repo, pull_number: number },
     );
-    console.log(pr);
+    if (pr.user?.login === "denopendabot[bot]") {
+      console.log(pr);
+      const { data: result } = await octokit.request(
+        "PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge",
+        { owner, repo, pull_number: number },
+      );
+      if (result.merged) {
+        console.log(`🎉 Merged a pull request "${pr.title}"`);
+      } else {
+        console.warn(`❗ ${result.message}`);
+      }
+    }
   }
 });
 
