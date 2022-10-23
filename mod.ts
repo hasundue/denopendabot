@@ -2,7 +2,7 @@ import { groupBy } from "https://deno.land/std@0.159.0/collections/group_by.ts";
 import { intersect } from "https://deno.land/std@0.159.0/collections/intersect.ts";
 import { withoutAll } from "https://deno.land/std@0.160.0/collections/without_all.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.1.0";
-import { env } from "./mod/env.ts";
+import { env } from "./env.ts";
 import {
   CommitType,
   pullRequestType,
@@ -15,7 +15,7 @@ import { getRepoUpdateSpecs, RepoUpdate } from "./mod/repo.ts";
 
 export const VERSION = "0.6.2"; // @denopendabot hasundue/denopendabot
 
-interface Options {
+export interface Options {
   base?: string;
   branch?: string;
   release?: string;
@@ -30,15 +30,20 @@ interface Options {
 const getActionToken = (options?: Options) => {
   const envToken = options?.token && env.get(options?.token);
   const rawToken = !envToken ? options?.token : undefined;
-  return (envToken || rawToken) ?? env.GITHUB_TOKEN;
+  return (envToken || rawToken) ?? env.get("GITHUB_TOKEN");
+};
+
+const getUserToken = (options?: Options) => {
+  const envUserToken = options?.userToken && env.get(options?.userToken);
+  const rawUserToken = !envUserToken ? options?.userToken : undefined;
+  return envUserToken ?? rawUserToken;
 };
 
 export async function getUpdates(
   repository: string,
   options?: Options,
 ) {
-  const actionToken = getActionToken(options);
-  const github = new GitHubClient(actionToken);
+  const github = new GitHubClient(options?.octokit ?? getActionToken(options));
 
   const base = options?.base ?? "main";
   const baseTree = await github.getTree(repository, base);
@@ -99,38 +104,34 @@ export async function createCommits(
   options: Options,
 ) {
   const actionToken = getActionToken(options);
-  if (!actionToken) {
+  const userToken = getUserToken(options);
+
+  if (!options?.octokit && !actionToken && !userToken) {
     throw new Error("❗ Access token is not provided");
   }
-  // github client to run the workflow
-  const actor = new GitHubClient(actionToken);
 
-  // check if we are authoried to update workflows
-  const envUserToken = options?.userToken && env.get(options?.userToken);
-  const rawUserToken = !envUserToken ? options?.userToken : undefined;
-  const userToken = envUserToken || rawUserToken;
+  const github = new GitHubClient(options?.octokit ?? userToken ?? actionToken);
+  const authorized = options?.octokit || userToken;
 
   // filter out workflows if we are not authorized to update them
-  const updatables = !userToken
+  const updatables = !authorized
     ? updates.filter((update) => !update.isWorkflow())
     : updates;
 
   const branch = options?.branch ?? "denopendabot";
-  await actor.createBranch(repository, branch, options?.base ?? "main");
+  await github.createBranch(repository, branch, options?.base ?? "main");
 
   const groupsByDep = groupBy(updatables, (it) => it.spec.name);
   const deps = Object.keys(groupsByDep);
-
-  const committer = userToken ? new GitHubClient(userToken) : actor;
 
   // create commits for each updated dependency
   for (const dep of deps) {
     const updates = groupsByDep[dep]!;
     const message = updates[0].message();
-    await committer.createCommit(repository, branch, message, updates);
+    await github.createCommit(repository, branch, message, updates);
   }
 
-  if (!userToken) {
+  if (!authorized) {
     console.log(
       "📣 Skipped the workflow files since we are not authorized to update them.",
     );
@@ -141,8 +142,14 @@ export async function createPullRequest(
   repository: string,
   options?: Options,
 ) {
-  // github client to run the workflow
-  const github = new GitHubClient(options?.octokit ?? getActionToken(options));
+  const actionToken = getActionToken(options);
+  const userToken = getUserToken(options);
+
+  if (!options?.octokit && !actionToken && !userToken) {
+    throw new Error("❗ Access token is not provided");
+  }
+
+  const github = new GitHubClient(options?.octokit ?? actionToken ?? userToken);
 
   const base = options?.base ?? "main";
   const branch = options?.branch ?? "denopendabot";
@@ -172,7 +179,7 @@ export async function createPullRequest(
     ? `bump the version from ${version} to ${options.release}`
     : "update dependencies";
   const title = `${type}(${scope}): ${body}`;
-  const labels = options?.test ? ["test"] : [];
+  const labels = options?.test ? ["test"] : undefined;
 
   return await github.createPullRequest(
     repository,

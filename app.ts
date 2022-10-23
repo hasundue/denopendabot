@@ -3,28 +3,41 @@ import { Hono } from "https://deno.land/x/hono@v2.2.5/mod.ts";
 import { logger } from "https://deno.land/x/hono@v2.2.5/middleware.ts";
 import { deployment, location } from "./app/deploy.ts";
 import { handler } from "./app/webhooks.ts";
+import { verifyRequest } from "./app/qstash.ts";
 
-const hono = new Hono();
+const app = new Hono();
 
-hono.use("*", logger());
+app.use("*", logger());
 
-hono.get("/", (context) => context.text("Hello, I'm Denopendabot!"));
-
-hono.post("/api/github/webhooks", async (context) => {
+// copy and transfer all requests to the staging deployment
+app.use("*", async (context, next) => {
   const deploy = await deployment();
-  console.log(`deployment: ${deploy}`);
-
-  // copy and transfer all requests to the staging deployment
   if (deploy === "production") {
     const staging = await location("staging");
     await fetch(staging + "api/github/webhooks", context.req.clone());
     console.log(`transfered the request to ${staging}`);
   }
+  await next();
+});
 
-  // handle the webhook with octokit
+app.get("/", (context) => context.text("Hello, I'm Denopendabot!"));
+
+// handle webhooks with octokit
+app.post("/api/github/webhooks", async (context) => {
   await handler(context.req);
-
   return context.json(null, 200);
 });
 
-await serve(hono.fetch);
+// verify requests
+app.use("/api/qstash/*", async (c, next) => {
+  const valid = await verifyRequest({
+    signature: c.req.header("upstash-signature"),
+    body: await c.req.text(),
+  });
+  if (!valid) {
+    throw new Error("Signature is invalid");
+  }
+  await next();
+});
+
+await serve(app.fetch);

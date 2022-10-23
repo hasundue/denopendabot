@@ -34,12 +34,20 @@ const { args, options } = await new Command()
     "Bump the repository version for a release.",
   )
   .option(
+    "-o --output <path>",
+    "Output the results to a file.",
+  )
+  .option(
     "-c --check",
     "Exit with code=1 if any update is found",
   )
   .option(
     "-d --dry-run",
     "Will not actually update",
+  )
+  .option(
+    "--test",
+    "Run for testing.",
   )
   .option(
     "-t --token <token>",
@@ -57,6 +65,10 @@ const updates = await getUpdates(repo, options);
 
 if (!updates.length) {
   console.log("🎉 Everything is up-to-date!");
+}
+
+if (options.output) {
+  Deno.writeTextFileSync(options.output, JSON.stringify(updates));
 }
 
 if (options.check && updates.length) {
