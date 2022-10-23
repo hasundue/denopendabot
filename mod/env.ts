@@ -4,8 +4,6 @@ type Env = {
   GITHUB_TOKEN?: string;
   CI?: "true";
   DENO_DEPLOYMENT_ID?: string;
-  HEAD_BRANCH?: string;
-  TEST?: "true" | "false";
 };
 
 type EnvKey = keyof Env;
@@ -14,7 +12,7 @@ const getEnv = () => {
   if (Deno.env.get("CI") || Deno.env.get("DENO_DEPLOYMENT_ID")) {
     return Deno.env.toObject() as Env;
   } else {
-    return configSync() as Env;
+    return configSync({ export: false }) as Env;
   }
 };
 

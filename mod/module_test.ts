@@ -1,7 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.160.0/testing/asserts.ts";
 import { getModuleUpdateSpecs, ModuleUpdate } from "./module.ts";
 import { VERSION } from "../mod.ts";
-import { env } from "./env.ts";
 
 const initial = "0.158.0";
 const target = "0.160.0"; // @denopendabot denoland/deno_std
@@ -48,7 +47,7 @@ Deno.test("getUpdateSpec/Update", async () => {
 
 Deno.test({
   name: "getUpdateSpec (release)",
-  ignore: env.TEST === "true",
+  ignore: Deno.env.get("INTEGRATION") === "true",
   fn: async () => {
     const input = `
     const url1 = "https://deno.land/std@${initial}/testing/mod.ts";

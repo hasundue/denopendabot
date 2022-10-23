@@ -5,7 +5,7 @@ import {
 import { delay } from "https://deno.land/std@0.160.0/async/mod.ts";
 import { createCommits, getUpdates } from "../mod.ts";
 import { GitHubClient } from "../mod/octokit.ts";
-import { env } from "../mod/env.ts";
+import { env } from "../app/env.ts";
 
 const repo = "hasundue/denopendabot";
 const base = "test";

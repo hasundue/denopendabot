@@ -20,7 +20,7 @@ const getEnv = () => {
   if (Deno.env.get("CI") || Deno.env.get("DENO_DEPLOYMENT_ID")) {
     return Deno.env.toObject() as Env;
   } else {
-    return configSync() as Env;
+    return configSync({ export: false }) as Env;
   }
 };
 

@@ -36,7 +36,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_BRANCH: ${{ github.head_ref }}
-          TEST: true
+          INTEGRATION: true
 
       - name: Create coverage report
         run: deno coverage ./coverage --lcov > ./coverage.lcov
@@ -88,4 +88,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_BRANCH: ${{ github.head_ref }}
-          TEST: true
+          INTEGRATION: true
