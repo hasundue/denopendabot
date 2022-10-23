@@ -5,7 +5,7 @@ import {
 import { delay } from "https://deno.land/std@0.160.0/async/mod.ts";
 import { createCommits, getUpdates } from "../mod.ts";
 import { GitHubClient } from "../mod/octokit.ts";
-import { env } from "../app/env.ts";
+import { env } from "../env.ts";
 
 const repo = "hasundue/denopendabot";
 const base = "test";
@@ -13,10 +13,10 @@ const branch = "test-app";
 const initial = "0.6.2"; // @denopendabot hasundue/denopendabot
 const target = "1.0.0";
 
-const github = new GitHubClient(env.GITHUB_TOKEN);
+const github = new GitHubClient(env.get("GITHUB_TOKEN"));
 
 Deno.test("integration (app)", async () => {
-  await github.createBranch(repo, base, env.HEAD_BRANCH);
+  await github.createBranch(repo, base, env.get("HEAD_BRANCH"));
 
   const options = {
     base,
