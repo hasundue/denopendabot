@@ -41,6 +41,7 @@ const getContext = async (
   payload: PayLoadWithRepositoryAndHeadBranch,
 ) => {
   const deploy = await deployment();
+  console.log(`deployment: ${deploy}`);
 
   const owner = payload.repository.owner.login;
   const repo = payload.repository.name;
@@ -104,10 +105,10 @@ app.webhooks.on(
   async ({ name, payload }) => {
     const context = await getContext(name, payload);
 
+    console.log(payload);
+
     // skip if the check suite is not associated with the deployment
     if (!associated(context)) return;
-
-    console.log(payload);
   },
 );
 
