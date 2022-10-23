@@ -1,7 +1,6 @@
 import { groupBy } from "https://deno.land/std@0.159.0/collections/group_by.ts";
 import { intersect } from "https://deno.land/std@0.159.0/collections/intersect.ts";
 import { withoutAll } from "https://deno.land/std@0.160.0/collections/without_all.ts";
-import { Octokit } from "https://esm.sh/@octokit/core@4.1.0";
 import { env } from "./mod/env.ts";
 import {
   CommitType,
@@ -12,6 +11,7 @@ import {
 import { GitHubClient } from "./mod/octokit.ts";
 import { getModuleUpdateSpecs, ModuleUpdate } from "./mod/module.ts";
 import { getRepoUpdateSpecs, RepoUpdate } from "./mod/repo.ts";
+import { getAppOctokit } from "./app/octokit.ts";
 
 export const VERSION = "0.6.2"; // @denopendabot hasundue/denopendabot
 
@@ -23,7 +23,6 @@ interface Options {
   exclude?: string[];
   token?: string;
   userToken?: string;
-  octokit?: Octokit;
   test?: boolean;
 }
 
@@ -31,6 +30,12 @@ const getActionToken = (options?: Options) => {
   const envToken = options?.token && env.get(options?.token);
   const rawToken = !envToken ? options?.token : undefined;
   return (envToken || rawToken) ?? env.GITHUB_TOKEN;
+};
+
+const getUserToken = (options?: Options) => {
+  const envUserToken = options?.userToken && env.get(options?.userToken);
+  const rawUserToken = !envUserToken ? options?.userToken : undefined;
+  return envUserToken ?? rawUserToken;
 };
 
 export async function getUpdates(
@@ -98,39 +103,36 @@ export async function createCommits(
   updates: Update[],
   options: Options,
 ) {
+  const appOctokit = await getAppOctokit(repository);
   const actionToken = getActionToken(options);
-  if (!actionToken) {
+  const userToken = getUserToken(options);
+
+  if (!appOctokit && !actionToken && !userToken) {
     throw new Error("❗ Access token is not provided");
   }
-  // github client to run the workflow
-  const actor = new GitHubClient(actionToken);
 
-  // check if we are authoried to update workflows
-  const envUserToken = options?.userToken && env.get(options?.userToken);
-  const rawUserToken = !envUserToken ? options?.userToken : undefined;
-  const userToken = envUserToken || rawUserToken;
+  const github = new GitHubClient(appOctokit ?? userToken ?? actionToken);
+  const authorized = appOctokit || userToken;
 
   // filter out workflows if we are not authorized to update them
-  const updatables = !userToken
+  const updatables = !authorized
     ? updates.filter((update) => !update.isWorkflow())
     : updates;
 
   const branch = options?.branch ?? "denopendabot";
-  await actor.createBranch(repository, branch, options?.base ?? "main");
+  await github.createBranch(repository, branch, options?.base ?? "main");
 
   const groupsByDep = groupBy(updatables, (it) => it.spec.name);
   const deps = Object.keys(groupsByDep);
-
-  const committer = userToken ? new GitHubClient(userToken) : actor;
 
   // create commits for each updated dependency
   for (const dep of deps) {
     const updates = groupsByDep[dep]!;
     const message = updates[0].message();
-    await committer.createCommit(repository, branch, message, updates);
+    await github.createCommit(repository, branch, message, updates);
   }
 
-  if (!userToken) {
+  if (!authorized) {
     console.log(
       "📣 Skipped the workflow files since we are not authorized to update them.",
     );
@@ -141,8 +143,8 @@ export async function createPullRequest(
   repository: string,
   options?: Options,
 ) {
-  // github client to run the workflow
-  const github = new GitHubClient(options?.octokit ?? getActionToken(options));
+  const appOctokit = await getAppOctokit(repository);
+  const github = new GitHubClient(appOctokit ?? getActionToken(options));
 
   const base = options?.base ?? "main";
   const branch = options?.branch ?? "denopendabot";

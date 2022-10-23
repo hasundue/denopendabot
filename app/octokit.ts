@@ -1,9 +1,9 @@
 import { App } from "https://esm.sh/@octokit/app@13.0.11";
+import { Octokit } from "https://esm.sh/@octokit/core@4.1.0";
 import type { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.3.0";
 import { env } from "./env.ts";
 import { privateKey } from "./redis.ts";
 import { Deployment, deployment } from "./deploy.ts";
-import { createPullRequest } from "../mod.ts";
 
 if (!privateKey) throw Error("Private key is not deployed on Upstash Redis.");
 
@@ -18,6 +18,25 @@ const app = new App({
     secret: env["WEBHOOK_SECRET"],
   },
 });
+
+export async function getAppOctokit(
+  repo: string,
+) {
+  try {
+    await app.eachRepository(({ repository, octokit }) => {
+      if (repository.full_name === repo) {
+        throw octokit;
+      }
+    });
+  } catch (exception) {
+    if (exception instanceof Octokit) {
+      return exception;
+    } else {
+      throw exception;
+    }
+  }
+  return null;
+}
 
 const home = env["APP_REPO"];
 
@@ -90,36 +109,6 @@ app.webhooks.on("check_suite.completed", async ({ octokit, payload }) => {
       }
     }
   }
-});
-
-app.webhooks.on("push", async ({ octokit, payload }) => {
-  const { repository, deploy, owner, repo } = await getContext(payload);
-
-  const branch = payload.ref.split("/").pop()!;
-  console.log(`branch: ${branch}`);
-
-  // skip if the push is not associated with the deployment
-  if (!associated(deploy, owner, repo, branch)) return;
-
-  // skip if the committer is not denopendabot
-  const committer = payload.head_commit?.author.name;
-  console.log(`comitter: ${committer}`);
-  if (committer !== "denopendabot-action") return;
-
-  console.log(payload);
-
-  // get default branch name
-  const { data } = await octokit.request(
-    "GET /repos/{owner}/{repo}",
-    { owner, repo },
-  );
-
-  await createPullRequest(repository, {
-    base: deploy === "staging" ? "test" : data.default_branch,
-    branch,
-    octokit,
-    test: deploy === "staging",
-  });
 });
 
 export const handler = async (request: Request) => {
