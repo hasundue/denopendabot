@@ -11,7 +11,6 @@ import {
 import { GitHubClient } from "./mod/octokit.ts";
 import { getModuleUpdateSpecs, ModuleUpdate } from "./mod/module.ts";
 import { getRepoUpdateSpecs, RepoUpdate } from "./mod/repo.ts";
-import { getAppOctokit } from "./app/octokit.ts";
 
 export const VERSION = "0.6.2"; // @denopendabot hasundue/denopendabot
 
@@ -23,6 +22,7 @@ interface Options {
   exclude?: string[];
   token?: string;
   userToken?: string;
+  octokit?: string;
   test?: boolean;
 }
 
@@ -103,16 +103,15 @@ export async function createCommits(
   updates: Update[],
   options: Options,
 ) {
-  const appOctokit = await getAppOctokit(repository);
   const actionToken = getActionToken(options);
   const userToken = getUserToken(options);
 
-  if (!appOctokit && !actionToken && !userToken) {
+  if (!options?.octokit && !actionToken && !userToken) {
     throw new Error("❗ Access token is not provided");
   }
 
-  const github = new GitHubClient(appOctokit ?? userToken ?? actionToken);
-  const authorized = appOctokit || userToken;
+  const github = new GitHubClient(options?.octokit ?? userToken ?? actionToken);
+  const authorized = options?.octokit || userToken;
 
   // filter out workflows if we are not authorized to update them
   const updatables = !authorized
@@ -143,8 +142,14 @@ export async function createPullRequest(
   repository: string,
   options?: Options,
 ) {
-  const appOctokit = await getAppOctokit(repository);
-  const github = new GitHubClient(appOctokit ?? getActionToken(options));
+  const actionToken = getActionToken(options);
+  const userToken = getUserToken(options);
+
+  if (!options?.octokit && !actionToken && !userToken) {
+    throw new Error("❗ Access token is not provided");
+  }
+
+  const github = new GitHubClient(options?.octokit ?? actionToken ?? userToken);
 
   const base = options?.base ?? "main";
   const branch = options?.branch ?? "denopendabot";

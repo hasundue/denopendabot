@@ -1,5 +1,4 @@
 import { App } from "https://esm.sh/@octokit/app@13.0.11";
-import { Octokit } from "https://esm.sh/@octokit/core@4.1.0";
 import type { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.3.0";
 import { env } from "../env.ts";
 import { privateKey } from "./redis.ts";
@@ -18,25 +17,6 @@ const app = new App({
     secret: env.get("WEBHOOK_SECRET")!,
   },
 });
-
-export async function getAppOctokit(
-  repo: string,
-) {
-  try {
-    await app.eachRepository(({ repository, octokit }) => {
-      if (repository.full_name === repo) {
-        throw octokit;
-      }
-    });
-  } catch (exception) {
-    if (exception instanceof Octokit) {
-      return exception;
-    } else {
-      throw exception;
-    }
-  }
-  return null;
-}
 
 const home = env.get("APP_REPO")!;
 
