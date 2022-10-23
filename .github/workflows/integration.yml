@@ -81,10 +81,10 @@ jobs:
           deno-version: v1.26.2 # @denopendabot denoland/deno
 
       - name: Cache dependencies
-        run: deno cache app/*_test.ts integration/app_test.ts
+        run: deno cache integration/app_test.ts
 
       - name: Run Test
-        run: deno task test app/ integration/app_test.ts
+        run: deno task test integration/app_test.ts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_BRANCH: ${{ github.head_ref }}

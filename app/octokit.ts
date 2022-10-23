@@ -1,21 +1,21 @@
 import { App } from "https://esm.sh/@octokit/app@13.0.11";
 import { Octokit } from "https://esm.sh/@octokit/core@4.1.0";
 import type { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.3.0";
-import { env } from "./env.ts";
+import { env } from "../env.ts";
 import { privateKey } from "./redis.ts";
 import { Deployment, deployment } from "./deploy.ts";
 
 if (!privateKey) throw Error("Private key is not deployed on Upstash Redis.");
 
 const app = new App({
-  appId: env["APP_ID"],
+  appId: env.get("APP_ID")!,
   privateKey,
   oauth: {
-    clientId: env["CLIENT_ID"],
-    clientSecret: env["CLIENT_SECRET"],
+    clientId: env.get("CLIENT_ID")!,
+    clientSecret: env.get("CLIENT_SECRET")!,
   },
   webhooks: {
-    secret: env["WEBHOOK_SECRET"],
+    secret: env.get("WEBHOOK_SECRET")!,
   },
 });
 
@@ -38,7 +38,7 @@ export async function getAppOctokit(
   return null;
 }
 
-const home = env["APP_REPO"];
+const home = env.get("APP_REPO")!;
 
 export type PayLoadWithRepository = {
   repository: {

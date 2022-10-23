@@ -1,7 +1,7 @@
 import { groupBy } from "https://deno.land/std@0.159.0/collections/group_by.ts";
 import { intersect } from "https://deno.land/std@0.159.0/collections/intersect.ts";
 import { withoutAll } from "https://deno.land/std@0.160.0/collections/without_all.ts";
-import { env } from "./mod/env.ts";
+import { env } from "./env.ts";
 import {
   CommitType,
   pullRequestType,
@@ -29,7 +29,7 @@ interface Options {
 const getActionToken = (options?: Options) => {
   const envToken = options?.token && env.get(options?.token);
   const rawToken = !envToken ? options?.token : undefined;
-  return (envToken || rawToken) ?? env.GITHUB_TOKEN;
+  return (envToken || rawToken) ?? env.get("GITHUB_TOKEN");
 };
 
 const getUserToken = (options?: Options) => {

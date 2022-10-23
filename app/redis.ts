@@ -1,9 +1,9 @@
 import { Redis } from "https://deno.land/x/upstash_redis@v1.15.0/mod.ts";
-import { env } from "./env.ts";
+import { env } from "../env.ts";
 
 export const redis = new Redis({
-  url: env["UPSTASH_REDIS_REST_URL"],
-  token: env["UPSTASH_REDIS_REST_TOKEN"],
+  url: env.get("UPSTASH_REDIS_REST_URL")!,
+  token: env.get("UPSTASH_REDIS_REST_TOKEN")!,
 });
 
 export async function uploadPrivateKey(path: string) {
