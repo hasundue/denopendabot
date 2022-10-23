@@ -20,7 +20,7 @@ const app = new App({
 
 const home = env.get("APP_REPO")!;
 
-export type PayLoadWithRepository = {
+type PayLoadWithRepositoryAndHeadBranch = {
   repository: {
     name: string;
     owner: {
@@ -29,23 +29,33 @@ export type PayLoadWithRepository = {
   };
 };
 
-const getContext = async (payload: PayLoadWithRepository) => {
-  const deploy = await deployment();
-  const owner = payload.repository.owner.login;
-  const repo = payload.repository.name;
-  const repository = `${owner}/${repo}`;
-  console.log(`repository: ${repository}`);
-  return { deploy, repository, owner, repo };
+type Context = {
+  deploy: Deployment;
+  owner: string;
+  repo: string;
+  branch: string;
 };
 
-const associated = (
-  deploy: Deployment,
-  owner: string,
-  repo: string,
-  branch: string | null,
+const getContext = async (
+  name: string,
+  payload: PayLoadWithRepositoryAndHeadBranch,
 ) => {
-  const isTest = `${owner}/${repo}` === home && branch !== null &&
-    branch === "test-app";
+  const deploy = await deployment();
+
+  const owner = payload.repository.owner.login;
+  const repo = payload.repository.name;
+  console.log(`repository: ${owner}/${repo}`);
+
+  // @ts-ignore an event object always has the head_branch field in our cases
+  const branch = payload[name].head_branch as string;
+  console.log(`branch: ${branch}`);
+
+  return { deploy, owner, repo, branch };
+};
+
+const associated = (context: Context) => {
+  const { deploy, owner, repo, branch } = context;
+  const isTest = `${owner}/${repo}` === home && branch === "test-app";
   return deploy === "staging" ? isTest : repo === "denopendabot";
 };
 
@@ -53,14 +63,12 @@ app.webhooks.onAny(({ name }) => {
   console.log(`event: ${name}`);
 });
 
-app.webhooks.on("check_suite.completed", async ({ octokit, payload }) => {
-  const { deploy, owner, repo } = await getContext(payload);
-
-  const branch = payload.check_suite.head_branch;
-  console.log(`branch: ${branch}`);
+app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
+  const context = await getContext(name, payload);
+  const { owner, repo } = context;
 
   // skip if the check suite is not associated with the deployment
-  if (!associated(deploy, owner, repo, branch)) return;
+  if (!associated(context)) return;
 
   // skip if the conclusion is not success
   const conclusion = payload.check_suite.conclusion;
@@ -90,6 +98,18 @@ app.webhooks.on("check_suite.completed", async ({ octokit, payload }) => {
     }
   }
 });
+
+app.webhooks.on(
+  "workflow_run.completed",
+  async ({ name, payload }) => {
+    const context = await getContext(name, payload);
+
+    // skip if the check suite is not associated with the deployment
+    if (!associated(context)) return;
+
+    console.log(payload);
+  },
+);
 
 export const handler = async (request: Request) => {
   await app.webhooks.verifyAndReceive({
