@@ -13,7 +13,7 @@ import { getModuleUpdateSpecs, ModuleUpdate } from "./mod/module.ts";
 import { getRepoUpdateSpecs, RepoUpdate } from "./mod/repo.ts";
 import { getAppOctokit } from "./app/octokit.ts";
 
-export const VERSION = "0.6.2"; // @denopendabot hasundue/denopendabot
+export const VERSION = "1.0.0"; // @denopendabot hasundue/denopendabot
 
 interface Options {
   base?: string;
