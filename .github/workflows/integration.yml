@@ -6,6 +6,13 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  APP_REPO: ${{ secrets.APP_REPO }}
+  APP_ID: ${{ secrets.APP_ID }}
+  CLIENT_ID: ${{ secrets.CLIENT_ID }}
+  CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+  WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }};
+  UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+  UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_URL }}
 
 jobs:
   module:
