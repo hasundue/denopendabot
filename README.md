@@ -60,7 +60,7 @@ See
 
 ## :bulb: Usage
 
-### GitHub App
+### GitHub App (experimental)
 
 [Install the App](https://github.com/apps/denopendabot) and create a workflow
 file to dispatch `denopendabot-run` events:
