@@ -13,7 +13,7 @@ import { GitHubClient } from "./mod/octokit.ts";
 import { getModuleUpdateSpecs, ModuleUpdate } from "./mod/module.ts";
 import { getRepoUpdateSpecs, RepoUpdate } from "./mod/repo.ts";
 
-export const VERSION = "0.6.2"; // @denopendabot hasundue/denopendabot
+export const VERSION = "0.7.0"; // @denopendabot hasundue/denopendabot
 
 export interface Options {
   base?: string;
