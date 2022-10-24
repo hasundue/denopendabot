@@ -1,5 +1,5 @@
 import { gt } from "https://deno.land/std@0.160.0/semver/mod.ts";
-import { Client } from "./github.ts";
+import { GitHubClient } from "./octokit.ts";
 import { semverRegExp, Update, UpdateSpec } from "./common.ts";
 
 export const regexp = (
@@ -31,7 +31,7 @@ export class RepoUpdate extends Update {
 }
 
 export async function getRepoUpdateSpecs(
-  github: Client,
+  github: GitHubClient,
   input: string,
   release?: UpdateSpec,
 ): Promise<UpdateSpec[]> {

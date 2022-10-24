@@ -41,11 +41,11 @@ export abstract class Update {
   abstract content: (input: string) => string;
 }
 
-export const pullRequestType = (updates: Update[]): CommitType =>
+export const pullRequestType = (types: CommitType[]): CommitType =>
   CommitType[
     minOf(
-      updates,
-      (update) => CommitType.findIndex((type) => type === update.type),
+      types,
+      (type) => CommitType.findIndex((it) => it === type),
     )!
   ];
 

@@ -9,11 +9,17 @@ interface BlobContent {
   content: string;
 }
 
-export class Client {
-  private octokit: Octokit;
+export class GitHubClient {
+  octokit: Octokit;
 
-  constructor(token?: string) {
-    this.octokit = new Octokit({ auth: token });
+  constructor(
+    octokit?: Octokit | string,
+  ) {
+    if (!octokit || typeof octokit === "string") {
+      this.octokit = new Octokit({ auth: octokit });
+    } else {
+      this.octokit = octokit;
+    }
   }
 
   async getLatestRelease(
@@ -29,6 +35,17 @@ export class Client {
     } catch {
       return undefined;
     }
+  }
+
+  async getDefaultBranchName(
+    repository: string,
+  ) {
+    const [owner, repo] = repository.split("/");
+    const { data } = await this.octokit.request(
+      "GET /repos/{owner}/{repo}",
+      { owner, repo },
+    );
+    return data.default_branch;
   }
 
   async getBranch(
@@ -86,7 +103,7 @@ export class Client {
       );
 
       const author = {
-        name: "denopendabot",
+        name: "denopendabot-action",
         email: "denopendabot@gmail.com",
       };
 
@@ -116,7 +133,7 @@ export class Client {
     }
   }
 
-  async getCommit(
+  async getLatestCommit(
     repository: string,
     branch = "main",
   ) {
@@ -130,6 +147,21 @@ export class Client {
     return commit;
   }
 
+  async compareBranches(
+    repository: string,
+    base: string,
+    head: string,
+  ) {
+    const [owner, repo] = repository.split("/");
+
+    const { data: commits } = await this.octokit.request(
+      "GET /repos/{owner}/{repo}/compare/{basehead}",
+      { owner, repo, basehead: `${base}...${head}` },
+    );
+
+    return commits;
+  }
+
   async createBranch(
     repository: string,
     branch: string,
@@ -141,7 +173,7 @@ export class Client {
 
     if (exists) {
       // update the ref
-      const baseRef = await this.getCommit(repository, base);
+      const baseRef = await this.getLatestCommit(repository, base);
       await this.octokit.request(
         "PATCH /repos/{owner}/{repo}/git/refs/{ref}",
         { owner, repo, ref: `heads/${branch}`, sha: baseRef.sha, force: true },
@@ -172,7 +204,7 @@ export class Client {
   ) {
     const [owner, repo] = repository.split("/");
 
-    const baseCommit = await this.getCommit(repository, base);
+    const baseCommit = await this.getLatestCommit(repository, base);
 
     await this.octokit.request(
       "PATCH /repos/{owner}/{repo}/git/refs/{ref}",
@@ -199,40 +231,46 @@ export class Client {
 
   async createPullRequest(
     repository: string,
+    base: string,
     branch: string,
     title: string,
-    base = "main",
+    labels = ["dependencies"],
   ) {
     const [owner, repo] = repository.split("/");
 
-    const prs = await this.getPullRequests(repository);
+    const prs = await this.getPullRequests(repository, "open");
     const relevant = prs.find((pr) => pr.head.ref === branch);
 
     const { data: result } = relevant
-      // pull request by denopendabot already exists
       ? await this.octokit.request(
         "PATCH /repos/{owner}/{repo}/pulls/{pull_number}",
         { owner, repo, pull_number: relevant.number, title },
       )
-      // create a new pull request
       : await this.octokit.request(
         "POST /repos/{owner}/{repo}/pulls",
         { owner, repo, title, base, head: branch },
       );
 
-    console.log(`🚀 ${result.title}`);
+    // add a label if given
+    await this.octokit.request(
+      "POST /repos/{owner}/{repo}/issues/{issue_number}/labels",
+      { owner, repo, issue_number: result.number, labels },
+    );
+
+    console.log(`🚀 Created a pull request "${result.title}"`);
 
     return result;
   }
 
   async getPullRequests(
     repository: string,
+    state: "open" | "closed" | "all" = "open",
   ) {
     const [owner, repo] = repository.split("/");
 
     const { data: results } = await this.octokit.request(
       "GET /repos/{owner}/{repo}/pulls",
-      { owner, repo },
+      { owner, repo, state },
     );
 
     return results;

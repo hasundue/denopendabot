@@ -21,10 +21,23 @@ jobs:
         with:
           deno-version: v1.26.2 # @denopendabot denoland/deno
 
-      - name: Test
-        run: deno task test -q integration/mod_test.ts
+      - name: Cache dependencies
+        run: deno cache integration/mod_test.ts
+
+      - name: Run Test
+        run: deno task test --coverage=./coverage integration/mod_test.ts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_BRANCH: ${{ github.head_ref }}
+          INTEGRATION: true
+
+      - name: Create coverage report
+        run: deno coverage ./coverage --lcov > ./coverage.lcov
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.lcov
 
   action:
     name: Action
@@ -34,10 +47,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3.1.0
 
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.26.2 # @denopendabot denoland/deno
+
       - name: Create test action
-        run: |
-          cp action.yml integration/action.yml
-          sed -i -e 's/https:\/\/deno.land\/x\/denopendabot@[0-9]*\.[0-9]*\.[0-9]*/\./' integration/action.yml
+        run: deno run -A integration/build.ts
 
       - name: Run action
         uses: ./integration
@@ -45,4 +61,15 @@ jobs:
           repository: hasundue/denopendabot
           base-branch: test
           working-branch: test-action
-          options: --dry-run
+          options: --test --release 1.0.0
+
+  app:
+    name: App
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository dispatch
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          event-type: denopendabot-run
+          client-payload: '{ "base": "test", "branch": "test-app", "test": "true" }'
