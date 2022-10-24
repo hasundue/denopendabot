@@ -8,13 +8,16 @@
 
 <!-- deno-fmt-ignore-end -->
 
-`denopendabot` keeps your Deno projects up-to-date.
+**Denopendabot** is a GitHub App, GitHub Action, and Deno module to keep the dependencies of your Deno projects up-to-date.
 
 > **Warning**\
 > Still under development. Many bugs might remain. Any breaking changes may be
 > introduced on each Feature release.
 
 ## :magic_wand: Features
+
+- [x] :t-rex: Written in [Deno](https://deno.land)
+- [x] :globe_with_meridians: Running on [Deno Deploy](https://deno.com/deploy)
 
 ### Update Deno modules
 
@@ -90,8 +93,6 @@ If you want to update workflow files (`./github/workflows/*.yml`), it also needs
 a private access token with the `workflow` scope. In the examples below, we
 assume the token is added in repository secrets as `GH_TOKEN`.
 
-#### Predefined workflow (recommended)
-
 ```yaml
 name: Denopendabot
 on:
@@ -109,29 +110,3 @@ jobs:
 ```
 
 See [action.yml](./action.yml) for other options.
-
-#### Manual configuration
-
-```yaml
-name: Denopendabot
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: "0 0 * * *" # modify to your convenient time
-jobs:
-  update:
-    name: Update
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.26.2 # @denopendabot denoland/deno
-      - name: Run Denopendabot
-        run: >
-          deno run -q --allow-env --allow-net
-          https://deno.land/x/denopendabot@0.7.0/main.ts
-          ${{ github.repository }}
-          --token ${{ secrets.GITHUB_TOKEN }}
-          --user-token ${{ secrets.GH_TOKEN }}
-```
