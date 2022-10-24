@@ -2,14 +2,20 @@ import {
   assert,
   assertEquals,
 } from "https://deno.land/std@0.160.0/testing/asserts.ts";
+import { env } from "../env.ts";
 import { createCommits, createPullRequest, getUpdates } from "../mod.ts";
+import { GitHubClient } from "../mod/octokit.ts";
 
 const repo = "hasundue/denopendabot";
 const base = "test";
 const initial = "0.6.2"; // @denopendabot hasundue/denopendabot
 const target = "1.0.0";
 
+const github = new GitHubClient(env.get("GITHUB_TOKEN"));
+
 Deno.test("integration (module)", async () => {
+  await github.createBranch(repo, base, env.get("HEAD_BRANCH"));
+
   const branch = "test-module";
 
   const options = {
