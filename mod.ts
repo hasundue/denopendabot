@@ -1,5 +1,5 @@
 import { groupBy } from "https://deno.land/std@0.159.0/collections/group_by.ts";
-import { intersect } from "https://deno.land/std@0.159.0/collections/intersect.ts";
+import { intersect } from "https://deno.land/std@0.160.0/collections/intersect.ts";
 import { withoutAll } from "https://deno.land/std@0.160.0/collections/without_all.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.1.0";
 import { env } from "./env.ts";
@@ -13,7 +13,7 @@ import { GitHubClient } from "./mod/octokit.ts";
 import { getModuleUpdateSpecs, ModuleUpdate } from "./mod/module.ts";
 import { getRepoUpdateSpecs, RepoUpdate } from "./mod/repo.ts";
 
-export const VERSION = "0.6.2"; // @denopendabot hasundue/denopendabot
+export const VERSION = "0.7.0"; // @denopendabot hasundue/denopendabot
 
 export interface Options {
   base?: string;

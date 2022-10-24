@@ -1,6 +1,6 @@
 import { Octokit } from "https://esm.sh/@octokit/core@4.1.0";
 import { App } from "https://esm.sh/@octokit/app@13.0.11";
-import type { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.3.0";
+import type { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.3.1";
 import { env } from "../env.ts";
 import { privateKey } from "./redis.ts";
 import { Deployment, deployment } from "./deploy.ts";
