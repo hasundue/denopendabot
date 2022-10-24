@@ -16,8 +16,8 @@
 
 ## :magic_wand: Features
 
-- [x] :t-rex: Written in [Deno](https://deno.land)
-- [x] :globe_with_meridians: Running on [Deno Deploy](https://deno.com/deploy)
+- [x] Written in [Deno](https://deno.land) :t-rex:
+- [x] Running on [Deno Deploy](https://deno.com/deploy) :zap:
 
 ### Update Deno modules
 
