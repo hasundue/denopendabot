@@ -28,7 +28,7 @@ app.post("/api/github/webhooks", async (context) => {
   return context.json(null, 200);
 });
 
-// verify requests
+// verify requests from qstash
 app.use("/api/qstash/*", async (c, next) => {
   const valid = await verifyRequest({
     signature: c.req.header("upstash-signature"),

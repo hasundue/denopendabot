@@ -14,7 +14,7 @@
 > Still under development. Many bugs might remain. Any breaking changes may be
 > introduced on each Feature release.
 
-## :rocket: Features
+## :magic_wand: Features
 
 ### Update Deno modules
 
@@ -58,11 +58,28 @@ comment of `@denopendabot {owner}/{repo}`.
 See
 [an example pull request](https://github.com/hasundue/denomantic-release/pull/4/commits).
 
+## :bulb: Usage
+
 ### GitHub App
 
-WIP
+[Install the App](https://github.com/apps/denopendabot) and create a workflow
+file to dispatch `denopendabot-run` events:
 
-## :bulb: Usage
+```yaml
+name: Denopendabot
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *" # modify to your convenient time
+jobs:
+  update:
+    steps:
+      - name: Run
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          event-type: denopendabot-run
+          client-payload: '{ "base": "main", "branch": "denopendabot" }' # optional
+```
 
 ### GitHub Action
 
@@ -78,8 +95,9 @@ assume the token is added in repository secrets as `GH_TOKEN`.
 ```yaml
 name: Denopendabot
 on:
+  workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *" # modify to your convinient time
+    - cron: "0 0 * * *" # modify to your convenient time
 jobs:
   update:
     name: Update
@@ -97,8 +115,9 @@ See [action.yml](./action.yml) for other options.
 ```yaml
 name: Denopendabot
 on:
+  workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *" # modify to your convinient time
+    - cron: "0 0 * * *" # modify to your convenient time
 jobs:
   update:
     name: Update
@@ -116,7 +135,3 @@ jobs:
           --token ${{ secrets.GITHUB_TOKEN }}
           --user-token ${{ secrets.GH_TOKEN }}
 ```
-
-### GitHub App
-
-WIP
