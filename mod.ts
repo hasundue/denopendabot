@@ -153,7 +153,9 @@ export async function createPullRequest(
 
   const base = options?.base ?? "main";
   const branch = options?.branch ?? "denopendabot";
-  const version = await github.getLatestRelease(repository);
+  const version = options?.test
+    ? VERSION
+    : await github.getLatestRelease(repository);
 
   const { commits } = await github.compareBranches(repository, base, branch);
 
