@@ -5,22 +5,19 @@
 ![CI](https://github.com/hasundue/denopendabot/actions/workflows/ci.yml/badge.svg)
 [![codecov](https://codecov.io/gh/hasundue/denopendabot/branch/main/graph/badge.svg)](https://codecov.io/gh/hasundue/denopendabot)
 ![denoland/deno](https://img.shields.io/badge/Deno-v1.26.1-informational?logo=deno) <!-- @denopendabot denoland/deno -->
+![deno deploy](https://img.shields.io/badge/Deno_Deploy-Beta_4-informational?logo=deno)
 
 <!-- deno-fmt-ignore-end -->
 
 **Denopendabot** is a GitHub App, GitHub Action, and Deno module to keep the
-dependencies of your Deno projects up-to-date, obviously inspired by
-[Dependabot](https://github.com/features/security/).
+dependencies of your Deno projects up-to-date. Obviously inspired by
+[Dependabot](https://github.com/features/security/), and making up for their missing support for Deno.
 
 > **Warning**\
 > Still under development. Many bugs might remain. Any breaking changes may be
 > introduced on each Feature release.
 
 ## :magic_wand: Features
-
-- :t-rex: Written in [Deno](https://deno.land)
-- :zap: Running on [Deno Deploy](https://deno.com/deploy)
-- :dove: MIT-licensed
 
 ### Update Deno modules
 
@@ -92,7 +89,7 @@ jobs:
 Denopendabot needs a GitHub access token authorized to run workflows.
 `secrets.GITHUB_TOKEN` is used by default and it works fine in most cases.
 
-If you want to update workflow files (`./github/workflows/*.yml`), it also needs
+If you want to update workflow files (`.github/workflows/*.yml`), it also needs
 a private access token with the `workflow` scope. In the examples below, we
 assume the token is added in repository secrets as `GH_TOKEN`.
 
