@@ -4,10 +4,11 @@ on:
   workflow_call:
   workflow_dispatch:
 
-
 jobs:
   release:
     name: Release
+
+    if: ${{ github.repository_owner == 'hasundue' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -21,8 +22,16 @@ jobs:
 
       - name: Run denomantic-release
         run: >
-          deno run -q --allow-env --allow-net
+          deno run -q --allow-env --allow-net --allow-write
           https://deno.land/x/denomantic_release@0.6.1/main.ts
           ${{ github.repository }}
           --token ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Denopendabot 
+        if: ${{ steps.run.outputs.needs_update }}
+        run: >
+          deno run -q --allow-env --allow-net ./main.ts
+          ${{ github.repository }}
+          --token ${{ secrets.GITHUB_TOKEN }}
           --user-token ${{ secrets.GH_TOKEN }}
+          --release ${{ steps.run.outputs.version }}
