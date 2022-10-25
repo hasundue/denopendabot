@@ -8,7 +8,7 @@
 
 <!-- deno-fmt-ignore-end -->
 
-**Denopendabot** is a GitHub App, GitHub Action, and Deno module to keep the dependencies of your Deno projects up-to-date.
+**Denopendabot** is a GitHub App, GitHub Action, and Deno module to keep the dependencies of your Deno projects up-to-date, obviously inspired by [Dependabot](https://github.com/features/security/).
 
 > **Warning**\
 > Still under development. Many bugs might remain. Any breaking changes may be
@@ -16,8 +16,9 @@
 
 ## :magic_wand: Features
 
-- [x] Written in [Deno](https://deno.land) :t-rex:
-- [x] Running on [Deno Deploy](https://deno.com/deploy) :zap:
+- :t-rex: Written in [Deno](https://deno.land)
+- :zap: Running on [Deno Deploy](https://deno.com/deploy)
+- :dove: MIT-licensed 
 
 ### Update Deno modules
 
