@@ -22,7 +22,7 @@ jobs:
       - name: Run denomantic-release
         run: >
           deno run -q --allow-env --allow-net
-          https://deno.land/x/denomantic_release@0.5.4/main.ts
+          https://deno.land/x/denomantic_release@0.6.1/main.ts
           ${{ github.repository }}
           --token ${{ secrets.GITHUB_TOKEN }}
           --user-token ${{ secrets.GH_TOKEN }}
