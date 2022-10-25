@@ -71,8 +71,10 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
 
   const context = await getContext(payload);
   const options: Options = payload.client_payload;
+  const branch = options?.branch ?? "denopendabot";
+  console.log(branch);
 
-  if (!associated(context, options?.branch ?? "denopendabot")) return;
+  if (!associated(context, branch)) return;
 
   console.log(payload);
 
