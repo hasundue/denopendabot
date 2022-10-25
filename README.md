@@ -11,7 +11,8 @@
 
 **Denopendabot** is a GitHub App, GitHub Action, and Deno module to keep the
 dependencies of your Deno projects up-to-date. Obviously inspired by
-[Dependabot](https://github.com/features/security/), and making up for their missing support for Deno.
+[Dependabot](https://github.com/features/security/), and making up for their
+missing support for Deno.
 
 > **Warning**\
 > Still under development. Many bugs might remain. Any breaking changes may be
