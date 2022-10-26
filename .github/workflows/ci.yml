@@ -1,7 +1,7 @@
 name: CI
 
 on:
-  pull_request:
+  pull_request_target:
     branches: 
       - main
     paths:
@@ -16,7 +16,7 @@ jobs:
     secrets: inherit
 
   deploy:
-    name: Staging Deploy
+    name: Deploy (staging)
     needs: test
     if: ${{ github.repository_owner == 'hasundue' }}
     uses: ./.github/workflows/deploy.yml
