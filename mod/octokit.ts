@@ -111,11 +111,8 @@ export class GitHubClient {
         { owner, repo, message, author, tree, parents },
       );
 
-      // update ref of the branch to the commit
-      await this.octokit.request(
-        "PATCH /repos/{owner}/{repo}/git/refs/{ref}",
-        { owner, repo, ref: `heads/${branch}`, sha: commit.sha },
-      );
+      // update the ref of the branch to the commit
+      await this.updateBranch(repository, branch, commit.sha);
 
       console.log(`📝 ${commit.message}`);
 
@@ -169,10 +166,7 @@ export class GitHubClient {
     if (exists) {
       // update the ref
       const baseRef = await this.getLatestCommit(repository, base);
-      await this.octokit.request(
-        "PATCH /repos/{owner}/{repo}/git/refs/{ref}",
-        { owner, repo, ref: `heads/${branch}`, sha: baseRef.sha, force: true },
-      );
+      await this.updateBranch(repository, branch, baseRef.sha);
       return exists;
     }
 
@@ -195,15 +189,13 @@ export class GitHubClient {
   async updateBranch(
     repository: string,
     branch: string,
-    base = "main",
+    sha: string,
   ) {
     const [owner, repo] = repository.split("/");
 
-    const baseCommit = await this.getLatestCommit(repository, base);
-
     await this.octokit.request(
       "PATCH /repos/{owner}/{repo}/git/refs/{ref}",
-      { owner, repo, ref: `heads/${branch}`, sha: baseCommit.sha, force: true },
+      { owner, repo, ref: `heads/${branch}`, sha, force: true },
     );
   }
 
