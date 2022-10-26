@@ -33,9 +33,17 @@ Deno.test("compareBranches", async () => {
   assert(commits);
 });
 
-Deno.test("createBranch", { ignore: !env.CI }, async () => {
-  const result = await github.createBranch(repo, base);
-  assert(result);
+Deno.test("createBranch/deleteBranch", { ignore: !env.CI }, async () => {
+  const baseBranch = await github.createBranch(repo, base);
+  assertEquals(baseBranch.name, base);
+
+  const testBranchName = "test-" + Date.now();
+  const testBranch = await github.createBranch(repo, testBranchName);
+  assertEquals(testBranch.name, testBranchName);
+
+  await github.deleteBranch(repo, testBranchName);
+  const deleted = await github.getBranch(repo, testBranchName);
+  assertEquals(deleted, null);
 });
 
 Deno.test("createPullRequest", { ignore: !env.CI }, async (t) => {

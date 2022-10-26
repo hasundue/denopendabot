@@ -170,20 +170,21 @@ export class GitHubClient {
       return exists;
     }
 
-    // get a reference to main branch
-    const { data } = await this.octokit.request(
+    // get a reference to the base branch
+    const { data: baseRef } = await this.octokit.request(
       "GET /repos/{owner}/{repo}/git/ref/{ref}",
       { owner, repo, ref: `heads/${base}` },
     );
 
     // create a branch
-    const { data: result } = await this.octokit.request(
+    await this.octokit.request(
       "POST /repos/{owner}/{repo}/git/refs",
-      { owner, repo, ref: `refs/heads/${branch}`, sha: data.object.sha },
+      { owner, repo, ref: `refs/heads/${branch}`, sha: baseRef.object.sha },
     );
+    const created = (await this.getBranch(repository, branch))!;
 
-    console.log(`🔨 branch ${branch}`);
-    return result;
+    console.log(`🔨 Created branch ${branch}`);
+    return created;
   }
 
   async updateBranch(
@@ -197,6 +198,23 @@ export class GitHubClient {
       "PATCH /repos/{owner}/{repo}/git/refs/{ref}",
       { owner, repo, ref: `heads/${branch}`, sha, force: true },
     );
+  }
+
+  async deleteBranch(
+    repository: string,
+    branch: string,
+  ) {
+    const [owner, repo] = repository.split("/");
+
+    try {
+      await this.octokit.request(
+        "DELETE /repos/{owner}/{repo}/git/refs/{ref}",
+        { owner, repo, ref: `heads/${branch}` },
+      );
+      console.log(`🗑️ Deleted branch ${branch}.`);
+    } catch {
+      console.info(`Branch ${branch} not exist.`);
+    }
   }
 
   async createPullRequest(
