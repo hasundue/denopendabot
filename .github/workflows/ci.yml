@@ -17,7 +17,7 @@ jobs:
   deploy:
     name: Staging
     needs: test
-    if: github.actor == 'hasundue'
+    if: github.event.pull_request.pull_request.head.repo.owner.login == 'hasundue'
     uses: ./.github/workflows/deploy.yml
     with:
       deployment: staging
