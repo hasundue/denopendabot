@@ -38,17 +38,6 @@ export class GitHubClient {
     }
   }
 
-  async getDefaultBranchName(
-    repository: string,
-  ) {
-    const [owner, repo] = repository.split("/");
-    const { data } = await this.octokit.request(
-      "GET /repos/{owner}/{repo}",
-      { owner, repo },
-    );
-    return data.default_branch;
-  }
-
   async getBranch(
     repository: string,
     branch: string,
@@ -216,23 +205,6 @@ export class GitHubClient {
       "PATCH /repos/{owner}/{repo}/git/refs/{ref}",
       { owner, repo, ref: `heads/${branch}`, sha: baseCommit.sha, force: true },
     );
-  }
-
-  async deleteBranch(
-    repository: string,
-    branch: string,
-  ) {
-    const [owner, repo] = repository.split("/");
-
-    try {
-      await this.octokit.request(
-        "DELETE /repos/{owner}/{repo}/git/refs/{ref}",
-        { owner, repo, ref: `heads/${branch}` },
-      );
-      console.log(`🗑️ branch ${branch}.`);
-    } catch {
-      console.log(`Branch ${branch} not exist.`);
-    }
   }
 
   async createPullRequest(
