@@ -11,6 +11,9 @@ jobs:
     if: ${{ github.repository_owner == 'hasundue' }}
     runs-on: ubuntu-latest
 
+    outputs:
+      released: ${{ steps.run.outputs.released }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3.1.0
@@ -21,6 +24,7 @@ jobs:
           deno-version: v1.26.2 # @denopendabot denoland/deno
 
       - name: Run denomantic-release
+        id: run
         run: >
           deno run -q --allow-env --allow-net --allow-write
           https://deno.land/x/denomantic_release@0.6.1/main.ts

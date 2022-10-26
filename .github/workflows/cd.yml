@@ -17,32 +17,30 @@ jobs:
 
   deploy-staging:
     name: Deploy (staging)
+    needs: test
     if: github.repository_owner == 'hasundue'
     uses: ./.github/workflows/deploy.yml
-    needs: test
-    secrets: inherit
     with:
       deployment: staging
+    secrets: inherit
 
   integration:
     name: Integration
-    if: github.repository_owner == 'hasundue'
-    uses: ./.github/workflows/integration.yml
     needs: deploy-staging
+    uses: ./.github/workflows/integration.yml
     secrets: inherit
 
   release:
     name: Release
-    if: github.repository_owner == 'hasundue'
-    uses:  ./.github/workflows/release.yml
     needs: integration
+    uses:  ./.github/workflows/release.yml
     secrets: inherit
 
   deploy-production:
     name: Deploy (production)
-    if: github.repository_owner == 'hasundue'
-    uses: ./.github/workflows/deploy.yml
     needs: release
+    if: ${{ needs.release.outputs.released }}
+    uses: ./.github/workflows/deploy.yml
     secrets: inherit
     with:
       deployment: production
