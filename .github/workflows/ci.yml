@@ -17,7 +17,7 @@ jobs:
   deploy:
     name: Staging
     needs: test
-    if: github.repository_owner == 'hasundue'
+    if: github.triggering_actor == 'hasundue'
     uses: ./.github/workflows/deploy.yml
     with:
       deployment: staging
