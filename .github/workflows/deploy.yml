@@ -2,6 +2,11 @@ name: Deploy
 
 on:
   workflow_call:
+    inputs:
+      deployment: 
+        description: deployment type (staging or production)
+        required: true
+        type: string
   workflow_dispatch:
 
 jobs:
@@ -12,9 +17,6 @@ jobs:
     permissions:
       id-token: write # Needed for auth with Deno Deploy
       contents: read # Needed to clone the repository
-
-    env:
-      deployment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
 
     steps:
       - name: Clone repository
@@ -30,11 +32,11 @@ jobs:
       - name: Set the deployment ID on Upstash
         run: >
           curl -X POST -d '${{ steps.deploy.outputs.deployment-id }}'
-          ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/${{ env.deployment }}-id
+          ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/${{ inputs.deployment }}-id
           -H "Authorization: Bearer ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}"
 
       - name: Set the deployment URL on Upstash
         run: >
           curl -X POST -d '${{ steps.deploy.outputs.url }}'
-          ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/${{ env.deployment }}-url
+          ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/${{ inputs.deployment }}-url
           -H "Authorization: Bearer ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}"
