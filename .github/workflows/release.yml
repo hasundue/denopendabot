@@ -2,6 +2,10 @@ name: Release
 
 on:
   workflow_call:
+    outputs:
+      released:
+        description: true if released
+        value: ${{ jobs.release.outputs.released }}
   workflow_dispatch:
 
 jobs:
