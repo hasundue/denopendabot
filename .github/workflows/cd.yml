@@ -28,7 +28,7 @@ jobs:
     name: Integration
     if: github.repository_owner == 'hasundue'
     uses: ./.github/workflows/integration.yml
-    needs: deploy
+    needs: deploy-staging
     secrets: inherit
 
   release:
