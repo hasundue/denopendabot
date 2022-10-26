@@ -15,9 +15,9 @@ jobs:
     secrets: inherit
 
   deploy:
-    name: Staging Deploy
+    name: Staging
     needs: test
-    if: ${{ github.repository_owner == 'hasundue' }}
+    if: github.repository_owner == 'hasundue'
     uses: ./.github/workflows/deploy.yml
     with:
       deployment: staging
