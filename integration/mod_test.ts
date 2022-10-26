@@ -13,37 +13,33 @@ const target = "1.0.0";
 
 const github = new GitHubClient(env.get("GITHUB_TOKEN"));
 
-Deno.test(
-  "integration (module)",
-  { ignore: !env.get("CI") },
-  async () => {
-    await github.createBranch(repo, base);
+Deno.test("integration (module)", async () => {
+  await github.createBranch(repo, base);
 
-    const branch = "test-module";
+  const branch = "test-module";
 
-    const options = {
-      base,
-      branch,
-      release: target,
-      include: ["mod.ts"],
-      test: true,
-    };
+  const options = {
+    base,
+    branch,
+    release: target,
+    include: ["mod.ts"],
+    test: true,
+  };
 
-    const updates = await getUpdates(repo, options);
+  const updates = await getUpdates(repo, options);
 
-    assertEquals(updates.length, 1);
-    assertEquals(updates[0].path, "mod.ts");
-    assertEquals(updates[0].spec, { name: repo, initial, target });
+  assertEquals(updates.length, 1);
+  assertEquals(updates[0].path, "mod.ts");
+  assertEquals(updates[0].spec, { name: repo, initial, target });
 
-    await createCommits(repo, updates, options);
+  await createCommits(repo, updates, options);
 
-    const result = await createPullRequest(repo, options);
+  const result = await createPullRequest(repo, options);
 
-    assert(result);
+  assert(result);
 
-    assertEquals(
-      result.title,
-      `build(version): bump the version from ${initial} to ${target}`,
-    );
-  },
-);
+  assertEquals(
+    result.title,
+    `build(version): bump the version from ${initial} to ${target}`,
+  );
+});
