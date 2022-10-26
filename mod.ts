@@ -2,7 +2,7 @@ import { groupBy } from "https://deno.land/std@0.160.0/collections/group_by.ts";
 import { intersect } from "https://deno.land/std@0.160.0/collections/intersect.ts";
 import { withoutAll } from "https://deno.land/std@0.160.0/collections/without_all.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.1.0";
-import { env } from "./env.ts";
+import { env } from "./mod/env.ts";
 import {
   CommitType,
   pullRequestType,
@@ -29,13 +29,13 @@ export interface Options {
 }
 
 const getActionToken = (options?: Options) => {
-  const envToken = options?.token && env.get(options?.token);
+  const envToken = options?.token && Deno.env.get(options?.token);
   const rawToken = !envToken ? options?.token : undefined;
-  return (envToken || rawToken) ?? env.get("GITHUB_TOKEN");
+  return (envToken || rawToken) ?? env["GITHUB_TOKEN"];
 };
 
 const getUserToken = (options?: Options) => {
-  const envUserToken = options?.userToken && env.get(options?.userToken);
+  const envUserToken = options?.userToken && Deno.env.get(options?.userToken);
   const rawUserToken = !envUserToken ? options?.userToken : undefined;
   return envUserToken ?? rawUserToken;
 };

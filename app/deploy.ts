@@ -1,10 +1,10 @@
-import { env } from "../env.ts";
+import { env } from "./env.ts";
 import { redis } from "./redis.ts";
 
 export type Deployment = "production" | "staging" | "preview";
 
 export const deployment = async (): Promise<Deployment> => {
-  const id = env.get("DENO_DEPLOYMENT_ID");
+  const id = env["DENO_DEPLOYMENT_ID"];
 
   if (id === await redis.get<string>("production-id")) {
     return "production";

@@ -1,9 +1,9 @@
 import { crypto } from "https://deno.land/std@0.160.0/crypto/mod.ts";
 import { Receiver } from "https://deno.land/x/upstash_qstash@v0.1.7/pkg/receiver.ts";
-import { env } from "../env.ts";
+import { env } from "./env.ts";
 
 const QSTASH_URL = "https://qstash.upstash.io/v1";
-const QSTASH_TOKEN = env.get("QSTASH_TOKEN");
+const QSTASH_TOKEN = env["QSTASH_TOKEN"];
 
 const signingKeysResponse = await fetch(QSTASH_URL + "/keys", {
   method: "GET",
