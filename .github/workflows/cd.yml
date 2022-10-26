@@ -16,7 +16,7 @@ jobs:
     secrets: inherit
 
   deploy-staging:
-    name: Deploy
+    name: Deploy (staging)
     if: github.repository_owner == 'hasundue'
     uses: ./.github/workflows/deploy.yml
     needs: test
@@ -39,7 +39,7 @@ jobs:
     secrets: inherit
 
   deploy-production:
-    name: Deploy
+    name: Deploy (production)
     if: github.repository_owner == 'hasundue'
     uses: ./.github/workflows/deploy.yml
     needs: release
