@@ -15,7 +15,7 @@ const github = new GitHubClient(env.get("GITHUB_TOKEN"));
 
 Deno.test(
   "integration (module)",
-  { only: env.get("CI") !== undefined },
+  { ignore: !env.get("CI") },
   async () => {
     await github.createBranch(repo, base, env.get("HEAD_BRANCH"));
 
