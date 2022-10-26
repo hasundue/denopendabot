@@ -22,14 +22,14 @@ Deno.test("integration (module)", async () => {
     base,
     branch,
     release: target,
-    include: ["mod.ts"],
+    include: ["mod/version.ts"],
     test: true,
   };
 
   const updates = await getUpdates(repo, options);
 
   assertEquals(updates.length, 1);
-  assertEquals(updates[0].path, "mod.ts");
+  assertEquals(updates[0].path, "mod/version.ts");
   assertEquals(updates[0].spec, { name: repo, initial, target });
 
   await createCommits(repo, updates, options);

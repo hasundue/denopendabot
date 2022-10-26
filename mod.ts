@@ -9,11 +9,12 @@ import {
   removeIgnore,
   Update,
 } from "./mod/common.ts";
+import { VERSION } from "./mod/version.ts";
 import { GitHubClient } from "./mod/octokit.ts";
 import { getModuleUpdateSpecs, ModuleUpdate } from "./mod/module.ts";
 import { getRepoUpdateSpecs, RepoUpdate } from "./mod/repo.ts";
 
-export const VERSION = "0.7.1"; // @denopendabot hasundue/denopendabot
+export { VERSION } from "./mod/version.ts";
 
 export interface Options {
   base?: string;
