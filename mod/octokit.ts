@@ -1,3 +1,4 @@
+import { groupBy } from "https://deno.land/std@0.160.0/collections/group_by.ts";
 import { decode } from "https://deno.land/std@0.160.0/encoding/base64.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.1.0";
 import { Update } from "./common.ts";
@@ -69,13 +70,18 @@ export class GitHubClient {
     updates: Update[],
     tree: { path?: string; sha?: string }[],
   ): Promise<BlobContent[]> {
-    return await Promise.all(updates.map(async (update) => {
-      const blob = tree.find((it) => it.path === update.path);
-      const content = update.content(
-        await this.getBlobContent(repository, blob!.sha!),
-      );
-      return { path: update.path, mode: "100644", type: "blob", content };
-    }));
+    const groupByPath = groupBy(updates, (it) => it.path);
+
+    return await Promise.all(
+      Object.entries(groupByPath).map(async ([path, updates]) => {
+        const blob = tree.find((it) => it.path === path);
+        let content = await this.getBlobContent(repository, blob!.sha!);
+        for (const update of updates!) {
+          content = update.content(content);
+        }
+        return { path: path, mode: "100644", type: "blob", content };
+      }),
+    );
   }
 
   async createCommit(
