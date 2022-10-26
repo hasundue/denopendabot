@@ -34,8 +34,6 @@ jobs:
         run: deno task test --coverage=./coverage mod/ integration/mod_test.ts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HEAD_BRANCH: ${{ github.head_ref }}
-          TEST: ${{ github.base_ref == 'test' }}
 
       - name: Create coverage report
         if: ${{ github.base_ref != 'test' }}
