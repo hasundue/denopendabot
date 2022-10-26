@@ -17,7 +17,7 @@ Deno.test(
   "integration (module)",
   { ignore: !env.get("CI") },
   async () => {
-    await github.createBranch(repo, base, env.get("HEAD_BRANCH"));
+    await github.createBranch(repo, base, env.get("HEAD"));
 
     const branch = "test-module";
 

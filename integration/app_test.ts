@@ -16,7 +16,7 @@ const target = "1.0.0";
 const github = new GitHubClient(env.get("GITHUB_TOKEN"));
 
 Deno.test("integration (app)", async () => {
-  await github.createBranch(repo, base, env.get("HEAD_BRANCH"));
+  await github.createBranch(repo, base, env.get("HEAD"));
 
   const options = {
     base,
