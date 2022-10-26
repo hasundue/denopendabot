@@ -76,7 +76,7 @@ export class GitHubClient {
       Object.entries(groupByPath).map(async ([path, updates]) => {
         const blob = tree.find((it) => it.path === path);
         let content = await this.getBlobContent(repository, blob!.sha!);
-        for await (const update of updates!) {
+        for (const update of updates!) {
           content = update.content(content);
         }
         return { path: path, mode: "100644", type: "blob", content };
