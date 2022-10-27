@@ -7,7 +7,16 @@ on:
         description: deployment type (staging or production)
         required: true
         type: string
+
   workflow_dispatch:
+    inputs:
+      deployment: 
+        description: deployment type
+        type: choice
+        options:
+          - production
+          - staging
+        default: production
 
 jobs:
   deploy:
