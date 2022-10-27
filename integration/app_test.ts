@@ -1,8 +1,8 @@
 import {
   assert,
   assertEquals,
-} from "https://deno.land/std@0.160.0/testing/asserts.ts";
-import { delay } from "https://deno.land/std@0.160.0/async/mod.ts";
+} from "https://deno.land/std@0.161.0/testing/asserts.ts";
+import { delay } from "https://deno.land/std@0.161.0/async/mod.ts";
 import { createCommits, getUpdates } from "../mod.ts";
 import { GitHubClient } from "../mod/octokit.ts";
 import { env } from "../mod/env.ts";

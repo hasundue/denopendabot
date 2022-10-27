@@ -1,4 +1,4 @@
-import { configSync } from "https://deno.land/std@0.160.0/dotenv/mod.ts";
+import { configSync } from "https://deno.land/std@0.161.0/dotenv/mod.ts";
 
 type Env = {
   GITHUB_TOKEN?: string;
