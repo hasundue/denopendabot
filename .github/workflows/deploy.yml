@@ -3,15 +3,19 @@ name: Deploy
 on:
   workflow_call:
     inputs:
+      branch: 
+        description: Branch to deploy
+        required: false
+        type: string
       deployment: 
-        description: deployment type (staging or production)
+        description: Deployment type (staging or production)
         required: true
         type: string
 
   workflow_dispatch:
     inputs:
       deployment: 
-        description: deployment type
+        description: Type of deployment
         type: choice
         options:
           - production
@@ -28,8 +32,10 @@ jobs:
       contents: read # Needed to clone the repository
 
     steps:
-      - name: Clone repository
+      - name: Checkout
         uses: actions/checkout@v3.0.1
+        with:
+          ref: ${{ inputs.branch || github.ref_name }}
 
       - name: Upload to Deno Deploy
         id: deploy
