@@ -13,4 +13,5 @@ jobs:
       - uses: ./
         with:
           mode: app
+          exclude: integration/src/deps.ts
           auto-merge: all
