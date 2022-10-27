@@ -98,7 +98,7 @@ export class GitHubClient {
       );
 
       const author = {
-        name: "denopendabot-action",
+        name: "denopendabot",
         email: "denopendabot@gmail.com",
       };
 

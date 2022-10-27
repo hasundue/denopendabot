@@ -47,6 +47,7 @@ Deno.test("createBranch/deleteBranch", { ignore: !env.CI }, async () => {
 });
 
 Deno.test("createPullRequest", { ignore: !env.CI }, async (t) => {
+  await github.deleteBranch(repo, branch);
   await github.createBranch(repo, branch, base);
 
   const update = new RepoUpdate("mod/version.ts", {
@@ -67,7 +68,6 @@ Deno.test("createPullRequest", { ignore: !env.CI }, async (t) => {
       base,
       branch,
       message,
-      ["test"],
     );
     assertEquals(result.title, message);
   });

@@ -6,24 +6,24 @@ import { env } from "../mod/env.ts";
 import { createCommits, createPullRequest, getUpdates } from "../mod.ts";
 import { GitHubClient } from "../mod/octokit.ts";
 
+const github = new GitHubClient(env.GITHUB_TOKEN);
+
 const repo = "hasundue/denopendabot";
-const base = "test";
-const initial = "0.7.2"; // @denopendabot hasundue/denopendabot
+const baseBranch = "test";
+const initial = await github.getLatestRelease(repo);
 const target = "1.0.0";
 
-const github = new GitHubClient(env["GITHUB_TOKEN"]);
-
 Deno.test("integration (module)", async () => {
-  await github.createBranch(repo, base);
+  await github.createBranch(repo, baseBranch);
 
-  const branch = "test-module";
+  const workingBranch = "test-module";
 
   const options = {
-    base,
-    branch,
+    baseBranch,
+    workingBranch,
     release: target,
     include: ["mod/version.ts"],
-    test: true,
+    labels: ["test"],
   };
 
   const updates = await getUpdates(repo, options);

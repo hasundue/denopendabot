@@ -10,9 +10,10 @@
 <!-- deno-fmt-ignore-end -->
 
 **Denopendabot** is a GitHub App, GitHub Action, and Deno module to keep the
-dependencies of your Deno projects up-to-date. Obviously inspired by
-[Dependabot](https://github.com/features/security/), and making up for their
-missing support for Deno.
+dependencies of your Deno projects up-to-date.
+
+Obviously inspired by [Dependabot](https://github.com/features/security/), and
+making up for their missing support for Deno.
 
 > **Warning**\
 > Still under development. Many bugs might remain. Any breaking changes may be
@@ -25,11 +26,12 @@ missing support for Deno.
 <!-- denopendabot-ignore-start -->
 
 ```typescript
-import { assert } from "https://deno.land/std@0.158.0/testing/asserts.ts";
+import $ from "https://deno.land/x/dax@0.14.0/mod.ts";
 ```
 
-```sh
-💡 deno.land/std 0.158.0 => 0.159.0
+```diff
+- import $ from "https://deno.land/x/dax@0.14.0/mod.ts";
++ import $ from "https://deno.land/x/dax@0.15.0/mod.ts";
 ```
 
 Denopendabot takes advantage of the core engine of
@@ -45,29 +47,30 @@ update libraries for Deno, which supports
     deno-version: v1.26.0 # @denopendabot denoland/deno
 ```
 
-```sh
-💡 denoland/deno v1.26.0 => v1.26.1
+```diff
+-   deno-version: v1.26.0 # @denopendabot denoland/deno
++   deno-version: v1.26.1 # @denopendabot denoland/deno
 ```
 
 <!-- denopendabot-ignore-end -->
 
-Denopendabot update any SemVer related to a GitHub repository, specified by a
-comment of `@denopendabot {owner}/{repo}`.
+Denopendabot can also update release versions of GitHub repositories, specified
+by comments of `@denopendabot {owner}/{repo}`.
 
-### Commits and pull requests
+### Create pull requests
 
 - Commits are created for each updated module/repository individually
 - Each run of Denopendabot creates only one pull request
 
-See
-[an example pull request](https://github.com/hasundue/denomantic-release/pull/4/commits).
+See [the example pull requests](https://github.com/hasundue/denopendabot/pulls).
 
-## :bulb: Usage
+## :rocket: Getting started
 
-### GitHub App (experimental)
+### GitHub App
 
-[Install the App](https://github.com/apps/denopendabot) and create a workflow
-file to dispatch `denopendabot-run` events:
+The easiest way to use Denopendabot is to install the
+[GitHub App](https://github.com/apps/denopendabot) and create a workflow to run
+it:
 
 ```yaml
 name: Denopendabot
@@ -77,17 +80,31 @@ on:
     - cron: "0 0 * * *" # modify to your convenient time
 jobs:
   update:
+    name: Run
+    runs-on: ubuntu-latest
     steps:
-      - name: Run
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          event-type: denopendabot-run
-          client-payload: '{ "base": "main", "branch": "denopendabot" }' # optional
+      - uses: hasundue/denopendabot@0.7.2 # @denopendabot hasundue/denopendabot
+        mode: app
+        auto-merge: all # optional
 ```
+
+This workflow dispatches a `denopendabot-run` repository event, and an instance
+of the app receives it to perform the procedure on Deno Deploy.
+
+See the next section for the details of the workflow.
+
+> **Warning**\
+> Denopendabot requires write access to your workflows, which technically
+> enables the bot to perform script injection on your repository. Install the
+> app only if you are sure that it is reliable.
 
 ### GitHub Action
 
-Denopendabot needs a GitHub access token authorized to run workflows.
+If you want Denopendabot to run in an environment under your control for
+security reasons, you can use our
+[GitHub Action](https://github.com/marketplace/actions/denopendabot).
+
+The action needs a GitHub access token authorized to run workflows.
 `secrets.GITHUB_TOKEN` is used by default and it works fine in most cases.
 
 If you want to update workflow files (`.github/workflows/*.yml`), it also needs

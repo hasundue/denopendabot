@@ -2,14 +2,22 @@ name: Denopendabot
 
 description: Keeps your Deno projects up-to-date
 
+branding:
+  icon: 'refresh-cw'
+  color: 'gray-dark'
+
 inputs:
-  token:
-    description: Access token authorized to run workflows
+  mode:
+    description: Run mode ('action' or 'app')
     required: true
-    default: ${{ github.token }}
+    default: action
+
+  token:
+    description: Access token authorized to run workflows (for Action)
+    required: false
 
   user-token:
-    description: Personal access token authorized to update workflows
+    description: Personal access token authorized to update workflows (for Action)
     required: false
 
   repository:
@@ -26,32 +34,58 @@ inputs:
     description: Working branch for Denopendabot
     required: true
     default: denopendabot
-  
-  options:
-    description: Other options passed to the CLI
+
+  exclude:
+    description: Path(s) to exclude
     required: false
+
+  labels:
+    description: Labels for the pull request (space-separated)
+    required: false
+    default: dependencies
+
+  release:
+    description: Bump the project version to this value for a release
+    required: false
+  
+  auto-merge:
+    description: Merge a pull request automaticaly ('off' or 'all', for App)
+    required: false
+    default: 'off'
+
+outputs:
+  updated:
+    description: true if updated
+    value: ${{ steps.run.outputs.updated }}
 
 runs:
   using: composite
 
   steps:
+    - name: Run Denopendabot GitHub App
+      if: ${{ inputs.mode == 'app' }}
+      uses: peter-evans/repository-dispatch@v2
+      with:
+        event-type: denopendabot-run
+        client-payload: ${{ toJSON(inputs) }}
+
     - name: Setup Deno
+      if: ${{ inputs.mode == 'action' }}
       uses: denoland/setup-deno@v1
       with:
         deno-version: v1.26.2 # @denopendabot denoland/deno
 
-    - name: Run Denopendabot
+    - name: Run Denopendabot from the CLI
+      if: ${{ inputs.mode == 'action' }}
       run: >
-        deno run -q --allow-env --allow-net
-        https://deno.land/x/denopendabot@0.7.2/main.ts
+        deno run -q --allow-env --allow-net --allow-write
+        https://deno.land/x/denopendabot@0.7.2/cli.ts
         ${{ inputs.repository }}
-        --base ${{ inputs.base-branch }}
-        --branch ${{ inputs.working-branch }}
-        ${{ inputs.token && format('--token {0}', inputs.token) }}
+        --base-branch ${{ inputs.base-branch }}
+        --working-branch ${{ inputs.working-branch }}
+        --token ${{ inputs.token || github.token }}
         ${{ inputs.user-token && format('--user-token {0}', inputs.user-token) }}
-        ${{ inputs.options }}
+        ${{ inputs.exclude && format('--exclude {0}', inputs.exclude) }}
+        ${{ inputs.release && format('--release {0}', inputs.release) }}
+        ${{ inputs.labels && format('--labels {0}', inputs.labels) }}
       shell: bash
-
-branding:
-  icon: 'refresh-cw'
-  color: 'gray-dark'

@@ -48,7 +48,7 @@ Deno.test("getUpdateSpec/Update", async () => {
 Deno.test("getUpdateSpec (release)", async () => {
   const input = `
     const url1 = "https://deno.land/std@${initial}/testing/mod.ts";
-    const url2 = "https://deno.land/x/denopendabot@${VERSION}/main.ts";
+    const url2 = "https://deno.land/x/denopendabot@${VERSION}/cli.ts";
     `;
 
   const specs = await getModuleUpdateSpecs(input, {

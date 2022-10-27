@@ -1,0 +1,12 @@
+name: Denopendabot
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *" # TODO: modify to your convenient time
+jobs:
+  update:
+    name: Update
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hasundue/denopendabot@0.7.2 # @denopendabot hasundue/denopendabot
+        mode: app
