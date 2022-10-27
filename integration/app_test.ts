@@ -10,7 +10,7 @@ import { env } from "../mod/env.ts";
 const repo = "hasundue/denopendabot";
 const base = "test";
 const branch = "test-app";
-const initial = "0.7.2"; // @denopendabot hasundue/denopendabot
+const initial = "0.8.0"; // @denopendabot hasundue/denopendabot
 const target = "1.0.0";
 
 const github = new GitHubClient(env.get("GITHUB_TOKEN"));
