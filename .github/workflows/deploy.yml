@@ -44,7 +44,7 @@ jobs:
         id: deploy
         run: >
           deployctl deploy --project=denopendabot --token ${{ secrets.DENO_DEPLOY_TOKEN }}
-          ${{ inputs.deployment == 'production' && '--prod' }} ./app.ts
+          ${{ inputs.deployment == 'production' && '--prod' || '' }} ./app.ts
 
       - name: Set deployment ID on Upstash
         run: >
