@@ -37,7 +37,6 @@ jobs:
 
       - name: Run Denopendabot 
         if: ${{ steps.run.outputs.needs_update }}
-        run: >
         uses: ./
         with:
           mode: app
