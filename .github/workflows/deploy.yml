@@ -3,10 +3,6 @@ name: Deploy
 on:
   workflow_call:
     inputs:
-      branch: 
-        description: Branch to deploy
-        required: false
-        type: string
       deployment: 
         description: Deployment type (staging or production)
         required: true
@@ -15,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       deployment: 
-        description: Type of deployment
+        description: Deployment type
         type: choice
         options:
           - production
@@ -28,29 +24,35 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      id-token: write # Needed for auth with Deno Deploy
       contents: read # Needed to clone the repository
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3.0.1
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
         with:
-          ref: ${{ inputs.branch || github.ref_name }}
+          deno-version: v1.26.2 # @denopendabot denoland/deno
+      
+      - name: Install deployctl
+        run: >
+          deno install --allow-read --allow-write --allow-env --allow-net --allow-run
+          --no-check -r -f https://deno.land/x/deploy/deployctl.ts
 
       - name: Upload to Deno Deploy
         id: deploy
-        uses: denoland/deployctl@v1
-        with:
-          project: denopendabot
-          entrypoint: ./app.ts
+        run: >
+          deployctl deploy --project=denopendabot --token ${{ secrets.DENO_DEPLOY_TOKEN }}
+          ${{ inputs.deployment == 'production' && '--prod' }} ./app.ts
 
-      - name: Set the deployment ID on Upstash
+      - name: Set deployment ID on Upstash
         run: >
           curl -X POST -d '${{ steps.deploy.outputs.deployment-id }}'
           ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/${{ inputs.deployment }}-id
           -H "Authorization: Bearer ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}"
 
-      - name: Set the deployment URL on Upstash
+      - name: Set deployment URL on Upstash
         run: >
           curl -X POST -d '${{ steps.deploy.outputs.url }}'
           ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/${{ inputs.deployment }}-url

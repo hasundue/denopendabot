@@ -20,7 +20,6 @@ jobs:
     if: github.repository_owner == 'hasundue'
     uses: ./.github/workflows/deploy.yml
     with:
-      branch: test
       deployment: staging
     secrets: inherit
 
