@@ -8,7 +8,7 @@ import { GitHubClient } from "../mod/octokit.ts";
 
 const repo = "hasundue/denopendabot";
 const base = "test";
-const initial = "0.7.2"; // @denopendabot hasundue/denopendabot
+const initial = "1.0.0"; // @denopendabot hasundue/denopendabot
 const target = "1.0.0";
 
 const github = new GitHubClient(env["GITHUB_TOKEN"]);
