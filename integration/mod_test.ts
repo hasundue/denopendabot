@@ -5,12 +5,13 @@ import {
 import { env } from "../mod/env.ts";
 import { createCommits, createPullRequest, getUpdates } from "../mod.ts";
 import { GitHubClient } from "../mod/octokit.ts";
+import { VERSION } from "./src/version.ts";
 
 const github = new GitHubClient(env.GITHUB_TOKEN);
 
 const repo = "hasundue/denopendabot";
 const baseBranch = "test";
-const initial = await github.getLatestRelease(repo);
+const initial = VERSION;
 const target = "1.0.0";
 
 Deno.test("integration (module)", async () => {
@@ -22,7 +23,7 @@ Deno.test("integration (module)", async () => {
     baseBranch,
     workingBranch,
     release: target,
-    include: ["mod/version.ts"],
+    include: ["integration/src/version.ts"],
     labels: ["test"],
   };
 
