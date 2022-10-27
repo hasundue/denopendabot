@@ -102,8 +102,8 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
 
   const options: denopendabot.Options = {
     octokit,
-    base: inputs["base-branch"],
-    branch: inputs["working-branch"],
+    baseBranch: inputs["base-branch"],
+    workingBranch: inputs["working-branch"],
     ...inputs,
   };
 

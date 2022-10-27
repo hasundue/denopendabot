@@ -21,8 +21,8 @@ interface GlobalOptions {
   octokit?: Octokit;
   token?: string;
   userToken?: string;
-  base?: string;
-  branch?: string;
+  baseBranch?: string;
+  workingBranch?: string;
   release?: string;
 }
 
@@ -51,7 +51,7 @@ export async function getUpdates(
     options?.octokit ?? getActionToken(options) ?? getUserToken(options),
   );
 
-  const base = options?.base ?? "main";
+  const base = options?.baseBranch ?? "main";
   const baseTree = await github.getTree(repository, base);
 
   const paths = baseTree.map((blob) => blob.path!);
@@ -124,8 +124,8 @@ export async function createCommits(
     ? updates.filter((update) => !update.isWorkflow())
     : updates;
 
-  const branch = options?.branch ?? "denopendabot";
-  await github.createBranch(repository, branch, options?.base ?? "main");
+  const branch = options?.workingBranch ?? "denopendabot";
+  await github.createBranch(repository, branch, options?.baseBranch ?? "main");
 
   const groupsByDep = groupBy(updatables, (it) => it.spec.name);
   const deps = Object.keys(groupsByDep);
@@ -161,8 +161,8 @@ export async function createPullRequest(
 
   const github = new GitHubClient(options?.octokit ?? actionToken ?? userToken);
 
-  const base = options?.base ?? "main";
-  const branch = options?.branch ?? "denopendabot";
+  const base = options?.baseBranch ?? "main";
+  const branch = options?.workingBranch ?? "denopendabot";
 
   const { commits } = await github.compareBranches(repository, base, branch);
 
