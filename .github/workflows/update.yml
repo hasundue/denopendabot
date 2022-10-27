@@ -1,27 +1,16 @@
-name: Update
+name: Denopendabot
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "23 23 * * *"
+    - cron: "0 0 * * *"
 
 jobs:
   update:
-    name: Update
+    name: Run
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Denopendabot
-        uses: actions/checkout@v3.1.0
-
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
+      - uses: ./
         with:
-          deno-version: v1.26.2 # @denopendabot denoland/deno
-
-      - name: Run Denopendabot
-        run: >
-          deno run -q --allow-env --allow-net ./main.ts
-          ${{ github.repository }}
-          --token ${{ secrets.GITHUB_TOKEN }}
-          --user-token ${{ secrets.GH_TOKEN }}
+          mode: app
+          auto-merge: all

@@ -1,4 +1,5 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.2/mod.ts";
+import { env } from "./mod/env.ts";
 import {
   createCommits,
   createPullRequest,
@@ -12,12 +13,12 @@ const { args, options } = await new Command()
   .description("Keep your Deno project up-to-date.")
   .arguments("<repository:string>")
   .option(
-    "--base <name>",
+    "-b --base-branch <name>",
     "Branch to update.",
     { default: "main" },
   )
   .option(
-    "--branch <name>",
+    "-w --working-branch <name>",
     "Working branch.",
     { default: "denopendabot" },
   )
@@ -34,20 +35,8 @@ const { args, options } = await new Command()
     "Bump the repository version for a release.",
   )
   .option(
-    "-o --output <path>",
-    "Output the results to a file.",
-  )
-  .option(
-    "-c --check",
-    "Exit with code=1 if any update is found",
-  )
-  .option(
     "-d --dry-run",
-    "Will not actually update",
-  )
-  .option(
-    "--test",
-    "Run for testing.",
+    "Just check updates.",
   )
   .option(
     "-t --token <token>",
@@ -64,22 +53,17 @@ const repo = args[0];
 const updates = await getUpdates(repo, options);
 
 if (!updates.length) {
-  console.log("🎉 Everything is up-to-date!");
+  console.info("🎉 Everything is up-to-date!");
 }
 
-if (options.output) {
-  Deno.writeTextFileSync(options.output, JSON.stringify(updates));
+if (!options.dryRun) {
+  await createCommits(repo, updates, options);
+  await createPullRequest(repo, options);
 }
 
-if (options.check && updates.length) {
-  Deno.exit(1);
+if (env.CI) {
+  await Deno.writeTextFile(env.GITHUB_OUTPUT!, "updated=true\n", {
+    append: true,
+  });
+  console.log(`echo "updated=true" >> $GITHUB_OUTPUT`);
 }
-
-if (options.dryRun) {
-  Deno.exit(0);
-}
-
-await createCommits(repo, updates, options);
-await createPullRequest(repo, options);
-
-Deno.exit(0);

@@ -4,9 +4,6 @@ on:
   workflow_call:
   workflow_dispatch:
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 jobs:
   module:
     name: Module
@@ -48,18 +45,24 @@ jobs:
       - name: Run action
         uses: ./integration
         with:
-          repository: hasundue/denopendabot
+          mode: action
           base-branch: test
           working-branch: test-action
-          options: --test --release 1.0.0
+          release: 1.0.0
 
   app:
     name: App
     runs-on: ubuntu-latest
 
     steps:
-      - name: Repository dispatch
-        uses: peter-evans/repository-dispatch@v2
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+
+      - name: Run App
+        uses: ./
         with:
-          event-type: denopendabot-run
-          client-payload: '{ "base": "test", "branch": "test-app", "test": "true" }'
+          mode: app
+          base-branch: test
+          working-branch: test-app
+          release: 1.0.0
+          auto-merge: all

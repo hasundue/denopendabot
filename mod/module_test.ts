@@ -3,7 +3,7 @@ import { getModuleUpdateSpecs, ModuleUpdate } from "./module.ts";
 import { VERSION } from "./version.ts";
 
 const initial = "0.158.0";
-const target = "0.160.0"; // @denopendabot denoland/deno_std
+const target = "0.161.0"; // @denopendabot denoland/deno_std
 
 Deno.test("getUpdateSpec/Update", async () => {
   const input = `
@@ -51,7 +51,7 @@ Deno.test({
   fn: async () => {
     const input = `
     const url1 = "https://deno.land/std@${initial}/testing/mod.ts";
-    const url2 = "https://deno.land/x/denopendabot@${VERSION}/main.ts";
+    const url2 = "https://deno.land/x/denopendabot@${VERSION}/cli.ts";
     `;
 
     const specs = await getModuleUpdateSpecs(input, {

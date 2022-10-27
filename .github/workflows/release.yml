@@ -38,8 +38,8 @@ jobs:
       - name: Run Denopendabot 
         if: ${{ steps.run.outputs.needs_update }}
         run: >
-          deno run -q --allow-env --allow-net ./main.ts
-          ${{ github.repository }}
-          --token ${{ secrets.GITHUB_TOKEN }}
-          --user-token ${{ secrets.GH_TOKEN }}
-          --release ${{ steps.run.outputs.version }}
+        uses: ./
+        with:
+          mode: app
+          release: ${{ steps.run.outputs.version }}
+          auto-merge: all

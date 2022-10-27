@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "run": "deno run --allow-env --allow-net --allow-read main.ts",
+    "run": "deno run --allow-env --allow-net --allow-read cli.ts",
     "test": "deno test --allow-env --allow-net --allow-read",
     "dev": "deno fmt && deno lint && deno task test mod/ --fail-fast",
     "test-action": "act -j test-action"

@@ -9,42 +9,47 @@ import {
   removeIgnore,
   Update,
 } from "./mod/common.ts";
-import { VERSION } from "./mod/version.ts";
 import { GitHubClient } from "./mod/octokit.ts";
 import { getModuleUpdateSpecs, ModuleUpdate } from "./mod/module.ts";
 import { getRepoUpdateSpecs, RepoUpdate } from "./mod/repo.ts";
 
 export { VERSION } from "./mod/version.ts";
 
-export interface Options {
+export type Options = GlobalOptions & UpdateOptions & PullRequestOptions;
+
+interface GlobalOptions {
+  octokit?: Octokit;
+  token?: string;
+  userToken?: string;
   base?: string;
   branch?: string;
   release?: string;
-  include?: string[];
-  exclude?: string[];
-  token?: string;
-  userToken?: string;
-  octokit?: Octokit;
-  test?: boolean;
 }
 
-const getActionToken = (options?: Options) => {
+const getActionToken = (options?: GlobalOptions) => {
   const envToken = options?.token && Deno.env.get(options?.token);
   const rawToken = !envToken ? options?.token : undefined;
-  return (envToken || rawToken) ?? env["GITHUB_TOKEN"];
+  return (envToken || rawToken) ?? env.GITHUB_TOKEN;
 };
 
-const getUserToken = (options?: Options) => {
+const getUserToken = (options?: GlobalOptions) => {
   const envUserToken = options?.userToken && Deno.env.get(options?.userToken);
   const rawUserToken = !envUserToken ? options?.userToken : undefined;
   return envUserToken ?? rawUserToken;
 };
 
+interface UpdateOptions {
+  include?: string[];
+  exclude?: string[];
+}
+
 export async function getUpdates(
   repository: string,
-  options?: Options,
+  options?: GlobalOptions & UpdateOptions,
 ) {
-  const github = new GitHubClient(options?.octokit ?? getActionToken(options));
+  const github = new GitHubClient(
+    options?.octokit ?? getActionToken(options) ?? getUserToken(options),
+  );
 
   const base = options?.base ?? "main";
   const baseTree = await github.getTree(repository, base);
@@ -102,7 +107,7 @@ export async function getUpdates(
 export async function createCommits(
   repository: string,
   updates: Update[],
-  options: Options,
+  options: GlobalOptions,
 ) {
   const actionToken = getActionToken(options);
   const userToken = getUserToken(options);
@@ -139,9 +144,13 @@ export async function createCommits(
   }
 }
 
+interface PullRequestOptions {
+  labels?: string[];
+}
+
 export async function createPullRequest(
   repository: string,
-  options?: Options,
+  options?: GlobalOptions & PullRequestOptions,
 ) {
   const actionToken = getActionToken(options);
   const userToken = getUserToken(options);
@@ -154,9 +163,6 @@ export async function createPullRequest(
 
   const base = options?.base ?? "main";
   const branch = options?.branch ?? "denopendabot";
-  const version = options?.test
-    ? VERSION
-    : await github.getLatestRelease(repository);
 
   const { commits } = await github.compareBranches(repository, base, branch);
 
@@ -176,19 +182,20 @@ export async function createPullRequest(
     CommitType,
   ) as CommitType[];
 
+  const version = await github.getLatestRelease(repository);
+
   const type = pullRequestType(types);
   const scope = options?.release ? "version" : "deps";
   const body = options?.release
     ? `bump the version from ${version} to ${options.release}`
     : "update dependencies";
   const title = `${type}(${scope}): ${body}`;
-  const labels = options?.test ? ["test"] : undefined;
 
   return await github.createPullRequest(
     repository,
     base,
     branch,
     title,
-    labels,
+    options?.labels,
   );
 }

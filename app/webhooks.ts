@@ -1,15 +1,9 @@
-import { Octokit } from "https://esm.sh/@octokit/core@4.1.0";
 import { App } from "https://esm.sh/@octokit/app@13.0.11";
 import type { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.3.1";
 import { env } from "./env.ts";
 import { privateKey } from "./redis.ts";
 import { Deployment, deployment } from "./deploy.ts";
-import {
-  createCommits,
-  createPullRequest,
-  getUpdates,
-  Options,
-} from "../mod.ts";
+import * as denopendabot from "../mod.ts";
 
 type PayLoadWithRepository = {
   repository: {
@@ -26,21 +20,35 @@ type Context = {
   repo: string;
 };
 
-const APP_REPO = env["APP_REPO"];
+type ClientPayloadKeys =
+  | "mode"
+  | "token"
+  | "user-token"
+  | "repository"
+  | "base-branch"
+  | "working-branch"
+  | "auto-merge"
+  | "release";
+
+type ClientPayload = Partial<
+  {
+    [K in ClientPayloadKeys]: string;
+  }
+>;
 
 if (!privateKey) {
   throw Error("Private key is not deployed on Upstash Redis.");
 }
 
 const app = new App({
-  appId: env["APP_ID"],
+  appId: env.APP_ID,
   privateKey,
   oauth: {
-    clientId: env["CLIENT_ID"],
-    clientSecret: env["CLIENT_SECRET"],
+    clientId: env.CLIENT_ID,
+    clientSecret: env.CLIENT_SECRET,
   },
   webhooks: {
-    secret: env["WEBHOOK_SECRET"],
+    secret: env.WEBHOOK_SECRET,
   },
 });
 
@@ -50,16 +58,20 @@ const getContext = async (payload: PayLoadWithRepository) => {
 
   const owner = payload.repository.owner.login;
   const repo = payload.repository.name;
-  console.log(`repository: ${owner}/${repo}`);
+  console.info(`repository: ${owner}/${repo}`);
 
   return { deploy, owner, repo };
 };
 
-const associated = (context: Context, branch: string) => {
-  const { deploy, owner, repo } = context;
-  const isTest = `${owner}/${repo}` === APP_REPO && branch === "test-app";
-  return deploy === "staging" ? isTest : branch === "denopendabot";
+const isTest = (context: Context, branch: string) => {
+  const { owner, repo } = context;
+  return `${owner}/${repo}` === env.APP_REPO && branch === "test-app";
 };
+
+const associated = (context: Context, branch: string) =>
+  context.deploy === "staging"
+    ? isTest(context, branch)
+    : branch === "denopendabot";
 
 app.webhooks.onAny(({ name }) => {
   console.log(`event: ${name}`);
@@ -70,8 +82,8 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
   if (payload.action !== "denopendabot-run") return;
 
   const context = await getContext(payload);
-  const options: Options = payload.client_payload;
-  const branch = options?.branch ?? "denopendabot";
+  const inputs: ClientPayload = payload.client_payload;
+  const branch = inputs["working-branch"] ?? "denopendabot";
   console.log(branch);
 
   if (!associated(context, branch)) return;
@@ -80,9 +92,24 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
 
   const repository = payload.repository.full_name;
 
-  const updates = await getUpdates(repository, { ...options, octokit });
-  await createCommits(repository, updates, { ...options, octokit });
-  await createPullRequest(repository, { ...options, octokit });
+  const labels = ["dependencies"];
+  if (isTest(context, branch)) {
+    labels.push("test");
+  }
+  if (inputs["auto-merge"] === "all") {
+    labels.push("auto-merge");
+  }
+
+  const options: denopendabot.Options = {
+    octokit,
+    base: inputs["base-branch"],
+    branch: inputs["working-branch"],
+    ...inputs,
+  };
+
+  const updates = await denopendabot.getUpdates(repository, options);
+  await denopendabot.createCommits(repository, updates, options);
+  await denopendabot.createPullRequest(repository, { ...options, labels });
 });
 
 // merge a pull request if the check has passed
@@ -111,14 +138,17 @@ app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
       "GET /repos/{owner}/{repo}/pulls/{pull_number}",
       { owner, repo, pull_number: number },
     );
-    if (pr.user?.login === "denopendabot[bot]") {
+    if (
+      pr.user?.login === "denopendabot[bot]" &&
+      pr.labels?.find((label) => label.name === "auto-merge")
+    ) {
       console.log(pr);
       const { data: result } = await octokit.request(
         "PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge",
         { owner, repo, pull_number: number },
       );
       if (result.merged) {
-        console.log(`🎉 Merged a pull request "${pr.title}"`);
+        console.info(`🎉 Merged a pull request "${pr.title}"`);
       } else {
         console.warn(`❗ ${result.message}`);
       }
@@ -133,23 +163,4 @@ export const handler = async (request: Request) => {
     payload: await request.text(),
     name: request.headers.get("x-github-event") as EmitterWebhookEventName,
   });
-};
-
-export const getAppOctokit = async (
-  repo: string,
-) => {
-  try {
-    await app.eachRepository(({ repository, octokit }) => {
-      if (repository.full_name === repo) {
-        throw octokit;
-      }
-    });
-  } catch (exception) {
-    if (exception instanceof Octokit) {
-      return exception;
-    } else {
-      throw exception;
-    }
-  }
-  return null;
 };
