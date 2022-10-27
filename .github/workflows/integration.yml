@@ -48,6 +48,7 @@ jobs:
           mode: action
           base-branch: test
           working-branch: test-action
+          labels: test
           release: 1.0.0
 
   app:

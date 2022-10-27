@@ -39,6 +39,11 @@ inputs:
     description: Path(s) to exclude
     required: false
 
+  labels:
+    description: Labels for the pull request (space-separated)
+    required: false
+    default: dependencies
+
   release:
     description: Bump the project version to this value for a release
     required: false
@@ -80,6 +85,7 @@ runs:
         --working-branch ${{ inputs.working-branch }}
         --token ${{ inputs.token || github.token }}
         ${{ inputs.user-token && format('--user-token {0}', inputs.user-token) }}
-        ${{ inputs.release && format('--release {0}', inputs.release) }}
         ${{ inputs.exclude && format('--exclude {0}', inputs.exclude) }}
+        ${{ inputs.release && format('--release {0}', inputs.release) }}
+        ${{ inputs.labels && format('--labels {0}', inputs.labels) }}
       shell: bash

@@ -31,6 +31,10 @@ const { args, options } = await new Command()
     "Files to exclude.",
   )
   .option(
+    "-l --labels <...names>",
+    "Labels for the pull request.",
+  )
+  .option(
     "-r --release <target_version>",
     "Bump the repository version for a release.",
   )
