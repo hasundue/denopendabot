@@ -84,11 +84,11 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
   const context = await getContext(payload);
   const inputs: ClientPayload = payload.client_payload;
   const branch = inputs["working-branch"] ?? "denopendabot";
-  console.log(branch);
+  console.log(`branch: ${branch}`);
 
   if (!associated(context, branch)) return;
 
-  console.log(payload);
+  console.debug(payload);
 
   const repository = payload.repository.full_name;
 
@@ -130,7 +130,7 @@ app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
     console.log(`conclusion: ${conclusion}`);
     return;
   }
-  console.log(payload);
+  console.debug(payload);
 
   // merge pull requests if the status is success
   for (const { number } of payload.check_suite.pull_requests) {
