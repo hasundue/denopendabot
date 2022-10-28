@@ -48,8 +48,8 @@ jobs:
           mode: action
           base-branch: test
           working-branch: test-action
+          include: integration/src/deps.ts
           labels: test
-          release: 1.0.0
 
   app:
     name: App
@@ -65,5 +65,5 @@ jobs:
           mode: app
           base-branch: test
           working-branch: test-app
-          release: 1.0.0
-          auto-merge: all
+          include: integration/src/deps.ts
+          auto-merge: any

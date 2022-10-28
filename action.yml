@@ -35,8 +35,12 @@ inputs:
     required: true
     default: denopendabot
 
+  include:
+    description: Specify Files to update (space-separated)
+    required: false
+
   exclude:
-    description: Path(s) to exclude
+    description: Files to exclude (space-separated)
     required: false
 
   labels:
@@ -84,6 +88,7 @@ runs:
         --working-branch ${{ inputs.working-branch }}
         --token ${{ inputs.token || github.token }}
         ${{ inputs.user-token && format('--user-token {0}', inputs.user-token) }}
+        ${{ inputs.include && format('--include {0}', inputs.include) }}
         ${{ inputs.exclude && format('--exclude {0}', inputs.exclude) }}
         ${{ inputs.release && format('--release {0}', inputs.release) }}
         ${{ inputs.labels && format('--labels {0}', inputs.labels) }}

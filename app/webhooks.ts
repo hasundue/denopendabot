@@ -27,6 +27,7 @@ type ClientPayloadKeys =
   | "working-branch"
   | "auto-merge"
   | "labels"
+  | "include"
   | "exclude"
   | "release";
 
@@ -105,6 +106,7 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
     octokit,
     baseBranch: inputs["base-branch"],
     workingBranch: inputs["working-branch"],
+    include: inputs.include?.split(" "),
     exclude: inputs.exclude?.split(" "),
   };
 
