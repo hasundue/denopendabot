@@ -39,4 +39,4 @@ jobs:
         with:
           mode: app
           release: ${{ steps.run.outputs.version }}
-          auto-merge: all
+          auto-merge: any

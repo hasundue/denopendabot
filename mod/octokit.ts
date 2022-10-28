@@ -222,7 +222,7 @@ export class GitHubClient {
     base: string,
     branch: string,
     title: string,
-    labels = ["dependencies"],
+    labels?: string[],
   ) {
     const [owner, repo] = repository.split("/");
 

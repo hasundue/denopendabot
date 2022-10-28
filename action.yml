@@ -46,7 +46,6 @@ inputs:
   labels:
     description: Labels for the pull request (space-separated)
     required: false
-    default: dependencies
 
   release:
     description: Bump the project version to this value for a release

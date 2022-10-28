@@ -95,12 +95,9 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
 
   const labels = inputs.labels?.split(" ") ?? [];
 
-  if (isTest(context, branch)) {
-    labels.push("test");
-  }
-  if (inputs["auto-merge"]) {
-    labels.push("auto-merge");
-  }
+  if (isTest(context, branch)) labels.push("test");
+  if (inputs.release) labels.push("release");
+  if (inputs["auto-merge"]) labels.push("auto-merge");
 
   const options: denopendabot.Options = {
     octokit,
