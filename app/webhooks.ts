@@ -107,8 +107,13 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
 app.webhooks.on("check_suite.requested", async ({ name, payload }) => {
   console.debug(payload);
 
-  const { owner, repo } = await getContext(payload);
+  const context = await getContext(payload);
+  const { owner, repo } = context;
+  const branch = payload[name].head_branch as string;
   const app = payload[name].app.slug;
+
+  // skip if we are not in charge of the webhook
+  if (!associated(context, branch)) return;
 
   console.info(
     `🔬 ${app} requested a check suite at ${owner}/${repo}`,
@@ -142,7 +147,8 @@ app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
     );
     if (
       pr.user?.login === "denopendabot[bot]" &&
-      pr.labels?.find((label) => label.name === "auto-merge")
+      pr.labels?.find((label) => label.name === "auto-merge") &&
+      pr.mergeable
     ) {
       console.debug(pr);
       const { data: result } = await octokit.request(
