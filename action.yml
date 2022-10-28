@@ -49,9 +49,8 @@ inputs:
     required: false
   
   auto-merge:
-    description: Merge a pull request automaticaly ('off' or 'all', for App)
+    description: Merge a pull request automaticaly ('any', for App)
     required: false
-    default: 'off'
 
 outputs:
   updated:

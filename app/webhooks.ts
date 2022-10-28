@@ -22,12 +22,12 @@ type Context = {
 
 type ClientPayloadKeys =
   | "mode"
-  | "token"
-  | "user-token"
   | "repository"
   | "base-branch"
   | "working-branch"
   | "auto-merge"
+  | "labels"
+  | "exclude"
   | "release";
 
 type ClientPayload = Partial<
@@ -92,11 +92,12 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
 
   const repository = payload.repository.full_name;
 
-  const labels = ["dependencies"];
+  const labels = inputs.labels?.split(" ") ?? [];
+
   if (isTest(context, branch)) {
     labels.push("test");
   }
-  if (inputs["auto-merge"] === "all") {
+  if (inputs["auto-merge"]) {
     labels.push("auto-merge");
   }
 
@@ -104,7 +105,7 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
     octokit,
     baseBranch: inputs["base-branch"],
     workingBranch: inputs["working-branch"],
-    ...inputs,
+    exclude: inputs.exclude?.split(" "),
   };
 
   const updates = await denopendabot.getUpdates(repository, options);

@@ -19,4 +19,4 @@ jobs:
         with:
           mode: app
           exclude: integration/src/deps.ts
-          auto-merge: all
+          auto-merge: any
