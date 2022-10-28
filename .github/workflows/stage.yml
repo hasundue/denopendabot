@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - '**.ts'
+      - '.github/workflows/stage.yml'
       - '.github/workflows/test.yml'
       - '.github/workflows/deploy.yml'
       - '.github/workflows/integration.yml'
