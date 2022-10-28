@@ -51,7 +51,6 @@ const app = new App({
 
 const getContext = async (payload: PayLoadWithRepository) => {
   const deploy = await deployment();
-  console.debug(`deployment: ${deploy}`);
 
   const owner = payload.repository.owner.login;
   const repo = payload.repository.name;
@@ -70,24 +69,22 @@ const associated = (context: Context, branch: string) =>
     ? isTest(context, branch)
     : branch === "denopendabot";
 
-app.webhooks.onAny(({ name }) => {
-  console.log(`event: ${name}`);
-});
-
 // run update
 app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
-  if (payload.action !== "denopendabot-run") return;
-
-  const context = await getContext(payload);
-  const inputs = payload.client_payload as ClientPayload;
-  const branch = inputs.workingBranch ?? "denopendabot";
-  console.log(`branch: ${branch}`);
-
-  if (!associated(context, branch)) return;
-
   console.debug(payload);
 
+  const context = await getContext(payload);
   const repository = payload.repository.full_name;
+  const inputs = payload.client_payload as ClientPayload;
+  const branch = inputs.workingBranch ?? "denopendabot";
+  const sender = payload.sender.login;
+
+  if (!associated(context, branch)) return;
+  if (payload.action !== "denopendabot-run") return;
+
+  console.info(
+    `🔥 [${repository}@${branch}] ${sender} dispatched ${payload.action}`,
+  );
 
   const labels = inputs.labels ? inputs.labels.split(" ") : [];
 
@@ -111,23 +108,22 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
 
 // merge a pull request if the check has passed
 app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
+  console.debug(payload);
+
   const context = await getContext(payload);
   const { owner, repo } = context;
-
-  // @ts-ignore an event object always has the head_branch field in our cases
   const branch = payload[name].head_branch as string;
-  console.log(`branch: ${branch}`);
+  const app = payload[name].app.slug;
 
-  // skip if the check suite is not associated with the deployment
+  // skip if we are not in charge of the webhook
   if (!associated(context, branch)) return;
 
   // skip if the conclusion is not success
-  const conclusion = payload.check_suite.conclusion;
-  if (conclusion !== "success") {
-    console.log(`conclusion: ${conclusion}`);
-    return;
-  }
-  console.debug(payload);
+  if (payload.check_suite.conclusion !== "success") return;
+
+  console.info(
+    `✅ [${owner}/${repo}@${branch}] ${app} completed a check suite`,
+  );
 
   // merge pull requests if the status is success
   for (const { number } of payload.check_suite.pull_requests) {
