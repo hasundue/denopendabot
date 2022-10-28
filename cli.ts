@@ -1,4 +1,4 @@
-import { Command } from "https://deno.land/x/cliffy@v0.25.2/mod.ts";
+import { Command } from "https://deno.land/x/cliffy@v0.25.4/mod.ts";
 import { env } from "./mod/env.ts";
 import {
   createCommits,
