@@ -1,4 +1,8 @@
-![denopendabot-320x320](https://user-images.githubusercontent.com/309723/198541162-cf0c65ae-7d9d-4855-8d19-2076f8fc01cd.png)
+<div align="center">
+
+![denopendabot-simple-320](https://user-images.githubusercontent.com/309723/198542926-bc43533c-63cd-4595-b7d3-6c7b4ade9bfb.png)
+
+</div>
 
 # denopendabot
 
