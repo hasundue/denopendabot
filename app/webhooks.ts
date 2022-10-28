@@ -80,7 +80,7 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
   if (payload.action !== "denopendabot-run") return;
 
   console.info(
-    `🔥 [${repository}@${branch}] ${sender} dispatched ${payload.action}`,
+    `🔥 ${sender} dispatched ${payload.action} at ${repository}`,
   );
 
   const labels = inputs.labels ? inputs.labels.split(" ") : [];
@@ -119,7 +119,7 @@ app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
   if (payload.check_suite.conclusion !== "success") return;
 
   console.info(
-    `✅ [${owner}/${repo}@${branch}] ${app} completed a check suite`,
+    `✅ ${app} completed a check suite at ${owner}/${repo}`,
   );
 
   // merge pull requests if the status is success
