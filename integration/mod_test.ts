@@ -1,7 +1,7 @@
 import {
   assert,
   assertEquals,
-} from "https://deno.land/std@0.160.0/testing/asserts.ts";
+} from "https://deno.land/std@0.161.0/testing/asserts.ts";
 import { env } from "../mod/env.ts";
 import { createCommits, createPullRequest, getUpdates } from "../mod.ts";
 import { GitHubClient } from "../mod/octokit.ts";
@@ -33,7 +33,7 @@ Deno.test("integration (module)", async () => {
 
   assertEquals(spec, {
     name: "deno.land/x/dax",
-    url: "https://deno.land/x/dax@0.14.0/mod.ts",
+    url: "https://deno.land/x/dax@0.15.0/mod.ts",
     initial: "0.14.0",
     target: (await github.getLatestRelease("dsherret/dax"))!,
   });
