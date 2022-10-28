@@ -14,7 +14,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3.1.0
 
-      - uses: ./
+      - name: Run App
+        uses: ./
         with:
           mode: app
           exclude: integration/src/deps.ts
