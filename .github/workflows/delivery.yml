@@ -1,0 +1,21 @@
+name: Delivery
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Release
+    needs: integration
+    uses:  ./.github/workflows/release.yml
+    secrets: inherit
+
+  deploy-production:
+    name: Production
+    needs: release
+    if: ${{ needs.release.outputs.released }}
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+    with:
+      deployment: production

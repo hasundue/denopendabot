@@ -1,0 +1,26 @@
+name: Stage
+
+on:
+  push:
+    branches: 
+      - main
+    paths:
+      - '**.ts'
+      - '**.yml'
+
+jobs:
+  stage:
+    name: Stage
+
+    if: ${{ github.repository_owner == 'hasundue' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.0.1
+
+      - name: Push
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}
+          branch: staging

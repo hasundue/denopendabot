@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 
 on:
   pull_request:
@@ -7,6 +7,9 @@ on:
     paths:
       - '**.ts'
       - '**.yml'
+  push:
+    branches:
+      - staging
 
 jobs:
   test:
@@ -16,8 +19,7 @@ jobs:
 
   deploy:
     name: Staging
-    needs: test
-    if: github.event.pull_request.head.repo.owner.login == 'hasundue'
+    if: github.event_name == 'push' || github.event.pull_request.user.login == 'hasundue'
     uses: ./.github/workflows/deploy.yml
     with:
       deployment: staging
@@ -25,6 +27,15 @@ jobs:
 
   integration:
     name: Integration
-    needs: deploy
+    needs: 
+      - test
+      - deploy
     uses: ./.github/workflows/integration.yml
+    secrets: inherit
+
+  delivery:
+    name: Delivery
+    if: github.event_name == 'push'
+    needs: integration
+    uses: ./.github/workflows/delivery.yml
     secrets: inherit

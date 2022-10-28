@@ -2,21 +2,10 @@ name: Deploy
 
 on:
   workflow_call:
-    inputs:
-      deployment: 
-        description: Deployment type (staging or production)
-        required: true
-        type: string
-
   workflow_dispatch:
-    inputs:
-      deployment: 
-        description: Deployment type
-        type: choice
-        options:
-          - production
-          - staging
-        default: production
+
+env:
+  deployment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
 
 jobs:
   deploy:
@@ -44,16 +33,16 @@ jobs:
         id: deploy
         run: >
           deployctl deploy --project=denopendabot --token ${{ secrets.DENO_DEPLOY_TOKEN }}
-          ${{ inputs.deployment == 'production' && '--prod' || '' }} ./app.ts
+          ${{ env.deployment == 'production' && '--prod' || '' }} ./app.ts
 
       - name: Set deployment ID on Upstash
         run: >
           curl -X POST -d '${{ steps.deploy.outputs.deployment-id }}'
-          ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/${{ inputs.deployment }}-id
+          ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/${{ env.deployment }}-id
           -H "Authorization: Bearer ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}"
 
       - name: Set deployment URL on Upstash
         run: >
           curl -X POST -d '${{ steps.deploy.outputs.url }}'
-          ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/${{ inputs.deployment }}-url
+          ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/${{ env.deployment }}-url
           -H "Authorization: Bearer ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}"
