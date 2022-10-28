@@ -33,7 +33,7 @@ export class ModuleUpdate extends Update {
   };
 }
 
-type ModuleUpdateSpec = UpdateSpec & {
+export type ModuleUpdateSpec = UpdateSpec & {
   url: string;
 };
 

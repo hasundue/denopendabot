@@ -5,6 +5,7 @@ import {
 import { env } from "../mod/env.ts";
 import { createCommits, createPullRequest, getUpdates } from "../mod.ts";
 import { GitHubClient } from "../mod/octokit.ts";
+import { ModuleUpdateSpec } from "../mod/module.ts";
 
 const github = new GitHubClient(env.GITHUB_TOKEN);
 
@@ -28,8 +29,11 @@ Deno.test("integration (module)", async () => {
   assertEquals(updates.length, 1);
   assertEquals(updates[0].path, "integration/src/deps.ts");
 
-  assertEquals(updates[0].spec, {
+  const spec = updates[0].spec as ModuleUpdateSpec;
+
+  assertEquals(spec, {
     name: "deno.land/x/dax",
+    url: "https://deno.land/x/dax@0.14.0/mod.ts",
     initial: "0.14.0",
     target: (await github.getLatestRelease("dsherret/dax"))!,
   });
