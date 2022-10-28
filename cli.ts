@@ -23,19 +23,21 @@ const { args, options } = await new Command()
     { default: "denopendabot" },
   )
   .option(
-    "-i --include <paths...>",
+    "-i --include <paths:file[]>",
     "Specify files to update.",
   )
   .option(
-    "-x --exclude <paths...>",
+    "-x --exclude <paths:file[]>",
     "Files to exclude.",
+    { separator: " " },
   )
   .option(
-    "-l --labels <...names>",
+    "-l --labels <names:string[]>",
     "Labels for the pull request.",
+    { separator: " " },
   )
   .option(
-    "-r --release <target_version>",
+    "-r --release <target_version:string>",
     "Bump the repository version for a release.",
   )
   .option(
@@ -43,12 +45,12 @@ const { args, options } = await new Command()
     "Just check updates.",
   )
   .option(
-    "-t --token <token>",
+    "-t --token <token:string>",
     "Access token associated with GitHub Action.",
     { default: "GITHUB_TOKEN" },
   )
   .option(
-    "-u --user-token <token>",
+    "-u --user-token <token:string>",
     "Private access token authorized to update workflows.",
   )
   .parse(Deno.args);
