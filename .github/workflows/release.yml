@@ -11,8 +11,6 @@ on:
 jobs:
   release:
     name: Release
-
-    if: ${{ github.repository_owner == 'hasundue' }}
     runs-on: ubuntu-latest
 
     outputs:

@@ -7,7 +7,6 @@ on:
 jobs:
   release:
     name: Release
-    needs: integration
     uses:  ./.github/workflows/release.yml
     secrets: inherit
 
