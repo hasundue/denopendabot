@@ -20,3 +20,4 @@ jobs:
           mode: app
           exclude: integration/src/deps.ts
           auto-merge: any
+          labels: dependencies

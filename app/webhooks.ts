@@ -21,11 +21,9 @@ type Context = {
 };
 
 type ClientPayloadKeys =
-  | "mode"
-  | "repository"
-  | "base-branch"
-  | "working-branch"
-  | "auto-merge"
+  | "baseBranch"
+  | "workingBranch"
+  | "autoMerge"
   | "labels"
   | "include"
   | "exclude"
@@ -55,7 +53,7 @@ const app = new App({
 
 const getContext = async (payload: PayLoadWithRepository) => {
   const deploy = await deployment();
-  console.log(`deployment: ${deploy}`);
+  console.debug(`deployment: ${deploy}`);
 
   const owner = payload.repository.owner.login;
   const repo = payload.repository.name;
@@ -84,7 +82,7 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
 
   const context = await getContext(payload);
   const inputs: ClientPayload = payload.client_payload;
-  const branch = inputs["working-branch"] ?? "denopendabot";
+  const branch = inputs.workingBranch ?? "denopendabot";
   console.log(`branch: ${branch}`);
 
   if (!associated(context, branch)) return;
@@ -95,17 +93,14 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
 
   const labels = inputs.labels?.split(" ") ?? [];
 
-  if (isTest(context, branch)) {
-    labels.push("test");
-  }
-  if (inputs["auto-merge"]) {
-    labels.push("auto-merge");
-  }
+  if (isTest(context, branch)) labels.push("test");
+  if (inputs.release) labels.push("release");
+  if (inputs.autoMerge) labels.push("auto-merge");
 
   const options: denopendabot.Options = {
     octokit,
-    baseBranch: inputs["base-branch"],
-    workingBranch: inputs["working-branch"],
+    baseBranch: inputs.baseBranch,
+    workingBranch: inputs.workingBranch,
     include: inputs.include?.split(" "),
     exclude: inputs.exclude?.split(" "),
     release: inputs.release,
