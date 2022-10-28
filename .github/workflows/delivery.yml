@@ -1,4 +1,4 @@
-name: Delivery
+name: CD
 
 on:
   workflow_call:

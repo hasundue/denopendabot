@@ -30,9 +30,9 @@ jobs:
           branch: staging
           force: true
 
-      - name: Dispatch CI/CD
+      - name: Dispatch CI
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: CI/CD
+          workflow: CI
           token: ${{ secrets.GH_TOKEN }}
           ref: staging
