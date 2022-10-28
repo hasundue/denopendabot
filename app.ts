@@ -15,7 +15,7 @@ app.use("*", async (context, next) => {
   if (deploy === "production") {
     const staging = await location("staging");
     await fetch(staging + "api/github/webhooks", context.req.clone());
-    console.log(`transfered the request to ${staging}`);
+    console.debug(`transfered the request to ${staging}`);
   }
   await next();
 });

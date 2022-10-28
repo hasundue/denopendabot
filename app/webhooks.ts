@@ -21,21 +21,17 @@ type Context = {
 };
 
 type ClientPayloadKeys =
-  | "mode"
-  | "repository"
-  | "base-branch"
-  | "working-branch"
-  | "auto-merge"
+  | "baseBranch"
+  | "workingBranch"
+  | "autoMerge"
   | "labels"
   | "include"
   | "exclude"
   | "release";
 
-type ClientPayload = Partial<
-  {
-    [K in ClientPayloadKeys]: string;
-  }
->;
+type ClientPayload = {
+  [K in ClientPayloadKeys]: string;
+};
 
 if (!privateKey) {
   throw Error("Private key is not deployed on Upstash Redis.");
@@ -55,7 +51,7 @@ const app = new App({
 
 const getContext = async (payload: PayLoadWithRepository) => {
   const deploy = await deployment();
-  console.log(`deployment: ${deploy}`);
+  console.debug(`deployment: ${deploy}`);
 
   const owner = payload.repository.owner.login;
   const repo = payload.repository.name;
@@ -83,8 +79,8 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
   if (payload.action !== "denopendabot-run") return;
 
   const context = await getContext(payload);
-  const inputs: ClientPayload = payload.client_payload;
-  const branch = inputs["working-branch"] ?? "denopendabot";
+  const inputs = payload.client_payload as ClientPayload;
+  const branch = inputs.workingBranch ?? "denopendabot";
   console.log(`branch: ${branch}`);
 
   if (!associated(context, branch)) return;
@@ -93,22 +89,19 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
 
   const repository = payload.repository.full_name;
 
-  const labels = inputs.labels?.split(" ") ?? [];
+  const labels = inputs.labels ? inputs.labels.split(" ") : [];
 
-  if (isTest(context, branch)) {
-    labels.push("test");
-  }
-  if (inputs["auto-merge"]) {
-    labels.push("auto-merge");
-  }
+  if (isTest(context, branch)) labels.push("test");
+  if (inputs.release) labels.push("release");
+  if (inputs.autoMerge) labels.push("auto-merge");
 
   const options: denopendabot.Options = {
     octokit,
-    baseBranch: inputs["base-branch"],
-    workingBranch: inputs["working-branch"],
-    include: inputs.include?.split(" "),
-    exclude: inputs.exclude?.split(" "),
-    release: inputs.release,
+    baseBranch: inputs.baseBranch,
+    workingBranch: inputs.workingBranch,
+    include: inputs.include ? inputs.include.split(" ") : undefined,
+    exclude: inputs.exclude ? inputs.exclude.split(" ") : undefined,
+    release: inputs.release ?? undefined,
   };
 
   const updates = await denopendabot.getUpdates(repository, options);
