@@ -1,21 +1,20 @@
 import { serve } from "https://deno.land/std@0.161.0/http/server.ts";
 import { Hono } from "https://deno.land/x/hono@v2.3.2/mod.ts";
-import { logger } from "https://deno.land/x/hono@v2.3.2/middleware.ts";
 import { deployment, location } from "./app/deploy.ts";
 import { handler } from "./app/webhooks.ts";
 import { verifyRequest } from "./app/qstash.ts";
 
 const app = new Hono();
 
-app.use("*", logger());
-
 // copy and transfer all requests to the staging deployment
 app.use("*", async (context, next) => {
   const deploy = await deployment();
+  console.debug(`🏠 deployment: ${deploy}`);
+
   if (deploy === "production") {
     const staging = await location("staging");
     await fetch(staging + "api/github/webhooks", context.req.clone());
-    console.debug(`transfered the request to ${staging}`);
+    console.debug(`✈️ transfered the request to ${staging}`);
   }
   await next();
 });
@@ -40,4 +39,4 @@ app.use("/api/qstash/*", async (c, next) => {
   await next();
 });
 
-await serve(app.fetch);
+await serve(app.fetch, { onListen: () => {} });
