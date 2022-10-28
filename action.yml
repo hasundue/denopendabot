@@ -46,14 +46,13 @@ inputs:
   labels:
     description: Labels for the pull request (space-separated)
     required: false
-    default: dependencies
 
   release:
     description: Bump the project version to this value for a release
     required: false
   
   auto-merge:
-    description: Merge a pull request automaticaly ('any', for App)
+    description: Merge a pull request automaticaly ('any' or null, for App)
     required: false
 
 outputs:
@@ -70,7 +69,16 @@ runs:
       uses: peter-evans/repository-dispatch@v2
       with:
         event-type: denopendabot-run
-        client-payload: ${{ toJSON(inputs) }}
+        client-payload: >
+          { 
+            "baseBranch": "${{ inputs.base-branch }}",
+            "workingBranch": "${{ inputs.working-branch }}",
+            "include": "${{ inputs.include }}",
+            "exclude": "${{ inputs.exclude }}",
+            "labels": "${{ inputs.labels }}",
+            "release": "${{ inputs.release }}",
+            "autoMerge": "${{ inputs.auto-merge }}"
+          }
 
     - name: Setup Deno
       if: ${{ inputs.mode == 'action' }}
