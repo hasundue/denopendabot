@@ -239,8 +239,8 @@ export class GitHubClient {
         { owner, repo, title, base, head: branch },
       );
 
-    // add a label if given
-    if (labels) {
+    // add labels if given
+    if (labels?.length) {
       await this.octokit.request(
         "POST /repos/{owner}/{repo}/issues/{issue_number}/labels",
         { owner, repo, issue_number: result.number, labels },
