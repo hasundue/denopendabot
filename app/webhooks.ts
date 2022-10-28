@@ -104,6 +104,18 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
 });
 
 // merge a pull request if the check has passed
+app.webhooks.on("check_suite.requested", async ({ name, payload }) => {
+  console.debug(payload);
+
+  const { owner, repo } = await getContext(payload);
+  const app = payload[name].app.slug;
+
+  console.info(
+    `🔬 ${app} requested a check suite at ${owner}/${repo}`,
+  );
+});
+
+// merge a pull request if all checks have passed
 app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
   console.debug(payload);
 
