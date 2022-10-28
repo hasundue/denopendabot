@@ -1,4 +1,6 @@
-# :robot: denopendabot
+![denopendabot-320x320](https://user-images.githubusercontent.com/309723/198541162-cf0c65ae-7d9d-4855-8d19-2076f8fc01cd.png)
+
+# denopendabot
 
 <!-- deno-fmt-ignore-start -->
 
