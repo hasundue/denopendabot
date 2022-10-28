@@ -39,4 +39,4 @@ app.use("/api/qstash/*", async (c, next) => {
   await next();
 });
 
-await serve(app.fetch);
+await serve(app.fetch, { onListen: () => {} });

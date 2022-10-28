@@ -51,11 +51,8 @@ const app = new App({
 
 const getContext = async (payload: PayLoadWithRepository) => {
   const deploy = await deployment();
-
   const owner = payload.repository.owner.login;
   const repo = payload.repository.name;
-  console.info(`repository: ${owner}/${repo}`);
-
   return { deploy, owner, repo };
 };
 
@@ -135,7 +132,7 @@ app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
       pr.user?.login === "denopendabot[bot]" &&
       pr.labels?.find((label) => label.name === "auto-merge")
     ) {
-      console.log(pr);
+      console.debug(pr);
       const { data: result } = await octokit.request(
         "PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge",
         { owner, repo, pull_number: number },
