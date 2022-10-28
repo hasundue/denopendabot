@@ -11,11 +11,9 @@ jobs:
     uses:  ./.github/workflows/release.yml
     secrets: inherit
 
-  deploy-production:
+  deploy:
     name: Production
     needs: release
     if: ${{ needs.release.outputs.released }}
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
-    with:
-      deployment: production

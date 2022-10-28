@@ -7,9 +7,7 @@ on:
     paths:
       - '**.ts'
       - '**.yml'
-  push:
-    branches:
-      - staging
+  workflow_dispatch:
 
 jobs:
   test:
@@ -19,10 +17,10 @@ jobs:
 
   deploy:
     name: Staging
-    if: github.event_name == 'push' || github.event.pull_request.user.login == 'hasundue'
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.pull_request.user.login == 'hasundue'
     uses: ./.github/workflows/deploy.yml
-    with:
-      deployment: staging
     secrets: inherit
 
   integration:
@@ -35,7 +33,12 @@ jobs:
 
   delivery:
     name: Delivery
-    if: github.event_name == 'push'
+    if: github.event_name == 'workflow_dispatch'
     needs: integration
-    uses: ./.github/workflows/delivery.yml
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Delivery
+          token: ${{ secrets.GH_TOKEN }}
+          ref: main
