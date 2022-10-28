@@ -67,7 +67,7 @@ export async function getUpdates(
   const updates: Update[] = [];
 
   for (const blob of blobs) {
-    console.log(`🔍 ${blob.path}`);
+    console.debug(`🔍 ${blob.path}`);
 
     const content = await github.getBlobContent(repository, blob.sha!);
     const contentToUpdate = removeIgnore(content);
@@ -138,7 +138,7 @@ export async function createCommits(
   }
 
   if (!authorized) {
-    console.log(
+    console.info(
       "📣 Skipped the workflow files since we are not authorized to update them.",
     );
   }
@@ -167,7 +167,7 @@ export async function createPullRequest(
   const { commits } = await github.compareBranches(repository, base, branch);
 
   if (!commits.length) {
-    console.log(`📣 ${base} and ${branch} are identical`);
+    console.info(`📣 ${base} and ${branch} are identical`);
     return null;
   }
 
