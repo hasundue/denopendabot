@@ -47,7 +47,7 @@ export async function getRepoUpdateSpecs(
       : await github.getLatestRelease(name);
 
     if (target && gt(target, initial)) {
-      console.log(`💡 ${name} ${initial} => ${target}`);
+      console.debug(`💡 ${name} ${initial} => ${target}`);
       specs.push({ name, initial, target });
     }
   }

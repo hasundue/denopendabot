@@ -56,7 +56,7 @@ export async function getModuleUpdateSpecs(
       : (await registry.all()).find((v) => !prerelease(v));
 
     if (valid(initial) && latest && gt(latest, initial)) {
-      console.log(`💡 ${name} ${initial} => ${latest}`);
+      console.debug(`💡 ${name} ${initial} => ${latest}`);
       specs.push({ url: registry.url, name, initial, target: latest });
     }
   }
