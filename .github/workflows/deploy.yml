@@ -13,35 +13,29 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
+      id-token: write # Needed for auth with Deno Deploy
       contents: read # Needed to clone the repository
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3.0.1
-
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.26.2 # @denopendabot denoland/deno
-      
-      - name: Install deployctl
-        run: >
-          deno install --allow-read --allow-write --allow-env --allow-net --allow-run
-          --no-check -r -f https://deno.land/x/deploy/deployctl.ts
+          ref: ${{ inputs.branch || github.ref_name }}
 
       - name: Upload to Deno Deploy
         id: deploy
-        run: >
-          deployctl deploy --project=denopendabot --token ${{ secrets.DENO_DEPLOY_TOKEN }}
-          ${{ env.deployment == 'production' && '--prod' || '' }} ./app.ts
+        uses: denoland/deployctl@v1
+        with:
+          project: denopendabot
+          entrypoint: ./app.ts
 
-      - name: Set deployment ID on Upstash
+      - name: Set the deployment ID on Upstash
         run: >
           curl -X POST -d '${{ steps.deploy.outputs.deployment-id }}'
           ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/${{ env.deployment }}-id
           -H "Authorization: Bearer ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}"
 
-      - name: Set deployment URL on Upstash
+      - name: Set the deployment URL on Upstash
         run: >
           curl -X POST -d '${{ steps.deploy.outputs.url }}'
           ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/${{ env.deployment }}-url
