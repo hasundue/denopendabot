@@ -103,7 +103,7 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
   await denopendabot.createPullRequest(repository, { ...options, labels });
 });
 
-// merge a pull request if the check has passed
+// merge a pull request if all checks have passed
 app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
   console.debug(payload);
 
@@ -112,7 +112,7 @@ app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
   const branch = payload[name].head_branch as string;
   const app = payload[name].app.slug;
 
-  // skip if we are not in charge of the webhook
+  // skip if we are not in charge of this webhook
   if (!associated(context, branch)) return;
 
   // skip if the conclusion is not success
@@ -130,7 +130,8 @@ app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
     );
     if (
       pr.user?.login === "denopendabot[bot]" &&
-      pr.labels?.find((label) => label.name === "auto-merge")
+      pr.labels?.find((label) => label.name === "auto-merge") &&
+      pr.mergeable
     ) {
       console.debug(pr);
       const { data: result } = await octokit.request(
