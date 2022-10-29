@@ -12,28 +12,28 @@ const base = "test";
 const branch = "test-octokit";
 const github = new GitHubClient(env.GITHUB_TOKEN);
 
-Deno.test("getLatestRelease", async () => {
+Deno.test("getLatestRelease", { ignore: !env.CI_MAIN }, async () => {
   const tag = await github.getLatestRelease(repo);
   assert(tag);
 });
 
-Deno.test("getBranch", async () => {
+Deno.test("getBranch", { ignore: !env.CI_MAIN }, async () => {
   const branch = await github.getBranch(repo, "main");
   assert(branch);
   assertEquals(branch.name, "main");
 });
 
-Deno.test("getLatestCommit", async () => {
+Deno.test("getLatestCommit", { ignore: !env.CI_MAIN }, async () => {
   const commit = await github.getLatestCommit(repo, "main");
   assert(commit);
 });
 
-Deno.test("compareBranches", async () => {
+Deno.test("compareBranches", { ignore: !env.CI_MAIN }, async () => {
   const commits = await github.compareBranches(repo, "main", "test");
   assert(commits);
 });
 
-Deno.test("createBranch/deleteBranch", { ignore: !env.CI }, async () => {
+Deno.test("createBranch/deleteBranch", { ignore: !env.CI_MAIN }, async () => {
   const baseBranch = await github.createBranch(repo, base);
   assertEquals(baseBranch.name, base);
 
@@ -46,7 +46,7 @@ Deno.test("createBranch/deleteBranch", { ignore: !env.CI }, async () => {
   assertEquals(deleted, null);
 });
 
-Deno.test("createPullRequest", { ignore: !env.CI }, async (t) => {
+Deno.test("createPullRequest", { ignore: !env.CI_MAIN }, async (t) => {
   await github.deleteBranch(repo, branch);
   await github.createBranch(repo, branch, base);
 
