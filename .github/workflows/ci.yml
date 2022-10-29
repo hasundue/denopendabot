@@ -4,13 +4,8 @@ on:
   pull_request:
     branches: 
       - main
-    paths:
-      - '**.ts'
-      - '.github/workflows/ci.yml'
-      - '.github/workflows/test.yml'
-      - '.github/workflows/deploy.yml'
-      - '.github/workflows/integration.yml'
-      - '.github/workflows/deploy.yml'
+    paths-ignore:
+      - '**.md'
   workflow_dispatch:
 
 jobs:

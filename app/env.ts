@@ -4,7 +4,14 @@ type Env = {
   CI?: string;
   DENO_DEPLOYMENT_ID?: string;
 
+  GITHUB_TOKEN?: string;
+  GH_TOKEN?: string;
+  GITHUB_REPOSITORY?: string;
+  GITHUB_REPOSITORY_OWNER?: string;
+
   APP_REPO: string;
+  INSTALLATION_ID: string;
+
   APP_ID: string;
   CLIENT_ID: string;
   CLIENT_SECRET: string;

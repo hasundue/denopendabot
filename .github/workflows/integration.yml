@@ -59,11 +59,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3.1.0
 
-      - name: Run App
-        uses: ./
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
         with:
-          mode: app
-          base-branch: test
-          working-branch: test-app
-          include: integration/src/deps.ts
-          auto-merge: any
+          deno-version: v1.27.0 # @denopendabot denoland/deno
+
+      - name: Cache dependencies
+        run: deno cache -q integration/app_test.ts
+
+      - name: Run tests
+        run: deno task test integration/app_test.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          INSTALLATION_ID: ${{ secrets.INSTALLATION_ID }}
