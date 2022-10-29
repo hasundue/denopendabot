@@ -1,4 +1,4 @@
-name: Stage
+name: CI/CD
 
 on:
   push:
@@ -30,3 +30,17 @@ jobs:
           workflow: CI
           token: ${{ secrets.GH_TOKEN }}
           ref: staging
+
+  delivery:
+    name: Dispatch CD
+    if: >-
+      github.repository_owner == 'hasundue' &&
+      startsWith(github.event.head_commit.message, 'build(version)')
+    needs: integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: CD
+          token: ${{ secrets.GH_TOKEN }}
+          ref: main
