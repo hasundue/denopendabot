@@ -34,7 +34,12 @@ jobs:
         run: deno task test --coverage=./coverage mod/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CI_MAIN: ${{ github.base_ref == 'main' && 'true' || '' }}
+          CI_MAIN: >-
+            ${{ 
+              github.base_ref == 'main' ||
+              github.event_name == 'workflow_call' ||
+              github.event_name == 'workflow_dispatch' || '' 
+            }}
 
       - name: Create coverage report
         if: ${{ github.base_ref != 'test' }}
