@@ -132,8 +132,10 @@ const createWorkflow = async (
     );
   }
 
-  // get sha of the denopendabot.yml if exists
-  let maybeSha: string | undefined = undefined;
+  const path = ".github/workflows/denopendabot.yml";
+  const message = "ci: setup Denopendabot";
+  const content = encode(await Deno.readTextFile("./app/denopendabot.yml"));
+
   try {
     const { data } = await octokit.request(
       "GET /repos/{owner}/{repo}/contents/{path}",
@@ -142,24 +144,19 @@ const createWorkflow = async (
     if (Array.isArray(data)) {
       throw new Error("denopendabot.yml is not a valid file");
     }
-    maybeSha = data.sha;
+    // create an update commit
+    await octokit.request(
+      "PUT /repos/{owner}/{repo}/contents/{path}",
+      { owner, repo, branch: head, path, message, content, sha: data.sha },
+    );
   } catch {
-    console.debug(`denopendabot.yml does not exist on ${owner}/${repo}`);
+    // create a commit to create the file
+    await octokit.request(
+      "PUT /repos/{owner}/{repo}/contents/{path}",
+      { owner, repo, branch: head, path, message, content },
+    );
   }
 
-  // create a commit
-  await octokit.request(
-    "PUT /repos/{owner}/{repo}/contents/{path}",
-    {
-      owner,
-      repo,
-      branch: head,
-      path: ".github/workflows/denopendabot.yml",
-      message: "ci: setup Denopendabot",
-      content: encode(await Deno.readTextFile("./app/denopendabot.yml")),
-      sha: maybeSha,
-    },
-  );
   // create a pull request
   try {
     // this throws an error if the pull request already exists
