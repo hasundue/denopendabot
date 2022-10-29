@@ -10,7 +10,7 @@
 
 ![CI](https://github.com/hasundue/denopendabot/actions/workflows/ci.yml/badge.svg)
 [![codecov](https://codecov.io/gh/hasundue/denopendabot/branch/main/graph/badge.svg)](https://codecov.io/gh/hasundue/denopendabot)
-![denoland/deno](https://img.shields.io/badge/Deno-v1.26.1-informational?logo=deno) <!-- @denopendabot denoland/deno -->
+![denoland/deno](https://img.shields.io/badge/Deno-v1.27.0-informational?logo=deno) <!-- @denopendabot denoland/deno -->
 ![deno deploy](https://img.shields.io/badge/Deno_Deploy-Beta_4-informational?logo=deno)
 
 <!-- deno-fmt-ignore-end -->
@@ -75,29 +75,10 @@ See [the example pull requests](https://github.com/hasundue/denopendabot/pulls).
 ### GitHub App
 
 The easiest way to use Denopendabot is to install the
-[GitHub App](https://github.com/apps/denopendabot) and create a workflow to run
-it:
-
-```yaml
-name: Denopendabot
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: "0 0 * * *" # modify to your convenient time
-jobs:
-  update:
-    name: Run
-    runs-on: ubuntu-latest
-    steps:
-      - uses: hasundue/denopendabot@0.9.0 # @denopendabot hasundue/denopendabot
-        mode: app
-        auto-merge: all # optional
-```
-
-This workflow dispatches a `denopendabot-run` repository event, and an instance
-of the app receives it to perform the procedure on Deno Deploy.
-
-See the next section for the details of the workflow.
+[GitHub App](https://github.com/apps/denopendabot). After installation,
+Denopendabot will send a pull request to create
+[`denopendabot.yml`](./app/denopendabot.yml) in `.github/workflows`. Merge it to
+get ready!
 
 > **Warning**\
 > Denopendabot requires write access to your workflows, which technically
@@ -106,9 +87,10 @@ See the next section for the details of the workflow.
 
 ### GitHub Action
 
-If you want Denopendabot to run in an environment under your control for
-security reasons, you can use our
-[GitHub Action](https://github.com/marketplace/actions/denopendabot).
+If you don't want to send repository contents to the remote for security
+reasons, you can use our
+[GitHub Action](https://github.com/marketplace/actions/denopendabot) to run
+Denopendabot locally inside the GitHub Actions environment.
 
 The action needs a GitHub access token authorized to run workflows.
 `secrets.GITHUB_TOKEN` is used by default and it works fine in most cases.
@@ -130,7 +112,7 @@ jobs:
     steps:
       - uses: hasundue/denopendabot@0.9.0 # @denopendabot hasundue/denopendabot
         with:
-          user-token: ${{ secrets.GH_TOKEN }}
+          user-token: ${{ secrets.GH_TOKEN }} # needed for updating workflows
 ```
 
 See [action.yml](./action.yml) for other options.
