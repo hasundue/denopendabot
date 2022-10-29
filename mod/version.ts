@@ -1,1 +1,1 @@
-export const VERSION = "0.9.0"; // @denopendabot hasundue/denopendabot
+export const VERSION = "1.0.0"; // @denopendabot hasundue/denopendabot
