@@ -1,12 +1,18 @@
 name: CD
 
 on:
+  push:
+    branches: 
+      - main
   workflow_call:
   workflow_dispatch:
 
 jobs:
   release:
     name: Release
+    if: >-
+      github.repository_owner == 'hasundue' &&
+      startsWith(github.event.head_commit.message, 'build(version)')
     uses:  ./.github/workflows/release.yml
     secrets: inherit
 

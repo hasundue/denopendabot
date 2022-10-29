@@ -8,8 +8,9 @@ on:
 jobs:
   stage:
     name: Stage
-
-    if: ${{ github.repository_owner == 'hasundue' }}
+    if: >-
+      github.repository_owner == 'hasundue' &&
+      !startsWith(github.event.head_commit.message, 'build(version)')
     runs-on: ubuntu-latest
 
     steps:
