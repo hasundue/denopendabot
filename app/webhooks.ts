@@ -222,12 +222,15 @@ app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
       "GET /repos/{owner}/{repo}/pulls/{pull_number}",
       { owner, repo, pull_number: number },
     );
+    console.debug(pr);
     if (
       pr.user?.login === "denopendabot[bot]" &&
-      pr.labels?.find((label) => label.name === "auto-merge") &&
-      pr.mergeable
+      pr.labels?.find((label) => label.name === "auto-merge")
     ) {
-      console.debug(pr);
+      if (!pr.mergeable) {
+        console.info("☕ Pull request is not mergeable");
+        continue;
+      }
       const { data: result } = await octokit.request(
         "PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge",
         { owner, repo, pull_number: number },
