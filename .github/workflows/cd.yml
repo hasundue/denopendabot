@@ -12,6 +12,8 @@ jobs:
     name: Release
     if: >-
       github.repository_owner == 'hasundue' &&
+      github.event_name == 'workflow_call' ||
+      github.event_name == 'workflow_dispatch' ||
       startsWith(github.event.head_commit.message, 'build(version)')
     uses:  ./.github/workflows/release.yml
     secrets: inherit
