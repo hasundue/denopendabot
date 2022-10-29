@@ -90,7 +90,7 @@ runs:
       if: ${{ inputs.mode == 'action' }}
       run: >
         deno run -q --allow-env --allow-net --allow-write
-        https://deno.land/x/denopendabot@0.10.0/cli.ts
+        https://deno.land/x/denopendabot@0.10.1/cli.ts
         ${{ inputs.repository }}
         --base-branch ${{ inputs.base-branch }}
         --working-branch ${{ inputs.working-branch }}
