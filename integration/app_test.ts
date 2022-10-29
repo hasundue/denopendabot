@@ -102,7 +102,7 @@ Deno.test("run update", async () => {
   );
   const created = prs.find((pr) =>
     pr.user?.login === "denopendabot[bot]" &&
-    new Date(pr.created_at) > started_at &&
+    new Date(pr.updated_at) > started_at &&
     pr.base.ref === "test" &&
     pr.head.ref === "test-app"
   );
