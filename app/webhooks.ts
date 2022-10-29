@@ -1,3 +1,4 @@
+import { encode } from "https://deno.land/std@0.161.0/encoding/base64.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.1.0";
 import { App } from "https://esm.sh/@octokit/app@13.0.11";
 import type { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.3.1";
@@ -47,28 +48,26 @@ const getContext = async (payload: PayloadWithRepository): Promise<Context> => {
 
 const isTestContext = (context: Context, branch: string) => {
   const { owner, repo } = context;
-  return `${owner}/${repo}` === env.APP_REPO && branch.startsWith("test");
+  return `${owner}/${repo}` === env.APP_REPO && branch === "test-app";
 };
 
-const associated = (context: Context, branch: string) => {
-  const testing = isTestContext(context, branch);
-  return context.deploy === "staging" ? testing : !testing;
-};
+const associated = (context: Context, branch: string) =>
+  context.deploy === "staging"
+    ? isTestContext(context, branch)
+    : branch.startsWith("denopendabot");
 
 const isDenoProject = async (
   octokit: Octokit,
   owner: string,
   repo: string,
 ) => {
-  const { data: contents } = await octokit.request(
+  const { data: content } = await octokit.request(
     "GET /repos/{owner}/{repo}/contents/{path}",
-    { owner, repo, path: "/" },
+    { owner, repo, path: "deno.json" },
   );
-  if (!Array.isArray(contents)) {
-    console.error(contents);
-    throw new Error("Project root is not a directory");
-  }
-  if (contents.find((it) => it.name.includes("deno.json"))) {
+  console.debug(content);
+
+  if (!Array.isArray(content) && content.type === "file") {
     return true;
   }
   return false;
@@ -86,45 +85,118 @@ const createWorkflow = async (
   if (deploy === "staging" && repository !== env.APP_REPO) {
     return;
   }
+  console.info(
+    `🚀 ${owner} installed Denopendabot to ${owner}/${repo}`,
+  );
+  if (!(await isDenoProject(octokit, owner, repo))) {
+    console.info("...but it does not seem to be a Deno project");
+    return;
+  }
 
-  if (await isDenoProject(octokit, owner, repo)) {
-    // create a commit
+  // get the repository info
+  const { data } = await octokit.request(
+    "GET /repos/{owner}/{repo}",
+    { owner, repo },
+  );
+  const testing = deploy === "staging";
+  const base = testing ? "test" : data.default_branch;
+  const head = testing ? "test-install" : "denopendabot/setup";
+
+  // check if denopendabot.yml already exists
+  const { data: exists } = await octokit.request(
+    "GET /repos/{owner}/{repo}/contents/{path}",
+    { owner, repo, ref: base, path: ".github/workflows/denopendabot.yml" },
+  );
+  if (Array.isArray(exists)) {
+    console.error(exists);
+    throw new Error("❓ denopendabot.yml is not a valid file");
+  }
+  if (exists && deploy === "production") {
+    console.info("👍 denopendabot.yml already exists");
+    return;
+  }
+
+  // get sha of the base branch
+  const { data: { object: { sha } } } = await octokit.request(
+    "GET /repos/{owner}/{repo}/git/ref/{ref}",
+    { owner, repo, ref: `heads/${base}` },
+  );
+
+  // check if the head branch already exists
+  try {
+    // this throws an error if the branch does not exist
     await octokit.request(
-      "PUT /repos/{owner}/{repo}/contents/{path}",
-      {
-        owner,
-        repo,
-        branch: "denopendabot",
-        path: ".github/workflows/denopendabot.yml",
-        message: "ci: setup Denopendabot",
-        committer: {
-          name: "denopendabot",
-          email: "denopendabot@github.com",
-        },
-        content: await Deno.readTextFile("./denopendabot.yml"),
-      },
+      "GET /repos/{owner}/{repo}/branches/{branch}",
+      { owner, repo, branch: head },
     );
-    // get the repository info
-    const { data } = await octokit.request(
-      "GET /repos/{owner}/{repo}",
-      { owner, repo },
-    );
-    // create a pull request
+    // found the branch, which should only happen in testing
+    if (!testing) {
+      console.warn(`❗ Branch ${head} already exists on ${owner}/${repo}`);
+    }
+    // update ref of the head branch
     await octokit.request(
+      "PATCH /repos/{owner}/{repo}/git/refs/{ref}",
+      { owner, repo, ref: `heads/${head}`, sha, force: true },
+    );
+  } catch {
+    // create head branch, not finding it
+    await octokit.request(
+      "POST /repos/{owner}/{repo}/git/refs",
+      { owner, repo, ref: `refs/heads/${head}`, sha },
+    );
+  }
+
+  // get sha of the denopendabot.yml if exists
+  const { data: maybeContent } = await octokit.request(
+    "GET /repos/{owner}/{repo}/contents/{path}",
+    { owner, repo, ref: head, path: ".github/workflows/denopendabot.yml" },
+  );
+  if (Array.isArray(maybeContent)) {
+    throw new Error("denopendabot.yml is not a valid file");
+  }
+
+  // create a commit
+  await octokit.request(
+    "PUT /repos/{owner}/{repo}/contents/{path}",
+    {
+      owner,
+      repo,
+      branch: head,
+      path: ".github/workflows/denopendabot.yml",
+      message: "ci: setup Denopendabot",
+      content: encode(await Deno.readTextFile("./app/denopendabot.yml")),
+      sha: maybeContent?.sha,
+    },
+  );
+  // create a pull request
+  try {
+    // this throws an error if the pull request already exists
+    const { data: result } = await octokit.request(
       "POST /repos/{owner}/{repo}/pulls",
       {
         owner,
         repo,
         title: "Setup Denopendabot",
-        base: data.default_branch,
-        head: "denopendabot",
+        base,
+        head,
         maintainer_can_modify: true,
       },
     );
+    // add labels if testing
+    if (testing) {
+      await octokit.request(
+        "POST /repos/{owner}/{repo}/issues/{issue_number}/labels",
+        { owner, repo, issue_number: result.number, labels: ["test"] },
+      );
+    }
+  } catch {
     console.info(
-      `🚀 Created a pull request "Setup Denopendabot" for ${owner}/${repo}`,
+      `👍 Pull request "Setup Denopendabot" alrady exists on ${owner}/${repo}`,
     );
   }
+  console.info(
+    `🎈 Created a pull request "Setup Denopendabot" for ${owner}/${repo}`,
+  );
 };
 
 app.webhooks.on("installation.created", async ({ octokit, payload }) => {
@@ -223,14 +295,22 @@ app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
       { owner, repo, pull_number: number },
     );
     console.debug(pr);
+
+    // find a pull request created by Denopendabot with a `auto-merge` label
     if (
       pr.user?.login === "denopendabot[bot]" &&
       pr.labels?.find((label) => label.name === "auto-merge")
     ) {
-      if (!pr.mergeable) {
-        console.info("☕ Pull request is not mergeable");
-        continue;
+      // Do not merge if another check run is ongoing
+      const { data: { check_runs } } = await octokit.request(
+        "GET /repos/{owner}/{repo}/commits/{ref}/check-runs",
+        { owner, repo, ref: branch },
+      );
+      if (check_runs.find((it) => it.status !== "completed")) {
+        console.info(`☕ Waiting for another check run to be completed...`);
+        return;
       }
+      // merge the pull request
       const { data: result } = await octokit.request(
         "PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge",
         { owner, repo, pull_number: number },

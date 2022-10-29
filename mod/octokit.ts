@@ -247,7 +247,7 @@ export class GitHubClient {
       );
     }
 
-    console.log(`🚀 Created a pull request "${result.title}"`);
+    console.log(`🎈 Created a pull request "${result.title}"`);
 
     return result;
   }
