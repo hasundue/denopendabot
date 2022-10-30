@@ -10,39 +10,81 @@ interface BlobContent {
   content: string;
 }
 
+interface Repository {
+  owner: string;
+  repo: string;
+}
+
+const split = (fullname: string): Repository => {
+  const [owner, repo] = fullname.split("/");
+  return { owner, repo };
+};
+
+interface GitHubClientOptions {
+  octokit?: Octokit;
+  token?: string;
+  repository?: string;
+}
+
 export class GitHubClient {
   octokit: Octokit;
+  repository?: Repository;
 
-  constructor(
-    octokit?: Octokit | string,
-  ) {
-    if (!octokit || typeof octokit === "string") {
-      this.octokit = new Octokit({ auth: octokit });
+  constructor(options: GitHubClientOptions) {
+    if (options.octokit) {
+      this.octokit = options.octokit;
     } else {
-      this.octokit = octokit;
+      this.octokit = new Octokit({ auth: options.token });
+    }
+    if (options.repository) {
+      this.repository = split(options.repository);
     }
   }
 
-  async getLatestRelease(
-    repository: string,
-  ) {
-    const [owner, repo] = repository.split("/");
-    try {
-      const { data: release } = await this.octokit.request(
-        "GET /repos/{owner}/{repo}/releases/latest",
-        { owner, repo },
-      );
-      return release.tag_name;
-    } catch {
-      return undefined;
+  ensureRepository(repository?: string) {
+    if (repository) {
+      return split(repository);
     }
+    if (!this.repository) {
+      throw new Error("Repository must be specified");
+    }
+    return this.repository;
   }
 
-  async getBranch(
-    repository: string,
-    branch: string,
-  ) {
-    const [owner, repo] = repository.split("/");
+  async getBlobContent(sha: string) {
+    const { owner, repo } = this.ensureRepository();
+
+    const { data: blob } = await this.octokit.request(
+      "GET /repos/{owner}/{repo}/git/blobs/{file_sha}",
+      { owner, repo, file_sha: sha },
+    );
+    if (blob.encoding !== "base64") {
+      console.error(blob);
+      throw Error("Unsupported file encoding.");
+    }
+    return new TextDecoder().decode(decode(blob.content));
+  }
+
+  async createBlobContents(
+    updates: Update[],
+    tree: { path?: string; sha?: string }[],
+  ): Promise<BlobContent[]> {
+    const groupByPath = groupBy(updates, (it) => it.path);
+
+    return await Promise.all(
+      Object.entries(groupByPath).map(async ([path, updates]) => {
+        const blob = tree.find((it) => it.path === path);
+        let content = await this.getBlobContent(blob!.sha!);
+        for (const update of updates!) {
+          content = update.content(content);
+        }
+        return { path: path, mode: "100644", type: "blob", content };
+      }),
+    );
+  }
+
+  async getBranch(branch: string) {
+    const { owner, repo } = this.ensureRepository();
     try {
       const { data } = await this.octokit.request(
         "GET /repos/{owner}/{repo}/branches/{branch}",
@@ -54,41 +96,47 @@ export class GitHubClient {
     }
   }
 
-  async createBlobContents(
+  async getTree(
     repository: string,
-    updates: Update[],
-    tree: { path?: string; sha?: string }[],
-  ): Promise<BlobContent[]> {
-    const groupByPath = groupBy(updates, (it) => it.path);
+    branch = "main",
+  ) {
+    const [owner, repo] = repository.split("/");
 
-    return await Promise.all(
-      Object.entries(groupByPath).map(async ([path, updates]) => {
-        const blob = tree.find((it) => it.path === path);
-        let content = await this.getBlobContent(repository, blob!.sha!);
-        for (const update of updates!) {
-          content = update.content(content);
-        }
-        return { path: path, mode: "100644", type: "blob", content };
-      }),
+    const head = await this.getBranch(branch);
+    if (!head) throw Error(`Branch ${branch} not found.`);
+
+    const { data } = await this.octokit.request(
+      "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
+      { owner, repo, tree_sha: head.commit.sha, recursive: "true" },
+    );
+    // we don't need the subtrees
+    return data.tree.filter((it) => it.type === "blob");
+  }
+
+  async updateBranch(branch: string, sha: string) {
+    const { owner, repo } = this.ensureRepository();
+
+    await this.octokit.request(
+      "PATCH /repos/{owner}/{repo}/git/refs/{ref}",
+      { owner, repo, ref: `heads/${branch}`, sha, force: true },
     );
   }
 
   async createCommit(
-    repository: string,
     branch: string,
     message: string,
     updates: Update[],
   ) {
-    const [owner, repo] = repository.split("/");
+    const { owner, repo } = this.ensureRepository();
 
     // get a reference to the target branch
-    const base = await this.getBranch(repository, branch);
+    const base = await this.getBranch(branch);
     if (!base) throw Error(`Branch ${branch} not found`);
 
-    const baseTree = await this.getTree(repository, branch);
+    const baseTree = await this.getTree(branch);
 
     // create a tree object for updated files
-    const blobs = await this.createBlobContents(repository, updates, baseTree);
+    const blobs = await this.createBlobContents(updates, baseTree);
 
     // create a new tree on the target branch
     try {
@@ -96,12 +144,10 @@ export class GitHubClient {
         "POST /repos/{owner}/{repo}/git/trees",
         { owner, repo, tree: blobs, base_tree: base.commit.sha },
       );
-
       const author = {
         name: "denopendabot",
-        email: "denopendabot@gmail.com",
+        email: "denopendabot@github.com",
       };
-
       // create a new tree on the target branch
       const tree = newTree.sha;
       const parents = [base.commit.sha];
@@ -110,197 +156,149 @@ export class GitHubClient {
         "POST /repos/{owner}/{repo}/git/commits",
         { owner, repo, message, author, tree, parents },
       );
-
       // update the ref of the branch to the commit
-      await this.updateBranch(repository, branch, commit.sha);
+      await this.updateBranch(branch, commit.sha);
 
-      console.log(`📝 ${commit.message}`);
+      console.debug(`📝 ${commit.message}`);
 
       return commit;
     } catch (error) {
       if (updates.find((update) => update.isWorkflow())) {
-        throw Error("❗ Unauthorized to update workflows");
+        throw Error("Unauthorized to update workflows");
       }
       throw error;
     }
   }
 
-  async getLatestCommit(
-    repository: string,
-    branch = "main",
-  ) {
-    const [owner, repo] = repository.split("/");
+  async getPullRequests(options?: {
+    state: "open" | "closed" | "all";
+  }) {
+    const { owner, repo } = this.ensureRepository();
 
-    const { data: commit } = await this.octokit.request(
-      "GET /repos/{owner}/{repo}/commits/{ref}",
-      { owner, repo, ref: `heads/${branch}` },
+    const { data: results } = await this.octokit.request(
+      "GET /repos/{owner}/{repo}/pulls",
+      { owner, repo, state: options?.state },
     );
-
-    return commit;
+    return results;
   }
 
-  async compareBranches(
-    repository: string,
-    base: string,
-    head: string,
-  ) {
-    const [owner, repo] = repository.split("/");
+  async createPullRequest(options: {
+    base: string;
+    branch: string;
+    title: string;
+    labels?: string[];
+  }) {
+    const { owner, repo } = this.ensureRepository();
+    const { base, branch, title, labels } = options;
 
-    const { data: commits } = await this.octokit.request(
-      "GET /repos/{owner}/{repo}/compare/{basehead}",
-      { owner, repo, basehead: `${base}...${head}` },
-    );
+    const prs = await this.getPullRequests({ state: "open" });
+    const exists = prs.find((pr) => pr.head.ref === branch);
 
-    return commits;
-  }
-
-  async createBranch(
-    repository: string,
-    branch: string,
-    base = "main",
-  ) {
-    const [owner, repo] = repository.split("/");
-
-    const exists = await this.getBranch(repository, branch);
-
-    if (exists) {
-      // update the ref
-      const baseRef = await this.getLatestCommit(repository, base);
-      await this.updateBranch(repository, branch, baseRef.sha);
-      return exists;
-    }
-
-    // get a reference to the base branch
-    const { data: baseRef } = await this.octokit.request(
-      "GET /repos/{owner}/{repo}/git/ref/{ref}",
-      { owner, repo, ref: `heads/${base}` },
-    );
-
-    // create a branch
-    await this.octokit.request(
-      "POST /repos/{owner}/{repo}/git/refs",
-      { owner, repo, ref: `refs/heads/${branch}`, sha: baseRef.object.sha },
-    );
-    const created = (await this.getBranch(repository, branch))!;
-
-    console.log(`🔨 Created branch ${branch}`);
-    return created;
-  }
-
-  async updateBranch(
-    repository: string,
-    branch: string,
-    sha: string,
-  ) {
-    const [owner, repo] = repository.split("/");
-
-    await this.octokit.request(
-      "PATCH /repos/{owner}/{repo}/git/refs/{ref}",
-      { owner, repo, ref: `heads/${branch}`, sha, force: true },
-    );
-  }
-
-  async deleteBranch(
-    repository: string,
-    branch: string,
-  ) {
-    const [owner, repo] = repository.split("/");
-
-    try {
-      await this.octokit.request(
-        "DELETE /repos/{owner}/{repo}/git/refs/{ref}",
-        { owner, repo, ref: `heads/${branch}` },
-      );
-      console.log(`🗑️ Deleted branch ${branch}.`);
-    } catch {
-      console.info(`Branch ${branch} not exist.`);
-    }
-  }
-
-  async createPullRequest(
-    repository: string,
-    base: string,
-    branch: string,
-    title: string,
-    labels?: string[],
-  ) {
-    const [owner, repo] = repository.split("/");
-
-    const prs = await this.getPullRequests(repository, "open");
-    const relevant = prs.find((pr) => pr.head.ref === branch);
-
-    const { data: result } = relevant
+    const { data: result } = exists
       ? await this.octokit.request(
         "PATCH /repos/{owner}/{repo}/pulls/{pull_number}",
-        { owner, repo, pull_number: relevant.number, title },
+        { owner, repo, pull_number: exists.number, title },
       )
       : await this.octokit.request(
         "POST /repos/{owner}/{repo}/pulls",
         { owner, repo, title, base, head: branch },
       );
-
-    // add labels if given
     if (labels?.length) {
       await this.octokit.request(
         "POST /repos/{owner}/{repo}/issues/{issue_number}/labels",
         { owner, repo, issue_number: result.number, labels },
       );
     }
-
-    console.log(`🎈 Created a pull request "${result.title}"`);
+    console.info(`🎈 Created a pull request "${result.title}"`);
 
     return result;
   }
 
-  async getPullRequests(
-    repository: string,
-    state: "open" | "closed" | "all" = "open",
-  ) {
-    const [owner, repo] = repository.split("/");
-
-    const { data: results } = await this.octokit.request(
-      "GET /repos/{owner}/{repo}/pulls",
-      { owner, repo, state },
-    );
-
-    return results;
-  }
-
-  async getTree(
-    repository: string,
+  async getLatestCommit(
+    repository?: string,
     branch = "main",
   ) {
-    const [owner, repo] = repository.split("/");
+    const { owner, repo } = this.ensureRepository(repository);
 
-    const head = await this.getBranch(repository, branch);
-
-    if (!head) throw Error(`Branch ${branch} not found.`);
-
-    const { data } = await this.octokit.request(
-      "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
-      { owner, repo, tree_sha: head.commit.sha, recursive: "true" },
+    const { data: commit } = await this.octokit.request(
+      "GET /repos/{owner}/{repo}/commits/{ref}",
+      { owner, repo, ref: `heads/${branch}` },
     );
-
-    // we don't need subtrees anymore
-    return data.tree.filter((it) => it.type === "blob");
+    return commit;
   }
 
-  async getBlobContent(
-    repository: string,
-    sha: string,
-  ) {
-    const [owner, repo] = repository.split("/");
+  async getLatestRelease(repository?: string) {
+    const { owner, repo } = this.ensureRepository(repository);
+    try {
+      const { data: release } = await this.octokit.request(
+        "GET /repos/{owner}/{repo}/releases/latest",
+        { owner, repo },
+      );
+      return release.tag_name;
+    } catch {
+      return null;
+    }
+  }
 
-    const { data: blob } = await this.octokit.request(
-      "GET /repos/{owner}/{repo}/git/blobs/{file_sha}",
-      { owner, repo, file_sha: sha },
+  async compareBranches(options: {
+    repository?: string;
+    base: string;
+    head: string;
+  }) {
+    const { repository, base, head } = options;
+    const { owner, repo } = this.ensureRepository(repository);
+
+    const { data: commits } = await this.octokit.request(
+      "GET /repos/{owner}/{repo}/compare/{basehead}",
+      { owner, repo, basehead: `${base}...${head}` },
     );
+    return commits;
+  }
 
-    if (blob.encoding !== "base64") {
-      console.error(blob);
-      throw Error("Unsupported file encoding.");
+  async createBranch(
+    branch: string,
+    base = "main",
+  ) {
+    const { owner, repo } = this.ensureRepository();
+    const exists = await this.getBranch(branch);
+
+    // update the branch and return if already exists
+    if (exists) {
+      const latest = await this.getLatestCommit(base);
+      await this.updateBranch(branch, latest.sha);
+      return exists;
     }
 
-    return new TextDecoder().decode(decode(blob.content));
+    // get ref to the base branch
+    const { data: baseRef } = await this.octokit.request(
+      "GET /repos/{owner}/{repo}/git/ref/{ref}",
+      { owner, repo, ref: `heads/${base}` },
+    );
+    // create a new branch (a new ref to an existing ref)
+    await this.octokit.request(
+      "POST /repos/{owner}/{repo}/git/refs",
+      { owner, repo, ref: `refs/heads/${branch}`, sha: baseRef.object.sha },
+    );
+    const created = await this.getBranch(branch);
+
+    if (!created) {
+      throw new Error(`Failed in creating a branch ${branch}`);
+    }
+    console.info(`🔨 Created branch ${branch}`);
+
+    return created;
+  }
+
+  async deleteBranch(branch: string) {
+    const { owner, repo } = this.ensureRepository();
+    try {
+      await this.octokit.request(
+        "DELETE /repos/{owner}/{repo}/git/refs/{ref}",
+        { owner, repo, ref: `heads/${branch}` },
+      );
+      console.info(`Deleted branch ${branch}.`);
+    } catch {
+      console.info(`Branch ${branch} not exist.`);
+    }
   }
 }
