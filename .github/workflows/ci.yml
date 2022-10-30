@@ -45,15 +45,11 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           ref: main
 
-  release:
-    name: Skip CI and dispatch CD
+  skip:
+    name: Skip CI
     if: >-
       github.repository_owner == 'hasundue' &&
       startsWith(github.event.pull_request.title, 'build(version)')
     runs-on: ubuntu-latest
     steps:
-      - uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: CD
-          token: ${{ secrets.GH_TOKEN }}
-          ref: main
+      - run: exit
