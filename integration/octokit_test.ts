@@ -6,7 +6,7 @@ import { env } from "../mod/env.ts";
 import { GitHubClient } from "../mod/octokit.ts";
 import { ModuleUpdate } from "../mod/module.ts";
 
-const base = "integration/octokit";
+const base = "test-octokit";
 
 const github = new GitHubClient({
   repository: env.GITHUB_REPOSITORY,
@@ -25,7 +25,7 @@ Deno.test("getBranch", async () => {
 });
 
 Deno.test("getLatestCommit", async () => {
-  const commit = await github.getLatestCommit("main");
+  const commit = await github.getLatestCommit();
   assert(commit);
 });
 
@@ -41,8 +41,8 @@ Deno.test("createBranch/deleteBranch", async () => {
   const baseBranch = await github.createBranch(base);
   assertEquals(baseBranch.name, base);
 
-  const head = base + "/" + Date.now();
-  const headBranch = await github.createBranch(head);
+  const head = base + "-" + Date.now();
+  const headBranch = await github.createBranch(head, base);
   assertEquals(headBranch.name, head);
 
   await github.deleteBranch(head);
@@ -51,7 +51,7 @@ Deno.test("createBranch/deleteBranch", async () => {
 });
 
 Deno.test("createPullRequest", async (t) => {
-  const head = base + "/" + Date.now();
+  const head = base + "-head";
   await github.createBranch(head, base);
 
   const update = new ModuleUpdate("integration/src/deps.ts", {
@@ -85,4 +85,6 @@ Deno.test("createPullRequest", async (t) => {
     });
     assert(result.labels.find((it) => it.name === "test"));
   });
+
+  await github.deleteBranch(head);
 });

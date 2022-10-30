@@ -100,7 +100,7 @@ export class GitHubClient {
     try {
       const { data } = await this.octokit.request(
         "GET /repos/{owner}/{repo}/branches/{branch}",
-        { owner, repo, branch: branch ?? await this.defaultBranch() },
+        { owner, repo, branch: (branch ?? await this.defaultBranch()) },
       );
       return data;
     } catch {
@@ -222,15 +222,12 @@ export class GitHubClient {
     return created;
   }
 
-  async getLatestCommit(
-    repository?: string,
-    branch = "main",
-  ) {
-    const { owner, repo } = this.ensureRepository(repository);
+  async getLatestCommit(branch?: string) {
+    const { owner, repo } = this.ensureRepository();
 
     const { data: commit } = await this.octokit.request(
       "GET /repos/{owner}/{repo}/commits/{ref}",
-      { owner, repo, ref: `heads/${branch}` },
+      { owner, repo, ref: "heads/" + (branch ?? await this.defaultBranch()) },
     );
     return commit;
   }
@@ -265,7 +262,7 @@ export class GitHubClient {
 
   async createBranch(
     branch: string,
-    base = "main",
+    base?: string,
   ) {
     const { owner, repo } = this.ensureRepository();
     const exists = await this.getBranch(branch);
@@ -276,11 +273,10 @@ export class GitHubClient {
       await this.updateBranch(branch, latest.sha);
       return exists;
     }
-
     // get ref to the base branch
     const { data: baseRef } = await this.octokit.request(
       "GET /repos/{owner}/{repo}/git/ref/{ref}",
-      { owner, repo, ref: `heads/${base}` },
+      { owner, repo, ref: "heads/" + (base ?? await this.defaultBranch()) },
     );
     // create a new branch (a new ref to an existing ref)
     await this.octokit.request(
