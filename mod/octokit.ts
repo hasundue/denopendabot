@@ -30,13 +30,13 @@ export class GitHubClient {
   octokit: Octokit;
   repository?: Repository;
 
-  constructor(options: GitHubClientOptions) {
-    if (options.octokit) {
+  constructor(options?: GitHubClientOptions) {
+    if (options?.octokit) {
       this.octokit = options.octokit;
     } else {
-      this.octokit = new Octokit({ auth: options.token });
+      this.octokit = new Octokit({ auth: options?.token });
     }
-    if (options.repository) {
+    if (options?.repository) {
       this.repository = split(options.repository);
     }
   }
