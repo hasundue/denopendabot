@@ -112,9 +112,9 @@ const createWorkflow = async (
   const repository = `${owner}/${repo}`;
   const testing = repository === env.APP_REPO;
 
-  if (deploy === "production" && testing) {
-    return;
-  }
+  if (deploy === "production" && testing) return;
+  if (deploy === "staging" && !testing) return;
+
   console.info(`🚀 ${owner} installed Denopendabot to ${owner}/${repo}`);
 
   const github = new GitHubClient({ octokit, repository });
