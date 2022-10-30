@@ -184,34 +184,39 @@ export class GitHubClient {
 
   async createPullRequest(options: {
     base: string;
-    branch: string;
+    head: string;
     title: string;
     labels?: string[];
   }) {
     const { owner, repo } = this.ensureRepository();
-    const { base, branch, title, labels } = options;
+    const { base, head, title, labels } = options;
 
     const prs = await this.getPullRequests({ state: "open" });
-    const exists = prs.find((pr) => pr.head.ref === branch);
+    const exists = prs.find((pr) => pr.head.ref === head);
 
-    const { data: result } = exists
+    const { data: created } = exists
       ? await this.octokit.request(
         "PATCH /repos/{owner}/{repo}/pulls/{pull_number}",
         { owner, repo, pull_number: exists.number, title },
       )
       : await this.octokit.request(
         "POST /repos/{owner}/{repo}/pulls",
-        { owner, repo, title, base, head: branch },
+        { owner, repo, title, base, head: head },
       );
+    console.info(`🎈 Created a pull request "${created.title}"`);
+
     if (labels?.length) {
       await this.octokit.request(
         "POST /repos/{owner}/{repo}/issues/{issue_number}/labels",
-        { owner, repo, issue_number: result.number, labels },
+        { owner, repo, issue_number: created.number, labels },
       );
+      const { data: labeled } = await this.octokit.request(
+        "GET /repos/{owner}/{repo}/pulls/{pull_number}",
+        { owner, repo, pull_number: created.number },
+      );
+      return labeled;
     }
-    console.info(`🎈 Created a pull request "${result.title}"`);
-
-    return result;
+    return created;
   }
 
   async getLatestCommit(
