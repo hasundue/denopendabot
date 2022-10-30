@@ -74,7 +74,7 @@ Deno.test("run update", async () => {
   const started_at = new Date();
 
   const base = "test-app";
-  const working = "test-app-" + Date.now();
+  const working = "test-app-" + env.GITHUB_REF_NAME;
 
   // ensure the base branch
   await github.createBranch(base);

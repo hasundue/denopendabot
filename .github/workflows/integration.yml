@@ -40,23 +40,20 @@ jobs:
         with:
           deno-version: v1.27.0 # @denopendabot denoland/deno
 
-      - name: Create test action
-        run: deno run -q -A integration/build.ts
-
-      - name: Create a branch for testing
-        run: git branch -C main test-action
+      - name: Setup the test
+        run: deno run -q -A integration/action_setup.ts
 
       - name: Run action
         uses: ./integration
         with:
           mode: action
           base-branch: test-action
-          working-branch: test-action-${{ github.ref }}
+          working-branch: test-action-${{ github.ref_name }}
           include: integration/src/deps.ts
           labels: test
 
-      - name: Delete the branch
-        run: git branch -D test-action-${{ github.ref }}
+      - name: Clean up the test
+        run: deno run -q -A integration/action_cleanup.ts
 
   app:
     name: App

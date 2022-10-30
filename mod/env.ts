@@ -8,6 +8,7 @@ type Env = {
   GITHUB_TOKEN?: string;
   GITHUB_OUTPUT?: string;
   GITHUB_REPOSITORY?: string;
+  GITHUB_REF_NAME?: string;
 };
 
 const getEnv = () => {
