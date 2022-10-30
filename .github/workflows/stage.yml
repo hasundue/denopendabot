@@ -33,7 +33,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           ref: staging
 
-  delivery:
+  release:
     name: Dispatch CD
     if: >-
       github.repository_owner == 'hasundue' &&

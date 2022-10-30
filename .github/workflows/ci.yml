@@ -11,6 +11,7 @@ on:
 jobs:
   test:
     name: Test
+    if: ${{ !startsWith(github.event.pull_request.title, 'build(version)') }}
     uses: ./.github/workflows/test.yml
     secrets: inherit
 
@@ -19,7 +20,8 @@ jobs:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       github.event.pull_request.user.login == 'hasundue' ||
-      github.event.pull_request.user.login == 'denopendabot[bot]'
+      github.event.pull_request.user.login == 'denopendabot[bot]' &&
+      !startsWith(github.event.pull_request.title, 'build(version)')
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
 
@@ -35,6 +37,19 @@ jobs:
     name: Dispatch CD
     if: github.event_name == 'workflow_dispatch'
     needs: integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: CD
+          token: ${{ secrets.GH_TOKEN }}
+          ref: main
+
+  release:
+    name: Skip CI and dispatch CD
+    if: >-
+      github.repository_owner == 'hasundue' &&
+      startsWith(github.event.pull_request.title, 'build(version)')
     runs-on: ubuntu-latest
     steps:
       - uses: benc-uk/workflow-dispatch@v1
