@@ -116,3 +116,13 @@ jobs:
 ```
 
 See [action.yml](./action.yml) for other options.
+
+## :handshake: Contributing
+
+Star the repository, and use Denopendabot for your project! Feel free to make an
+issue when you find any problem.
+
+Pull requests for bug-fix, testing, or documentation are always welcome.
+
+If you want to create a pull request for feature addition or refactoring, it is
+recommended to make an issue first, since we don't necessarily like the changes.
