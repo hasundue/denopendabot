@@ -77,8 +77,9 @@ See [the example pull requests](https://github.com/hasundue/denopendabot/pulls).
 The easiest way to use Denopendabot is to install the
 [GitHub App](https://github.com/apps/denopendabot). After installation,
 Denopendabot will send a pull request to create
-[`denopendabot.yml`](./app/denopendabot.yml) in `.github/workflows`. Merge it to
-get ready!
+[`denopendabot.yml`](./app/denopendabot.yml) in `.github/workflows` if it finds
+your repository to be a Deno project. Merge it to get ready, or create the file
+by yourself.
 
 > **Warning**\
 > Denopendabot requires write access to your workflows, which technically
