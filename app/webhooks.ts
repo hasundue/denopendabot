@@ -5,7 +5,7 @@ import type { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@1
 import { env } from "./env.ts";
 import { privateKey } from "./redis.ts";
 import { Deployment, deployment } from "./deploy.ts";
-import * as denopendabot from "../mod.ts";
+import * as mod from "../mod.ts";
 
 if (!privateKey) {
   throw Error("Private key is not deployed on Upstash Redis.");
@@ -23,7 +23,20 @@ const app = new App({
   },
 });
 
-type PayloadWithRepository = {
+type ClientPayloadKeys =
+  | "baseBranch"
+  | "workingBranch"
+  | "autoMerge"
+  | "labels"
+  | "include"
+  | "exclude"
+  | "release";
+
+type ClientPayload = {
+  [K in ClientPayloadKeys]: string;
+};
+
+interface Payload {
   repository: {
     owner: {
       login: string;
@@ -31,30 +44,46 @@ type PayloadWithRepository = {
     name: string;
     full_name: string;
   };
-};
+  client_payload?: Record<string, unknown>;
+  check_suite?: {
+    head_branch: string | null;
+  };
+}
 
 type Context = {
   deploy: Deployment;
   owner: string;
   repo: string;
+  branch: string | null;
 };
 
-const getContext = async (payload: PayloadWithRepository): Promise<Context> => {
+const getContext = async (payload: Payload): Promise<Context> => {
   const deploy = await deployment();
   const owner = payload.repository.owner.login;
   const repo = payload.repository.name;
-  return { deploy, owner, repo };
+
+  if (payload.client_payload) {
+    const inputs = payload.client_payload as ClientPayload;
+    const branch = inputs.workingBranch ?? "denopendabot";
+    return { deploy, owner, repo, branch };
+  }
+  if (payload.check_suite) {
+    const branch = payload.check_suite.head_branch;
+    return { deploy, owner, repo, branch };
+  }
+  console.error(payload);
+  throw new Error("Unsupported tyep of payload");
 };
 
-const isTestContext = (context: Context, branch: string) => {
-  const { owner, repo } = context;
+const isTestContext = (context: Context) => {
+  const { owner, repo, branch } = context;
   return `${owner}/${repo}` === env.APP_REPO && branch === "test-app";
 };
 
-const associated = (context: Context, branch: string) =>
+const associated = (context: Context) =>
   context.deploy === "staging"
-    ? isTestContext(context, branch)
-    : branch.startsWith("denopendabot");
+    ? isTestContext(context)
+    : context.branch?.startsWith("denopendabot");
 
 const isDenoProject = async (
   octokit: Octokit,
@@ -210,30 +239,15 @@ app.webhooks.on(
   },
 );
 
-type ClientPayloadKeys =
-  | "baseBranch"
-  | "workingBranch"
-  | "autoMerge"
-  | "labels"
-  | "include"
-  | "exclude"
-  | "release";
-
-type ClientPayload = {
-  [K in ClientPayloadKeys]: string;
-};
-
 // run update on "denopendabot_run" repsitory-dispatch events
 app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
   console.debug(payload);
 
   const context = await getContext(payload);
   const inputs = payload.client_payload as ClientPayload;
-  const branch = inputs.workingBranch ?? "denopendabot";
   const sender = payload.sender.login;
 
-  if (!associated(context, branch)) return;
-  if (payload.action !== "denopendabot-run") return;
+  if (!associated(context) || payload.action !== "denopendabot-run") return;
 
   const repository = payload.repository.full_name;
 
@@ -241,11 +255,11 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
 
   const labels = inputs.labels ? inputs.labels.split(" ") : [];
 
-  if (isTestContext(context, branch)) labels.push("test");
+  if (isTestContext(context)) labels.push("test");
   if (inputs.release) labels.push("release");
   if (inputs.autoMerge) labels.push("auto-merge");
 
-  const options: denopendabot.Options = {
+  const options: mod.Options = {
     octokit,
     baseBranch: inputs.baseBranch,
     workingBranch: inputs.workingBranch,
@@ -255,9 +269,9 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
     labels,
   };
 
-  const updates = await denopendabot.getUpdates(repository, options);
-  await denopendabot.createCommits(repository, updates, options);
-  await denopendabot.createPullRequest(repository, options);
+  const updates = await mod.getUpdates(repository, options);
+  await mod.createCommits(repository, updates, options);
+  await mod.createPullRequest(repository, options);
 });
 
 // merge a pull request if all checks have passed
@@ -270,7 +284,7 @@ app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
   const app = payload[name].app.slug;
 
   // skip if we are not in charge of this webhook
-  if (!associated(context, branch)) return;
+  if (!associated(context)) return;
 
   // skip if the conclusion is not success
   if (payload.check_suite.conclusion !== "success") return;
