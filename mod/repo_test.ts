@@ -1,5 +1,4 @@
 import { assertEquals } from "https://deno.land/std@0.161.0/testing/asserts.ts";
-import { GitHubClient } from "./octokit.ts";
 import { UpdateSpec } from "./common.ts";
 import {
   getRepoUpdateSpecs,
@@ -8,7 +7,6 @@ import {
   versionRegExp,
 } from "./repo.ts";
 
-const github = new GitHubClient();
 const repo = "denoland/deno";
 const initial = "v1.26.0";
 const target = "v1.27.0"; // @denopendabot denoland/deno
@@ -35,7 +33,7 @@ Deno.test("versionRegExp", () => {
 });
 
 Deno.test("getUpdateSpecs", async () => {
-  const specs = await getRepoUpdateSpecs(github, content());
+  const specs = await getRepoUpdateSpecs(content());
   assertEquals(specs.length, 2);
   assertEquals(specs[0].name, repo);
   assertEquals(specs[0].initial, initial);
@@ -44,7 +42,7 @@ Deno.test("getUpdateSpecs", async () => {
 });
 
 Deno.test("getUpdateSpecs (release)", async () => {
-  const specs = await getRepoUpdateSpecs(github, content(), {
+  const specs = await getRepoUpdateSpecs(content(), {
     name: repo,
     target,
   });

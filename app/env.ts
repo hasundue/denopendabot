@@ -8,6 +8,7 @@ type Env = {
   GH_TOKEN?: string;
   GITHUB_REPOSITORY?: string;
   GITHUB_REPOSITORY_OWNER?: string;
+  GITHUB_REF_NAME?: string;
 
   APP_REPO: string;
   INSTALLATION_ID: string;

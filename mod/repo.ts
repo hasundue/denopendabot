@@ -31,10 +31,12 @@ export class RepoUpdate extends Update {
 }
 
 export async function getRepoUpdateSpecs(
-  github: GitHubClient,
   input: string,
   release?: UpdateSpec,
+  github?: GitHubClient,
 ): Promise<UpdateSpec[]> {
+  const ensuredGitHub = github ?? new GitHubClient();
+
   const matches = input.matchAll(regexp(release?.name));
   const specs: UpdateSpec[] = [];
 
@@ -44,7 +46,7 @@ export async function getRepoUpdateSpecs(
     const initial = match[2];
     const target = (release?.name === name)
       ? release.target
-      : await github.getLatestRelease(name);
+      : await ensuredGitHub.getLatestRelease(name);
 
     if (target && gt(target, initial)) {
       console.debug(`💡 ${name} ${initial} => ${target}`);

@@ -7,15 +7,18 @@ import { createCommits, createPullRequest, getUpdates } from "../mod.ts";
 import { GitHubClient } from "../mod/octokit.ts";
 import { ModuleUpdateSpec } from "../mod/module.ts";
 
-const github = new GitHubClient(env.GITHUB_TOKEN);
+const repository = "hasundue/denopendabot";
+const baseBranch = "test-module";
 
-const repo = "hasundue/denopendabot";
-const baseBranch = "test";
+const github = new GitHubClient({
+  repository,
+  token: env.GITHUB_TOKEN,
+});
 
 Deno.test("integration (module)", async () => {
-  await github.createBranch(repo, baseBranch);
+  await github.createBranch(baseBranch);
 
-  const workingBranch = "test-module";
+  const workingBranch = baseBranch + "-" + env.GITHUB_REF_NAME;
 
   const options = {
     baseBranch,
@@ -23,8 +26,7 @@ Deno.test("integration (module)", async () => {
     include: ["integration/src/deps.ts"],
     labels: ["test"],
   };
-
-  const updates = await getUpdates(repo, options);
+  const updates = await getUpdates(repository, options);
 
   assertEquals(updates.length, 1);
   assertEquals(updates[0].path, "integration/src/deps.ts");
@@ -38,8 +40,10 @@ Deno.test("integration (module)", async () => {
     target: (await github.getLatestRelease("dsherret/dax"))!,
   });
 
-  await createCommits(repo, updates, options);
+  await createCommits(repository, updates, options);
 
-  const result = await createPullRequest(repo, options);
+  const result = await createPullRequest(repository, options);
   assert(result);
+
+  await github.deleteBranch(workingBranch);
 });

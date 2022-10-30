@@ -7,6 +7,11 @@ on:
   workflow_call:
   workflow_dispatch:
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CI_MAIN: >-
+    ${{ github.base_ref == 'main' || github.event_name == 'workflow_dispatch' || '' }}
+
 jobs:
   test:
     name: Unit Tests
@@ -28,25 +33,19 @@ jobs:
         run: deno lint
 
       - name: Cache dependencies
-        run: deno cache mod/*.ts
+        run: deno cache mod/*.ts ${{ env.CI_MAIN && 'integration/octokit_test.ts' || '' }}
 
       - name: Run tests
-        run: deno task test --coverage=./coverage mod/
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CI_MAIN: >-
-            ${{ 
-              github.base_ref == 'main' ||
-              github.event_name == 'workflow_call' ||
-              github.event_name == 'workflow_dispatch' || '' 
-            }}
+        run: >
+          deno task test --coverage=./coverage mod/
+          ${{ env.CI_MAIN && 'integration/octokit_test.ts' || '' }}
 
       - name: Create coverage report
-        if: ${{ github.base_ref != 'test' }}
+        if: ${{ env.CI_MAIN }}
         run: deno coverage ./coverage --lcov > ./coverage.lcov
 
       - name: Upload to Codecov
-        if: ${{ github.base_ref != 'test' }}
+        if: ${{ env.CI_MAIN }}
         uses: codecov/codecov-action@v3
         with:
           file: ./coverage.lcov
