@@ -47,12 +47,14 @@ export async function getUpdates(
   repository: string,
   options?: GlobalOptions & UpdateOptions,
 ) {
-  const github = new GitHubClient(
-    options?.octokit ?? getActionToken(options) ?? getUserToken(options),
-  );
+  const github = new GitHubClient({
+    repository,
+    octokit: options?.octokit,
+    token: getActionToken(options) ?? getUserToken(options),
+  });
 
-  const base = options?.baseBranch ?? "main";
-  const baseTree = await github.getTree(repository, base);
+  const base = options?.baseBranch ?? await github.defaultBranch();
+  const baseTree = await github.getTree(base);
 
   const paths = baseTree.map((blob) => blob.path!);
   const pathsToInclude = options?.include || paths;
@@ -69,7 +71,7 @@ export async function getUpdates(
   for (const blob of blobs) {
     console.debug(`🔍 ${blob.path}`);
 
-    const content = await github.getBlobContent(repository, blob.sha!);
+    const content = await github.getBlobContent(blob.sha!);
     const contentToUpdate = removeIgnore(content);
 
     // TS/JS modules
@@ -77,12 +79,10 @@ export async function getUpdates(
     const moduleReleaseSpec = options?.release
       ? { name: `deno.land/x/${moduleName}`, target: options.release }
       : undefined;
-
     const moduleSpecs = await getModuleUpdateSpecs(
       contentToUpdate,
       moduleReleaseSpec,
     );
-
     moduleSpecs.forEach((spec) =>
       updates.push(new ModuleUpdate(blob.path!, spec))
     );
@@ -93,11 +93,10 @@ export async function getUpdates(
       : undefined;
 
     const repoSpecs = await getRepoUpdateSpecs(
-      github,
       contentToUpdate,
       repoReleaseSpec,
+      github,
     );
-
     repoSpecs.forEach((spec) => updates.push(new RepoUpdate(blob.path!, spec)));
   }
 
@@ -116,7 +115,11 @@ export async function createCommits(
     throw new Error("❗ Access token is not provided");
   }
 
-  const github = new GitHubClient(options?.octokit ?? userToken ?? actionToken);
+  const github = new GitHubClient({
+    repository,
+    octokit: options?.octokit,
+    token: userToken ?? actionToken,
+  });
   const authorized = options?.octokit || userToken;
 
   // filter out workflows if we are not authorized to update them
@@ -125,7 +128,7 @@ export async function createCommits(
     : updates;
 
   const branch = options?.workingBranch ?? "denopendabot";
-  await github.createBranch(repository, branch, options?.baseBranch ?? "main");
+  await github.createBranch(branch, options?.baseBranch);
 
   const groupsByDep = groupBy(updatables, (it) => it.spec.name);
   const deps = Object.keys(groupsByDep);
@@ -134,9 +137,8 @@ export async function createCommits(
   for (const dep of deps) {
     const updates = groupsByDep[dep]!;
     const message = updates[0].message();
-    await github.createCommit(repository, branch, message, updates);
+    await github.createCommit(branch, message, updates);
   }
-
   if (!authorized) {
     console.info(
       "📣 Skipped the workflow files since we are not authorized to update them.",
@@ -159,19 +161,23 @@ export async function createPullRequest(
     throw new Error("❗ Access token is not provided");
   }
 
-  const github = new GitHubClient(options?.octokit ?? actionToken ?? userToken);
+  const github = new GitHubClient({
+    repository,
+    octokit: options?.octokit,
+    token: actionToken ?? userToken,
+  });
+  const base = options?.baseBranch ?? await github.defaultBranch();
+  const head = options?.workingBranch ?? "denopendabot";
 
-  const base = options?.baseBranch ?? "main";
-  const branch = options?.workingBranch ?? "denopendabot";
-
-  const { commits } = await github.compareBranches(repository, base, branch);
+  const { commits } = await github.compareBranches({ base, head });
 
   if (!commits.length) {
-    console.info(`📣 ${base} and ${branch} are identical`);
+    console.info(`📣 ${base} and ${head} are identical`);
     return null;
   }
 
   const messages = commits.map((commit) => commit.commit.message);
+
   const types = intersect(
     messages.map((message) => {
       if (!message.includes(":")) {
@@ -191,11 +197,11 @@ export async function createPullRequest(
     : "update dependencies";
   const title = `${type}(${scope}): ${body}`;
 
-  return await github.createPullRequest(
-    repository,
+  return await github.createPullRequest({
     base,
-    branch,
+    head,
     title,
-    options?.labels,
-  );
+    modifiable: true,
+    labels: options?.labels,
+  });
 }
