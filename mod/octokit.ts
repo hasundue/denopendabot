@@ -224,6 +224,16 @@ export class GitHubClient {
     return created;
   }
 
+  async closePullRequest(number: number) {
+    const { owner, repo } = this.ensureRepository();
+
+    const { data: result } = await this.octokit.request(
+      "PATCH /repos/{owner}/{repo}/pulls/{pull_number}",
+      { owner, repo, pull_number: number, state: "closed" },
+    );
+    return result;
+  }
+
   async getLatestCommit(branch?: string) {
     const { owner, repo } = this.ensureRepository();
 

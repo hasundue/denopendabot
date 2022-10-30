@@ -67,23 +67,26 @@ Deno.test("createPullRequest", async (t) => {
     assertEquals(result.message, message);
   });
 
-  await t.step("createPullRequest", async () => {
-    const result = await github.createPullRequest({
-      base,
-      head,
-      title: message,
-    });
-    assertEquals(result.title, message);
+  const created = await github.createPullRequest({
+    base,
+    head,
+    title: message,
   });
+  assertEquals(created.title, message);
 
   await t.step("createPullRequest (update)", async () => {
-    const result = await github.createPullRequest({
+    const updated = await github.createPullRequest({
       base,
       head,
       title: message,
       labels: ["test"],
     });
-    assert(result.labels.find((it) => it.name === "test"));
+    assert(updated.labels.find((it) => it.name === "test"));
+  });
+
+  await t.step("closePullRequest", async () => {
+    const closed = await github.closePullRequest(created.number);
+    assertEquals(closed.state, "closed");
   });
 
   await github.deleteBranch(head);
