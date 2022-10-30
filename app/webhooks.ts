@@ -78,13 +78,20 @@ const getContext = async (payload: Payload): Promise<Context> => {
 
 const isTestContext = (context: Context) => {
   const { owner, repo, branch } = context;
-  return `${owner}/${repo}` === env.APP_REPO && branch?.startsWith("test-app");
+  return `${owner}/${repo}` === env.APP_REPO &&
+    (!branch || branch.startsWith("test"));
 };
 
-const associated = (context: Context) =>
-  context.deploy === "staging"
-    ? isTestContext(context)
-    : context.branch?.startsWith("denopendabot");
+const associated = (context: Context) => {
+  if (context.deploy === "production") {
+    return !isTestContext(context);
+  }
+  if (context.deploy === "staging") {
+    return isTestContext(context);
+  } else {
+    return false;
+  }
+};
 
 const isDenoProject = async (github: GitHubClient) => {
   const tree = await github.getTree();
@@ -103,8 +110,9 @@ const createWorkflow = async (
 ) => {
   const deploy = await deployment();
   const repository = `${owner}/${repo}`;
+  const testing = repository === env.APP_REPO;
 
-  if (deploy === "staging" && repository !== env.APP_REPO) {
+  if (deploy === "production" && testing) {
     return;
   }
   console.info(`🚀 ${owner} installed Denopendabot to ${owner}/${repo}`);
@@ -115,8 +123,6 @@ const createWorkflow = async (
     console.info("...but it does not seem to be a Deno project");
     return;
   }
-
-  const testing = deploy === "staging";
   const base = testing ? "test-install" : await github.defaultBranch();
   const head = testing ? base + "-" + Date.now() : "denopendabot-setup";
 
@@ -209,8 +215,6 @@ app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
   // skip if the conclusion is not success
   if (payload.check_suite.conclusion !== "success") return;
 
-  console.info(`✅ ${app} completed a check suite at ${owner}/${repo}`);
-
   // merge pull requests if the status is success
   for (const { number } of payload.check_suite.pull_requests) {
     const { data: pr } = await octokit.request(
@@ -224,6 +228,8 @@ app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
       pr.user?.login === "denopendabot[bot]" &&
       pr.labels?.find((label) => label.name === "auto-merge")
     ) {
+      console.info(`✅ ${app} completed a check suite at ${owner}/${repo}`);
+
       // Do not merge if another check run is ongoing
       const { data: { check_runs } } = await octokit.request(
         "GET /repos/{owner}/{repo}/commits/{ref}/check-runs",
