@@ -11,7 +11,6 @@
 ![CI](https://github.com/hasundue/denopendabot/actions/workflows/ci.yml/badge.svg)
 [![codecov](https://codecov.io/gh/hasundue/denopendabot/branch/main/graph/badge.svg)](https://codecov.io/gh/hasundue/denopendabot)
 ![denoland/deno](https://img.shields.io/badge/Deno-v1.27.0-informational?logo=deno) <!-- @denopendabot denoland/deno -->
-![deno deploy](https://img.shields.io/badge/Deno_Deploy-Beta_4-informational?logo=deno)
 
 <!-- deno-fmt-ignore-end -->
 
@@ -19,7 +18,8 @@
 dependencies of your Deno projects up-to-date.
 
 Obviously inspired by [Dependabot](https://github.com/features/security/), and
-making up for their missing support for Deno.
+making up for their missing support for Deno. Written in Deno, and running on
+Deno Deploy.
 
 > **Warning**\
 > Still under development. Many bugs might remain. Any breaking changes may be
@@ -88,8 +88,7 @@ by yourself.
 
 ### GitHub Action
 
-If you don't want to send repository contents to the remote for security
-reasons, you can use our
+If you don't want to send repository contents to the app, you can use our
 [GitHub Action](https://github.com/marketplace/actions/denopendabot) to run
 Denopendabot locally inside the GitHub Actions environment.
 
