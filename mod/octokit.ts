@@ -3,6 +3,8 @@ import { decode } from "https://deno.land/std@0.161.0/encoding/base64.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.1.0";
 import { Update } from "./common.ts";
 
+type UpdateContent = Pick<Update, "path" | "content">;
+
 interface BlobContent {
   path: string;
   mode: "100644";
@@ -66,7 +68,7 @@ export class GitHubClient {
   }
 
   async createBlobContents(
-    updates: Update[],
+    updates: UpdateContent[],
     tree: { path?: string; sha?: string }[],
   ): Promise<BlobContent[]> {
     const groupByPath = groupBy(updates, (it) => it.path);
@@ -83,12 +85,22 @@ export class GitHubClient {
     );
   }
 
-  async getBranch(branch: string) {
+  async defaultBranch(repository?: string) {
+    const { owner, repo } = this.ensureRepository(repository);
+
+    const { data } = await this.octokit.request(
+      "GET /repos/{owner}/{repo}",
+      { owner, repo },
+    );
+    return data.default_branch;
+  }
+
+  async getBranch(branch?: string) {
     const { owner, repo } = this.ensureRepository();
     try {
       const { data } = await this.octokit.request(
         "GET /repos/{owner}/{repo}/branches/{branch}",
-        { owner, repo, branch },
+        { owner, repo, branch: branch ?? await this.defaultBranch() },
       );
       return data;
     } catch {
@@ -96,11 +108,8 @@ export class GitHubClient {
     }
   }
 
-  async getTree(
-    repository: string,
-    branch = "main",
-  ) {
-    const [owner, repo] = repository.split("/");
+  async getTree(branch?: string) {
+    const { owner, repo } = this.ensureRepository();
 
     const head = await this.getBranch(branch);
     if (!head) throw Error(`Branch ${branch} not found.`);
@@ -125,49 +134,40 @@ export class GitHubClient {
   async createCommit(
     branch: string,
     message: string,
-    updates: Update[],
+    updates: UpdateContent[],
   ) {
     const { owner, repo } = this.ensureRepository();
 
-    // get a reference to the target branch
-    const base = await this.getBranch(branch);
-    if (!base) throw Error(`Branch ${branch} not found`);
-
-    const baseTree = await this.getTree(branch);
+    // ensure the target branch
+    const base = await this.createBranch(branch);
 
     // create a tree object for updated files
+    const baseTree = await this.getTree(branch);
     const blobs = await this.createBlobContents(updates, baseTree);
 
     // create a new tree on the target branch
-    try {
-      const { data: newTree } = await this.octokit.request(
-        "POST /repos/{owner}/{repo}/git/trees",
-        { owner, repo, tree: blobs, base_tree: base.commit.sha },
-      );
-      const author = {
-        name: "denopendabot",
-        email: "denopendabot@github.com",
-      };
-      // create a new tree on the target branch
-      const tree = newTree.sha;
-      const parents = [base.commit.sha];
+    const { data: newTree } = await this.octokit.request(
+      "POST /repos/{owner}/{repo}/git/trees",
+      { owner, repo, tree: blobs, base_tree: base.commit.sha },
+    );
+    const author = {
+      name: "denopendabot",
+      email: "denopendabot@github.com",
+    };
+    // create a new tree on the target branch
+    const tree = newTree.sha;
+    const parents = [base.commit.sha];
 
-      const { data: commit } = await this.octokit.request(
-        "POST /repos/{owner}/{repo}/git/commits",
-        { owner, repo, message, author, tree, parents },
-      );
-      // update the ref of the branch to the commit
-      await this.updateBranch(branch, commit.sha);
+    const { data: commit } = await this.octokit.request(
+      "POST /repos/{owner}/{repo}/git/commits",
+      { owner, repo, message, author, tree, parents },
+    );
+    // update the ref of the branch to the commit
+    await this.updateBranch(branch, commit.sha);
 
-      console.debug(`📝 ${commit.message}`);
+    console.debug(`📝 ${commit.message}`);
 
-      return commit;
-    } catch (error) {
-      if (updates.find((update) => update.isWorkflow())) {
-        throw Error("Unauthorized to update workflows");
-      }
-      throw error;
-    }
+    return commit;
   }
 
   async getPullRequests(options?: {
@@ -186,10 +186,11 @@ export class GitHubClient {
     base: string;
     head: string;
     title: string;
+    modifiable?: boolean;
     labels?: string[];
   }) {
     const { owner, repo } = this.ensureRepository();
-    const { base, head, title, labels } = options;
+    const { base, head, title, labels, modifiable } = options;
 
     const prs = await this.getPullRequests({ state: "open" });
     const exists = prs.find((pr) => pr.head.ref === head);
@@ -201,9 +202,11 @@ export class GitHubClient {
       )
       : await this.octokit.request(
         "POST /repos/{owner}/{repo}/pulls",
-        { owner, repo, title, base, head: head },
+        { owner, repo, title, base, head, maintainer_can_modify: modifiable },
       );
-    console.info(`🎈 Created a pull request "${created.title}"`);
+    console.info(
+      `🎈 Created a pull request "${created.title}" for ${owner}/${repo}`,
+    );
 
     if (labels?.length) {
       await this.octokit.request(
