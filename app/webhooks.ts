@@ -78,7 +78,7 @@ const getContext = async (payload: Payload): Promise<Context> => {
 
 const isTestContext = (context: Context) => {
   const { owner, repo, branch } = context;
-  return `${owner}/${repo}` === env.APP_REPO && branch === "test-app";
+  return `${owner}/${repo}` === env.APP_REPO && branch?.startsWith("test-app");
 };
 
 const associated = (context: Context) =>
@@ -117,14 +117,16 @@ const createWorkflow = async (
   }
 
   const testing = deploy === "staging";
-  const base = testing ? "test/install" : await github.defaultBranch();
-  const head = testing ? base + `/${Date.now()}` : "denopendabot/setup";
+  const base = testing ? "test-install" : await github.defaultBranch();
+  const head = testing ? base + "-" + Date.now() : "denopendabot-setup";
 
-  const path = ".github/workflows/denopendabot.yml";
   const message = "ci: setup Denopendabot";
-  const content = () => Deno.readTextFileSync("./app/denopendabot.yml");
+  const content = await Deno.readTextFile("./app/denopendabot.yml");
 
-  await github.createCommit(head, message, [{ path, content }]);
+  await github.createCommit(head, message, [{
+    path: ".github/workflows/denopendabot.yml",
+    content: () => content,
+  }]);
 
   await github.createPullRequest({
     base,

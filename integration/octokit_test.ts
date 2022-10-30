@@ -51,7 +51,7 @@ Deno.test("createBranch/deleteBranch", async () => {
 });
 
 Deno.test("createPullRequest", async (t) => {
-  const head = base + "-head";
+  const head = base + "-" + Date.now();
   await github.createBranch(head, base);
 
   const update = new ModuleUpdate("integration/src/deps.ts", {

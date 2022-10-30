@@ -4,6 +4,9 @@ on:
   workflow_call:
   workflow_dispatch:
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   module:
     name: Module
@@ -19,12 +22,10 @@ jobs:
           deno-version: v1.27.0 # @denopendabot denoland/deno
 
       - name: Cache dependencies
-        run: deno cache integration/mod_test.ts
+        run: deno cache -q integration/mod_test.ts
 
       - name: Run tests
         run: deno task test integration/mod_test.ts
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   action:
     name: Action
@@ -40,16 +41,22 @@ jobs:
           deno-version: v1.27.0 # @denopendabot denoland/deno
 
       - name: Create test action
-        run: deno run -A integration/build.ts
+        run: deno run -q -A integration/build.ts
+
+      - name: Create a branch for testing
+        run: git branch -C main test-action
 
       - name: Run action
         uses: ./integration
         with:
           mode: action
-          base-branch: test
-          working-branch: test-action
+          base-branch: test-action
+          working-branch: test-action-${{ github.ref }}
           include: integration/src/deps.ts
           labels: test
+
+      - name: Delete the branch
+        run: git branch -D test-action-${{ github.ref }}
 
   app:
     name: App

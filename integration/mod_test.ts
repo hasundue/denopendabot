@@ -44,4 +44,6 @@ Deno.test("integration (module)", async () => {
 
   const result = await createPullRequest(repository, options);
   assert(result);
+
+  await github.deleteBranch(workingBranch);
 });

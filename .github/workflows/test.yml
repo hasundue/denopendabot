@@ -3,7 +3,7 @@ name: Test
 on:
   pull_request:
     branches:
-      - test
+      - test-app
   workflow_call:
   workflow_dispatch:
 
@@ -33,10 +33,12 @@ jobs:
         run: deno lint
 
       - name: Cache dependencies
-        run: deno cache mod/*.ts integration/octokit_test.ts
+        run: deno cache mod/*.ts ${{ env.CI_MAIN && 'integration/octokit_test.ts' || '' }}
 
       - name: Run tests
-        run: deno task test --coverage=./coverage mod/ integration/octokit_test.ts
+        run: >
+          deno task test --coverage=./coverage mod/
+          ${{ env.CI_MAIN && 'integration/octokit_test.ts' || '' }}
 
       - name: Create coverage report
         if: ${{ env.CI_MAIN }}

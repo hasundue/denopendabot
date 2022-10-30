@@ -76,7 +76,9 @@ export class GitHubClient {
     return await Promise.all(
       Object.entries(groupByPath).map(async ([path, updates]) => {
         const blob = tree.find((it) => it.path === path);
-        let content = await this.getBlobContent(blob!.sha!);
+        let content = blob
+          ? await this.getBlobContent(blob.sha!) // file exists (updating dependencies)
+          : ""; // file not exist (installing Denopendabot App)
         for (const update of updates!) {
           content = update.content(content);
         }

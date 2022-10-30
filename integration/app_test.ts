@@ -2,6 +2,7 @@ import { assert } from "https://deno.land/std@0.161.0/testing/asserts.ts";
 import { delay } from "https://deno.land/std@0.161.0/async/mod.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.1.0";
 import { env } from "../app/env.ts";
+import { GitHubClient } from "../mod/octokit.ts";
 
 if (!env.GITHUB_REPOSITORY || !env.GITHUB_REPOSITORY_OWNER) {
   throw new Error(
@@ -13,15 +14,14 @@ const owner = env.GITHUB_REPOSITORY_OWNER;
 const repo = repository.split("/")[1];
 
 Deno.test("installation", async () => {
-  // Octokit authorized to install/uninstall the app
   const octokit = new Octokit({ auth: env.GH_TOKEN });
+  const github = new GitHubClient({ repository, token: env.GITHUB_TOKEN });
 
   // get repository data
   const { data } = await octokit.request(
     "GET /repos/{owner}/{repo}",
     { owner, repo },
   );
-
   // remove the repository from the registration if already exists
   const res = await octokit.request(
     "DELETE /user/installations/{installation_id}/repositories/{repository_id}",
@@ -34,16 +34,8 @@ Deno.test("installation", async () => {
     console.log("👋 Uninstalled Denopendabot");
   }
 
-  // Delete the branch for testing if exists
-  try {
-    await octokit.request(
-      "DELETE /repos/{owner}/{repo}/git/refs/{ref}",
-      { owner, repo, ref: `heads/test-install` },
-    );
-    console.log("👋 Deleted a branch `test-install`");
-  } catch {
-    console.log("Branch `test-install` does not exists");
-  }
+  // ensure the base branch
+  await github.createBranch("test-install");
 
   const started_at = new Date();
 
@@ -71,12 +63,21 @@ Deno.test("installation", async () => {
     pr.title === "Setup Denopendabot"
   );
   assert(created);
+
+  await github.deleteBranch(created.head.ref);
 });
 
 Deno.test("run update", async () => {
   const octokit = new Octokit({ auth: env.GITHUB_TOKEN });
+  const github = new GitHubClient({ repository, token: env.GITHUB_TOKEN });
 
   const started_at = new Date();
+
+  const base = "test-app";
+  const working = "test-app-" + Date.now();
+
+  // ensure the base branch
+  await github.createBranch(base);
 
   // dispatch a `denopendabot-run` event
   await octokit.request("POST /repos/{owner}/{repo}/dispatches", {
@@ -84,8 +85,8 @@ Deno.test("run update", async () => {
     repo,
     event_type: "denopendabot-run",
     client_payload: {
-      baseBranch: "test",
-      workingBranch: "test-app",
+      baseBranch: base,
+      workingBranch: working,
       include: "integration/src/deps.ts",
       autoMerge: "any",
     },
@@ -103,8 +104,8 @@ Deno.test("run update", async () => {
   const created = prs.find((pr) =>
     pr.user?.login === "denopendabot[bot]" &&
     new Date(pr.updated_at) > started_at &&
-    pr.base.ref === "test" &&
-    pr.head.ref === "test-app"
+    pr.base.ref === base &&
+    pr.head.ref === working
   );
   assert(created);
 
@@ -117,4 +118,6 @@ Deno.test("run update", async () => {
     { owner, repo, pull_number: created.number },
   );
   assert(pr.merged);
+
+  await github.deleteBranch(working);
 });
