@@ -103,24 +103,18 @@ const isDenoProject = async (github: GitHubClient) => {
 // create .github/workflows/denopendabot.yml in a repository
 const createWorkflow = async (
   octokit: Octokit,
-  owner: string,
-  repo: string,
+  repository: string,
 ) => {
   const deploy = await deployment();
-  const repository = `${owner}/${repo}`;
   const testing = repository === env.APP_REPO;
 
   if (deploy === "production" && testing) return;
   if (deploy === "staging" && !testing) return;
 
-  console.info(`🚀 ${owner} installed Denopendabot to ${owner}/${repo}`);
-
   const github = new GitHubClient({ octokit, repository });
 
-  if (!(await isDenoProject(github))) {
-    console.info("...but it does not seem to be a Deno project");
-    return;
-  }
+  if (!(await isDenoProject(github))) return;
+
   const base = testing ? "test-install" : await github.defaultBranch();
   const head = testing ? base + "-" + Date.now() : "denopendabot-setup";
 
@@ -144,10 +138,11 @@ const createWorkflow = async (
 app.webhooks.on("installation.created", async ({ octokit, payload }) => {
   console.debug(payload);
   if (!payload.repositories) return;
-  const owner = payload.sender.login;
+  const sender = payload.sender.login;
 
-  for (const { name: repo } of payload.repositories) {
-    await createWorkflow(octokit, owner, repo);
+  for (const { full_name } of payload.repositories) {
+    console.info(`🚀 ${sender} installed Denopendabot to ${full_name}`);
+    await createWorkflow(octokit, full_name);
   }
 });
 
@@ -155,10 +150,11 @@ app.webhooks.on(
   "installation_repositories.added",
   async ({ octokit, payload }) => {
     console.debug(payload);
-    const owner = payload.sender.login;
+    const sender = payload.sender.login;
 
-    for (const { name: repo } of payload.repositories_added) {
-      await createWorkflow(octokit, owner, repo);
+    for (const { full_name } of payload.repositories_added) {
+      console.info(`🚀 ${sender} installed Denopendabot to ${full_name}`);
+      await createWorkflow(octokit, full_name);
     }
   },
 );
