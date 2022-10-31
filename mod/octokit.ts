@@ -97,12 +97,12 @@ export class GitHubClient {
     return data.default_branch;
   }
 
-  async getBranch(branch?: string) {
+  async getBranch(branch: string) {
     const { owner, repo } = this.ensureRepository();
     try {
       const { data } = await this.octokit.request(
         "GET /repos/{owner}/{repo}/branches/{branch}",
-        { owner, repo, branch: (branch ?? await this.defaultBranch()) },
+        { owner, repo, branch },
       );
       return data;
     } catch {
@@ -110,7 +110,7 @@ export class GitHubClient {
     }
   }
 
-  async getTree(branch?: string) {
+  async getTree(branch: string) {
     const { owner, repo } = this.ensureRepository();
 
     const head = await this.getBranch(branch);
