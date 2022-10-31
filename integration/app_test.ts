@@ -94,7 +94,7 @@ Deno.test("run update", async () => {
   console.info("Dispatched a 'denopendabot-run' event");
 
   // wait for a moment until the app completes the routine
-  await delay(10 * 1000);
+  await delay(30 * 1000);
 
   // check if a pull request has been created
   const { data: prs } = await octokit.request(
