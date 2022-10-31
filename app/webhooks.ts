@@ -78,8 +78,7 @@ const getContext = async (payload: Payload): Promise<Context> => {
 
 const isTestContext = (context: Context) => {
   const { owner, repo, branch } = context;
-  return `${owner}/${repo}` === env.APP_REPO &&
-    (!branch || branch.startsWith("test"));
+  return `${owner}/${repo}` === env.APP_REPO && branch?.startsWith("test");
 };
 
 const associated = (context: Context) => {
@@ -88,9 +87,8 @@ const associated = (context: Context) => {
   }
   if (context.deploy === "staging") {
     return isTestContext(context);
-  } else {
-    return false;
   }
+  return false;
 };
 
 const isDenoProject = async (github: GitHubClient) => {
