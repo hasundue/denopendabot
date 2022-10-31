@@ -92,7 +92,7 @@ const associated = (context: Context) => {
 };
 
 const isDenoProject = async (github: GitHubClient) => {
-  const tree = await github.getTree();
+  const tree = await github.getTree(await github.defaultBranch());
   const paths = tree.map((blob) => blob.path!);
 
   const targets = ["deno.json", "deno.jsonc"];
