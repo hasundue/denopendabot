@@ -1,4 +1,4 @@
-import { Redis } from "https://deno.land/x/upstash_redis@1.15.1/mod.ts";
+import { Redis } from "https://deno.land/x/upstash_redis@v1.16.0/mod.ts";
 import { env } from "./env.ts";
 
 export const redis = new Redis({
