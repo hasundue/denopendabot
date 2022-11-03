@@ -35,6 +35,10 @@ inputs:
     required: true
     default: denopendabot
 
+  root:
+    description: Path to the project root (not prefixed with './')
+    required: false
+
   include:
     description: Specify Files to update (space-separated)
     required: false
@@ -73,6 +77,7 @@ runs:
           { 
             "baseBranch": "${{ inputs.base-branch }}",
             "workingBranch": "${{ inputs.working-branch }}",
+            "root": "${{ inputs.root }}",
             "include": "${{ inputs.include }}",
             "exclude": "${{ inputs.exclude }}",
             "labels": "${{ inputs.labels }}",
@@ -94,6 +99,7 @@ runs:
         ${{ inputs.repository }}
         --base-branch ${{ inputs.base-branch }}
         --working-branch ${{ inputs.working-branch }}
+        --root ${{ inputs.root }}
         --token ${{ inputs.token || github.token }}
         ${{ inputs.user-token && format('--user-token {0}', inputs.user-token) }}
         ${{ inputs.include && format('--include {0}', inputs.include) }}

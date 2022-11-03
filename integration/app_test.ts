@@ -87,7 +87,7 @@ Deno.test("run update", async () => {
     client_payload: {
       baseBranch: base,
       workingBranch: working,
-      include: "integration/src/deps.ts",
+      root: "integration/src",
       autoMerge: "any",
     },
   });

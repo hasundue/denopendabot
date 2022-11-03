@@ -37,6 +37,15 @@ Deno.test("compareBranches", async () => {
   assert(commits);
 });
 
+Deno.test("getTree", async () => {
+  const root = await github.getTree(base);
+  assert(root.find((it) => it.path === "README.md"));
+
+  const src = await github.getTree(base, "integration/src");
+  assert(!src.find((it) => it.path === "README.md"));
+  assert(src.find((it) => it.path === "integration/src/deps.ts"));
+});
+
 Deno.test("createBranch/deleteBranch", async () => {
   const baseBranch = await github.createBranch(base);
   assertEquals(baseBranch.name, base);

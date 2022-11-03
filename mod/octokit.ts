@@ -110,7 +110,7 @@ export class GitHubClient {
     }
   }
 
-  async getTree(branch: string) {
+  async getTree(branch: string, root?: string) {
     const { owner, repo } = this.ensureRepository();
 
     const head = await this.getBranch(branch);
@@ -121,7 +121,13 @@ export class GitHubClient {
       { owner, repo, tree_sha: head.commit.sha, recursive: "true" },
     );
     // we don't need the subtrees
-    return data.tree.filter((it) => it.type === "blob");
+    const blobs = data.tree.filter((it) => it.type === "blob");
+
+    if (root) {
+      return blobs.filter((it) => it.path?.startsWith(root));
+    } else {
+      return blobs;
+    }
   }
 
   async updateBranch(branch: string, sha: string) {

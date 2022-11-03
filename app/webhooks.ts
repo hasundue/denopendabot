@@ -27,6 +27,7 @@ const app = new App({
 type ClientPayloadKeys =
   | "baseBranch"
   | "workingBranch"
+  | "root"
   | "autoMerge"
   | "labels"
   | "include"
@@ -183,6 +184,7 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
     octokit,
     baseBranch: inputs.baseBranch,
     workingBranch: inputs.workingBranch,
+    root: inputs.root,
     include: inputs.include ? inputs.include.split(" ") : undefined,
     exclude: inputs.exclude ? inputs.exclude.split(" ") : undefined,
     release: inputs.release ?? undefined,
