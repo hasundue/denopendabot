@@ -51,10 +51,17 @@ export const pullRequestType = (types: CommitType[]): CommitType =>
 
 export function removeIgnore(input: string) {
   const fns = [
+    // ignore sections in typescript code (denopendabot-ignore-start/end)
+    (input: string) => {
+      const start = "// @denopendabot ignore\\-start";
+      const end = "// @denopendabot ignore\\-end";
+      const regexp = RegExp("^\\s*" + start + ".*" + end + "\\s*$", "gms");
+      return input.replaceAll(regexp, "");
+    },
     // ignore sections in markdown (denopendabot-ignore-start/end)
     (input: string) => {
-      const start = "<!\\-\\- denopendabot\\-ignore\\-start \\-\\->";
-      const end = "<!\\-\\- denopendabot\\-ignore\\-end \\-\\->";
+      const start = "<!\\-\\- @denopendabot ignore\\-start \\-\\->";
+      const end = "<!\\-\\- @denopendabot ignore\\-end \\-\\->";
       const regexp = RegExp("^\\s*" + start + ".*" + end + "\\s*$", "gms");
       return input.replaceAll(regexp, "");
     },
