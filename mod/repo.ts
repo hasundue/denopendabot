@@ -7,8 +7,7 @@ export const regexp = (
   version = semverRegExp.source,
 ) =>
   RegExp(
-    "(^.*\\W|^)(" + version + ")(\\W+@denopendabot\\s+)(" + repo +
-      ")($|\\s.*$)",
+    "(^.*[^v]|^)(" + version + ")(.+@denopendabot\\s+)(" + repo + ")($|\\s.*$)",
     "mg",
   );
 
@@ -17,7 +16,7 @@ export const versionRegExp = (
   version = semverRegExp.source,
 ) =>
   RegExp(
-    "(?<=^.*\\W|^)" + version + "(?=\\W+@denopendabot\\s+" + repo +
+    "(?<=^.*[^v]|^)" + version + "(?=.+@denopendabot\\s+" + repo +
       "($|\\s.*$))",
     "mg",
   );
