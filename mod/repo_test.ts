@@ -11,6 +11,8 @@ import {
   versionRegExp,
 } from "./repo.ts";
 
+// @denopendabot ignore-start
+
 describe("regexp", () => {
   it("source code", () => {
     const s = `
@@ -142,3 +144,5 @@ describe("Update.content", () => {
     s.replace("v1.26.0", "v2.0.0"),
   );
 });
+
+// @denopendabot ignore-end
