@@ -60,8 +60,8 @@ export function removeIgnore(input: string) {
     },
     // ignore sections in markdown (denopendabot-ignore-start/end)
     (input: string) => {
-      const start = "<!\\-\\- denopendabot\\-ignore\\-start \\-\\->";
-      const end = "<!\\-\\- denopendabot\\-ignore\\-end \\-\\->";
+      const start = "<!\\-\\- @denopendabot ignore\\-start \\-\\->";
+      const end = "<!\\-\\- @denopendabot ignore\\-end \\-\\->";
       const regexp = RegExp("^\\s*" + start + ".*" + end + "\\s*$", "gms");
       return input.replaceAll(regexp, "");
     },

@@ -29,7 +29,7 @@ Deno Deploy.
 
 ### Update Deno modules
 
-<!-- denopendabot-ignore-start -->
+<!-- @denopendabot ignore-start -->
 
 ```typescript
 import $ from "https://deno.land/x/dax@0.14.0/mod.ts";
@@ -58,7 +58,7 @@ update libraries for Deno, which supports
 +   deno-version: v1.26.1 # @denopendabot denoland/deno
 ```
 
-<!-- denopendabot-ignore-end -->
+<!-- @denopendabot ignore-end -->
 
 Denopendabot can also update release versions of GitHub repositories, specified
 by comments of `@denopendabot {owner}/{repo}`.
