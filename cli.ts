@@ -23,6 +23,10 @@ const { args, options } = await new Command()
     { default: "denopendabot" },
   )
   .option(
+    "--root <path:file>",
+    "Path to the project root (not prefixed with './')",
+  )
+  .option(
     "-i --include <paths:file[]>",
     "Specify files to update.",
   )
