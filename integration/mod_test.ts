@@ -23,7 +23,7 @@ Deno.test("integration (module)", async () => {
   const options = {
     baseBranch,
     workingBranch,
-    include: ["integration/src/deps.ts"],
+    root: "integration/src",
     labels: ["test"],
   };
   const updates = await getUpdates(repository, options);

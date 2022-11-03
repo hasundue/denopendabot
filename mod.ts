@@ -41,6 +41,7 @@ const getUserToken = (options?: GlobalOptions) => {
 interface UpdateOptions {
   include?: string[];
   exclude?: string[];
+  root?: string; // not prefixed with "./"
 }
 
 export async function getUpdates(
@@ -54,7 +55,7 @@ export async function getUpdates(
   });
 
   const base = options?.baseBranch ?? await github.defaultBranch();
-  const baseTree = await github.getTree(base);
+  const baseTree = await github.getTree(base, options?.root);
 
   const paths = baseTree.map((blob) => blob.path!);
   const pathsToInclude = options?.include || paths;
