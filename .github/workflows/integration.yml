@@ -49,7 +49,7 @@ jobs:
           mode: action
           base-branch: test-action
           working-branch: test-action-${{ github.ref_name }}
-          include: integration/src/deps.ts
+          root: integration/src
           labels: test
 
       - name: Clean up the test
