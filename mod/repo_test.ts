@@ -1,4 +1,8 @@
-import { assertEquals } from "https://deno.land/std@0.161.0/testing/asserts.ts";
+import {
+  assert,
+  assertEquals,
+} from "https://deno.land/std@0.161.0/testing/asserts.ts";
+import { describe, it } from "https://deno.land/std@0.161.0/testing/bdd.ts";
 import { UpdateSpec } from "./common.ts";
 import {
   getRepoUpdateSpecs,
@@ -7,56 +11,134 @@ import {
   versionRegExp,
 } from "./repo.ts";
 
-const repo = "denoland/deno";
-const initial = "v1.26.0";
-const target = "v1.27.0"; // @denopendabot denoland/deno
-const content = (version = initial) => `
-deno version: ${version} <!-- @denopendabot ${repo} -->
-deno_std version: 0.158.0 <!-- @denopendabot ${repo}_std -->
-`;
+describe("regexp", () => {
+  it("source code", () => {
+    const s = `
+      const deno = "v1.26.0" # @denopendabot denoland/deno
+      const deno_std = "0.158.0" # @denopendabot denoland/deno_std
+    `;
+    const m = Array.from(s.matchAll(regexp()));
 
-Deno.test("regexp", () => {
-  const matches = Array.from(content().matchAll(regexp()));
-  assertEquals(matches.length, 2);
-  assertEquals(matches[0][2], initial);
-  assertEquals(matches[0][7], repo);
+    assert(m[0]);
+    assertEquals(m[0][2], "v1.26.0");
+    assertEquals(m[0][7], "denoland/deno");
+
+    assert(m[1]);
+    assertEquals(m[1][2], "0.158.0");
+    assertEquals(m[1][7], "denoland/deno_std");
+  });
+
+  it("plain text in markdown", () => {
+    const s = `
+      deno: v1.26.0 <!-- @denopendabot denoland/deno -->
+      deno_std: 0.158.0 <!-- @denopendabot denoland/deno_std -->
+    `;
+    const m = Array.from(s.matchAll(regexp()));
+
+    assert(m[0]);
+    assertEquals(m[0][2], "v1.26.0");
+    assertEquals(m[0][7], "denoland/deno");
+
+    assert(m[1]);
+    assertEquals(m[1][2], "0.158.0");
+    assertEquals(m[1][7], "denoland/deno_std");
+  });
+
+  it("badges in markdown", () => {
+    const s = `
+      ![deno](https://img.shields.io/badge/Deno-v1.26.0-blue) <!-- @denopendabot denoland/deno -->
+      ![deno_std](https://img.shields.io/badge/std-0.158.0-blue) <!-- @denopendabot denoland/deno_std -->
+    `;
+    const m = Array.from(s.matchAll(regexp()));
+
+    assert(m[0]);
+    assertEquals(m[0][2], "v1.26.0");
+    assertEquals(m[0][7], "denoland/deno");
+
+    assert(m[1]);
+    assertEquals(m[1][2], "0.158.0");
+    assertEquals(m[1][7], "denoland/deno_std");
+  });
+
+  it("GitHub Action", () => {
+    const s = `
+      - uses: denoland/setup-deno@v1
+        with:
+        deno-version: v1.26.0 # @denopendabot denoland/deno
+    `;
+    const m = Array.from(s.matchAll(regexp()));
+    assert(m[0]);
+    assertEquals(m[0][2], "v1.26.0");
+    assertEquals(m[0][7], "denoland/deno");
+  });
 });
 
-Deno.test("versionRegExp", () => {
-  const matches = Array.from(
-    content().matchAll(
-      versionRegExp(repo),
-    ),
-  );
-  assertEquals(matches.length, 1);
-  assertEquals(matches[0][0], initial);
+describe("versionRegExp", () => {
+  it("denoland/deno", (t) => {
+    const s = `
+      const deno = "v1.26.0" # @denopendabot denoland/deno
+      const deno_std = "0.158.0" # @denopendabot denoland/deno_std
+    `;
+    const m = Array.from(s.matchAll(versionRegExp(t.name)));
+
+    assertEquals(m.length, 1);
+    assertEquals(m[0][0], "v1.26.0");
+  });
+
+  it("denoland/deno_std", (t) => {
+    const s = `
+      const deno = "v1.26.0" # @denopendabot denoland/deno
+      const deno_std = "0.158.0" # @denopendabot denoland/deno_std
+    `;
+    const m = Array.from(s.matchAll(versionRegExp(t.name)));
+
+    assertEquals(m.length, 1);
+    assertEquals(m[0][0], "0.158.0");
+  });
 });
 
-Deno.test("getUpdateSpecs", async () => {
-  const specs = await getRepoUpdateSpecs(content());
+describe("getUpdateSpecs", async () => {
+  const s = `
+    const deno = "v1.26.0" # @denopendabot denoland/deno
+    const deno_std = "0.158.0" # @denopendabot denoland/deno_std
+  `;
+  const specs = await getRepoUpdateSpecs(s);
+
   assertEquals(specs.length, 2);
-  assertEquals(specs[0].name, repo);
-  assertEquals(specs[0].initial, initial);
+
+  assertEquals(specs[0].name, "denoland/deno");
+  assertEquals(specs[0].initial, "v1.26.0");
+
   assertEquals(specs[1].name, "denoland/deno_std");
   assertEquals(specs[1].initial, "0.158.0");
 });
 
-Deno.test("getUpdateSpecs (release)", async () => {
-  const specs = await getRepoUpdateSpecs(content(), {
-    name: repo,
-    target,
+describe("getUpdateSpecs (release)", async () => {
+  const s = `
+    const deno = "v1.26.0" # @denopendabot denoland/deno
+    const deno_std = "0.158.0" # @denopendabot denoland/deno_std
+  `;
+  const specs = await getRepoUpdateSpecs(s, {
+    name: "denoland/deno",
+    target: "v2.0.0",
   });
   assertEquals(specs.length, 1);
-  assertEquals(specs[0].name, repo);
-  assertEquals(specs[0].initial, initial);
-  assertEquals(specs[0].target, target);
+
+  assertEquals(specs[0].name, "denoland/deno");
+  assertEquals(specs[0].initial, "v1.26.0");
+  assertEquals(specs[0].target, "v2.0.0");
 });
 
-Deno.test("Update.content", () => {
-  const spec: UpdateSpec = { name: repo, target };
-  const update = new RepoUpdate("README.md", spec);
+describe("Update.content", () => {
+  const s = `
+    const deno = "v1.26.0" # @denopendabot denoland/deno
+    const deno_std = "0.158.0" # @denopendabot denoland/deno_std
+  `;
+  const spec: UpdateSpec = { name: "denoland/deno", target: "v2.0.0" };
+  const update = new RepoUpdate("mod.ts", spec);
+
   assertEquals(
-    update.content(content()),
-    content(target),
+    update.content(s),
+    s.replace("v1.26.0", "v2.0.0"),
   );
 });
