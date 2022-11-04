@@ -1,5 +1,5 @@
-import { extname } from "https://deno.land/std@0.161.0/path/mod.ts";
-import { minOf } from "https://deno.land/std@0.161.0/collections/min_of.ts";
+import { extname } from "https://deno.land/std@0.162.0/path/mod.ts";
+import { minOf } from "https://deno.land/std@0.162.0/collections/min_of.ts";
 
 export const semverRegExp = /v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)/;
 
