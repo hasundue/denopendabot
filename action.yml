@@ -89,7 +89,7 @@ runs:
       if: ${{ inputs.mode == 'action' }}
       uses: denoland/setup-deno@v1
       with:
-        deno-version: v1.27.0 # @denopendabot denoland/deno
+        deno-version: v1.27.1 # @denopendabot denoland/deno
 
     - name: Run Denopendabot from the CLI
       if: ${{ inputs.mode == 'action' }}
