@@ -29,7 +29,7 @@ jobs:
         id: run
         run: >
           deno run -q --allow-env --allow-net --allow-write
-          https://deno.land/x/denomantic_release@0.6.1/main.ts
+          https://deno.land/x/denomantic_release@0.7.0/main.ts
           ${{ github.repository }}
           --token ${{ secrets.GITHUB_TOKEN }}
 
