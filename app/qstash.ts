@@ -1,4 +1,4 @@
-import { crypto } from "https://deno.land/std@0.162.0/crypto/mod.ts";
+import { crypto } from "https://deno.land/std@0.163.0/crypto/mod.ts";
 import { Receiver } from "https://deno.land/x/upstash_qstash@v0.1.8/pkg/receiver.ts";
 import { env } from "./env.ts";
 
