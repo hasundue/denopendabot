@@ -2,7 +2,7 @@ import {
   gt,
   prerelease,
   valid,
-} from "https://deno.land/std@0.163.0/semver/mod.ts";
+} from "https://deno.land/std@0.164.0/semver/mod.ts";
 import { lookup, REGISTRIES } from "https://deno.land/x/udd@0.8.1/registry.ts";
 import { importUrls } from "https://deno.land/x/udd@0.8.1/search.ts";
 import { semverRegExp, Update, UpdateSpec } from "./common.ts";
