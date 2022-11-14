@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.163.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.164.0/http/server.ts";
 import { Hono } from "https://deno.land/x/hono@v2.5.0/mod.ts";
 import { deployment, location } from "./app/deploy.ts";
 import { handler } from "./app/webhooks.ts";
