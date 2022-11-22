@@ -99,8 +99,8 @@ runs:
         ${{ inputs.repository }}
         --base-branch ${{ inputs.base-branch }}
         --working-branch ${{ inputs.working-branch }}
-        --root ${{ inputs.root }}
         --token ${{ inputs.token || github.token }}
+        ${{ inputs.root && format('--root {0}', inputs.root) }}
         ${{ inputs.user-token && format('--user-token {0}', inputs.user-token) }}
         ${{ inputs.include && format('--include {0}', inputs.include) }}
         ${{ inputs.exclude && format('--exclude {0}', inputs.exclude) }}
