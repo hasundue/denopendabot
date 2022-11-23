@@ -1,3 +1,4 @@
 .env
 private-key.pem
 private-key-pkcs8.key
+deno.lock
