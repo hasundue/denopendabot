@@ -1,4 +1,4 @@
-import { configSync } from "https://deno.land/std@0.165.0/dotenv/mod.ts";
+import { configSync } from "https://deno.land/std@0.166.0/dotenv/mod.ts";
 
 type Env = {
   CI?: string;
