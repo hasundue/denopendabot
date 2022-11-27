@@ -94,7 +94,7 @@ Deno.test("run update", async () => {
   console.info("Dispatched a 'denopendabot-run' event");
 
   // wait for a moment until the app completes the routine
-  await delay(30 * 1000);
+  await delay(10 * 1000);
 
   // check if a pull request has been created
   const { data: prs } = await octokit.request(
@@ -107,17 +107,17 @@ Deno.test("run update", async () => {
     pr.base.ref === base &&
     pr.head.ref === working
   );
-  assert(created);
+  assert(created, "Pull request has not been created");
 
   // wait for a minute until the app completes merging the pull request
-  await delay(60 * 1000);
+  await delay(30 * 1000);
 
   // check if the pull request has been merged
   const { data: pr } = await octokit.request(
     "GET /repos/{owner}/{repo}/pulls/{pull_number}",
     { owner, repo, pull_number: created.number },
   );
-  assert(pr.merged);
+  assert(pr.merged, "Pull request has not been merged");
 
   await github.deleteBranch(working);
 });
