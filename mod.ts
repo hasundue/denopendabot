@@ -38,6 +38,10 @@ const getUserToken = (options?: GlobalOptions) => {
   return envUserToken ?? rawUserToken;
 };
 
+const defaultExcludePaths = [
+  "deno.lock",
+] as const;
+
 interface UpdateOptions {
   include?: string[];
   exclude?: string[];
@@ -59,7 +63,7 @@ export async function getUpdates(
 
   const paths = baseTree.map((blob) => blob.path!);
   const pathsToInclude = options?.include || paths;
-  const pathsToExclude = options?.exclude || [];
+  const pathsToExclude = options?.exclude || defaultExcludePaths;
 
   const pathsToUpdate = withoutAll(
     intersect(paths, pathsToInclude),
