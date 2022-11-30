@@ -27,7 +27,7 @@ jobs:
           force: true
 
       - name: Dispatch CI
-        uses: benc-uk/workflow-dispatch@v1
+        uses: benc-uk/workflow-dispatch@v121
         with:
           workflow: CI
           token: ${{ secrets.GH_TOKEN }}
@@ -40,7 +40,7 @@ jobs:
       startsWith(github.event.head_commit.message, 'build(version)')
     runs-on: ubuntu-latest
     steps:
-      - uses: benc-uk/workflow-dispatch@v1
+      - uses: benc-uk/workflow-dispatch@v121
         with:
           workflow: CD
           token: ${{ secrets.GH_TOKEN }}

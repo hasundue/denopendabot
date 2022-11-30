@@ -42,7 +42,7 @@ jobs:
     needs: integration
     runs-on: ubuntu-latest
     steps:
-      - uses: benc-uk/workflow-dispatch@v1
+      - uses: benc-uk/workflow-dispatch@v121
         with:
           workflow: CD
           token: ${{ secrets.GH_TOKEN }}
