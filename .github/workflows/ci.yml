@@ -8,6 +8,11 @@ on:
       - '**.md'
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
 jobs:
   test:
     name: Test
@@ -17,19 +22,18 @@ jobs:
 
   deploy:
     name: Staging
+    needs: test
     if: >-
       github.event_name == 'workflow_dispatch' ||
       github.event.pull_request.user.login == 'hasundue' ||
-      github.event.pull_request.user.login == 'denopendabot[bot]' &&
-      !startsWith(github.event.pull_request.title, 'build(version)')
+      github.event.pull_request.user.login == 'dependabot[bot]' ||
+      github.event.pull_request.user.login == 'denopendabot[bot]'
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
 
   integration:
     name: Integration
-    needs: 
-      - test
-      - deploy
+    needs: deploy
     uses: ./.github/workflows/integration.yml
     secrets: inherit
 
