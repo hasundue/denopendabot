@@ -26,7 +26,6 @@ jobs:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       github.event.pull_request.user.login == 'hasundue' ||
-      github.event.pull_request.user.login == 'dependabot[bot]' ||
       github.event.pull_request.user.login == 'denopendabot[bot]'
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
