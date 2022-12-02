@@ -19,7 +19,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.28.2 # @denopendabot denoland/deno
+          deno-version: v1.28.3 # @denopendabot denoland/deno
 
       - name: Cache dependencies
         run: deno cache -q integration/mod_test.ts
@@ -38,7 +38,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.28.2 # @denopendabot denoland/deno
+          deno-version: v1.28.3 # @denopendabot denoland/deno
 
       - name: Setup the test
         run: deno run -q -A integration/action_setup.ts
@@ -66,7 +66,7 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.28.2 # @denopendabot denoland/deno
+          deno-version: v1.28.3 # @denopendabot denoland/deno
 
       - name: Cache dependencies
         run: deno cache -q integration/app_test.ts

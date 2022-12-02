@@ -1,5 +1,5 @@
 import { crypto } from "https://deno.land/std@0.166.0/crypto/mod.ts";
-import { Receiver } from "https://deno.land/x/upstash_qstash@v0.3.0/pkg/receiver.ts";
+import { Receiver } from "https://deno.land/x/upstash_qstash@v0.3.1/pkg/receiver.ts";
 import { env } from "./env.ts";
 
 const QSTASH_URL = "https://qstash.upstash.io/v1";
