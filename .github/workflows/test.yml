@@ -10,7 +10,10 @@ on:
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CI_MAIN: >-
-    ${{ github.base_ref == 'main' || github.event_name == 'workflow_dispatch' || '' }}
+    ${{ github.base_ref == 'main' && (
+          github.event.pull_request.user.login == 'hasundue' ||
+          github.event.pull_request.user.login == 'denopendabot[bot]'
+        ) || github.event_name == 'workflow_dispatch' || '' }}
 
 jobs:
   test:
