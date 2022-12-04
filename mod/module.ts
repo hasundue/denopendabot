@@ -9,7 +9,7 @@ import { semverRegExp, Update, UpdateSpec } from "./common.ts";
 
 function parseUrl(url: string): { name: string; version: string } {
   const regexp = RegExp(
-    "(?<=^https?://)(\\S+)@(" + semverRegExp.source + ")?",
+    "(?<=^https?://|^npm:)(\\S+)@(" + semverRegExp.source + ")?",
   );
   const match = url.match(regexp);
   if (!match) throw Error(`Invalid url: ${url}`);

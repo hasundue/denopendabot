@@ -8,6 +8,7 @@ const github = new GitHubClient();
 const latest = {
   flat: await github.getLatestRelease("githubocto/flat-postprocessing"),
   lambda: await github.getLatestRelease("hayd/deno-lambda"),
+  express: await github.getLatestRelease("expressjs/express"),
 };
 
 // @denopendabot ignore-start
@@ -66,6 +67,31 @@ Deno.test("getUpdateSpec (release)", async () => {
   assertEquals(specs.length, 1);
   assertEquals(specs[0].name, `deno.land/x/denopendabot`);
   assertEquals(specs[0].target, "1.0.0");
+});
+
+Deno.test("getUpdateSpec/Update (npm)", async () => {
+  const input = `
+    import express from "npm:express@3.5.3";
+    `;
+
+  const specs = await getModuleUpdateSpecs(input);
+
+  assertEquals(specs.length, 1);
+  assertEquals(specs[0].target, latest.express);
+
+  const updates = specs.map((it) => new ModuleUpdate("deps.ts", it));
+
+  assertEquals(updates[0].spec.name, `express`);
+  assertEquals(
+    updates[0].spec.url,
+    `npm:express@3.5.3`,
+  );
+  assertEquals(
+    updates[0].content(input),
+    `
+    import express from "npm:express@${latest.express}";
+    `,
+  );
 });
 
 // @denopendabot ignore-end
