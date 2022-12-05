@@ -3,17 +3,22 @@ import {
   prerelease,
   valid,
 } from "https://deno.land/std@0.167.0/semver/mod.ts";
-import { lookup, REGISTRIES } from "https://deno.land/x/udd@0.8.2/registry.ts";
+import {
+  defaultName,
+  lookup,
+  REGISTRIES,
+  RegistryUrl,
+} from "https://deno.land/x/udd@0.8.2/registry.ts";
 import { importUrls } from "https://deno.land/x/udd@0.8.2/search.ts";
-import { semverRegExp, Update, UpdateSpec } from "./common.ts";
+import { Update, UpdateSpec } from "./common.ts";
 
-function parseUrl(url: string): { name: string; version: string } {
-  const regexp = RegExp(
-    "(?<=^https?://|^npm:)(\\S+)@(" + semverRegExp.source + ")?",
-  );
-  const match = url.match(regexp);
-  if (!match) throw Error(`Invalid url: ${url}`);
-  return { name: match[1], version: match[2] };
+function parseName(url: RegistryUrl) {
+  try {
+    // @ts-ignore use a method name() if exists
+    return url.name() as string;
+  } catch {
+    return defaultName(url);
+  }
 }
 
 export class ModuleUpdate extends Update {
@@ -48,7 +53,9 @@ export async function getModuleUpdateSpecs(
   for (const registry of registries) {
     if (!registry) continue;
 
-    const { name, version: initial } = parseUrl(registry.url);
+    const name = parseName(registry);
+    const initial = registry.version();
+
     if (release && !name.startsWith(release.name)) continue;
 
     const latest = release

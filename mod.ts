@@ -82,7 +82,7 @@ export async function getUpdates(
     // TS/JS modules
     const moduleName = repository.split("/")[1].replaceAll("-", "_");
     const moduleReleaseSpec = options?.release
-      ? { name: `deno.land/x/${moduleName}`, target: options.release }
+      ? { name: moduleName, target: options.release }
       : undefined;
     const moduleSpecs = await getModuleUpdateSpecs(
       contentToUpdate,

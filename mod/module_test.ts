@@ -27,10 +27,10 @@ Deno.test("getUpdateSpec/Update", async () => {
 
   const updates = specs.map((it) => new ModuleUpdate("deps.ts", it));
 
-  assertEquals(updates[0].spec.name, `deno.land/x/flat`);
+  assertEquals(updates[0].spec.name, "flat");
   assertEquals(
     updates[0].spec.url,
-    `https://deno.land/x/flat@0.0.14/mod.ts`,
+    "https://deno.land/x/flat@0.0.14/mod.ts",
   );
   assertEquals(
     updates[0].content(input),
@@ -39,10 +39,10 @@ Deno.test("getUpdateSpec/Update", async () => {
     import { Context } from "https://deno.land/x/lambda@1.26.0/mod.ts";
     `,
   );
-  assertEquals(updates[1].spec.name, `deno.land/x/lambda`);
+  assertEquals(updates[1].spec.name, "lambda");
   assertEquals(
     updates[1].spec.url,
-    `https://deno.land/x/lambda@1.26.0/mod.ts`,
+    "https://deno.land/x/lambda@1.26.0/mod.ts",
   );
   assertEquals(
     updates[1].content(input),
@@ -60,12 +60,12 @@ Deno.test("getUpdateSpec (release)", async () => {
     `;
 
   const specs = await getModuleUpdateSpecs(input, {
-    name: "deno.land/x/denopendabot",
+    name: "denopendabot",
     target: "1.0.0",
   });
 
   assertEquals(specs.length, 1);
-  assertEquals(specs[0].name, `deno.land/x/denopendabot`);
+  assertEquals(specs[0].name, "denopendabot");
   assertEquals(specs[0].target, "1.0.0");
 });
 
@@ -81,7 +81,7 @@ Deno.test("getUpdateSpec/Update (npm)", async () => {
 
   const updates = specs.map((it) => new ModuleUpdate("deps.ts", it));
 
-  assertEquals(updates[0].spec.name, `express`);
+  assertEquals(updates[0].spec.name, "express");
   assertEquals(
     updates[0].spec.url,
     `npm:express@3.5.3`,
