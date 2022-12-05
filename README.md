@@ -110,7 +110,7 @@ jobs:
     name: Update
     runs-on: ubuntu-latest
     steps:
-      - uses: hasundue/denopendabot@0.13.0 # @denopendabot hasundue/denopendabot
+      - uses: hasundue/denopendabot@0.14.0 # @denopendabot hasundue/denopendabot
         with:
           user-token: ${{ secrets.GH_TOKEN }} # needed for updating workflows
 ```
