@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.167.0/http/server.ts";
-import { Hono } from "https://deno.land/x/hono@v2.5.10/mod.ts";
+import { Hono } from "https://deno.land/x/hono@v2.6.0/mod.ts";
 import { deployment, location } from "./app/deploy.ts";
 import { handler } from "./app/webhooks.ts";
 import { verifyRequest } from "./app/qstash.ts";
