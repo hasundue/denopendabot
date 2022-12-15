@@ -2,7 +2,7 @@ import {
   gt,
   prerelease,
   valid,
-} from "https://deno.land/std@0.167.0/semver/mod.ts";
+} from "https://deno.land/std@0.168.0/semver/mod.ts";
 import {
   defaultName,
   lookup,
