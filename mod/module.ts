@@ -1,3 +1,4 @@
+import { distinct } from "https://deno.land/std@0.168.0/collections/distinct.ts";
 import {
   gt,
   prerelease,
@@ -12,13 +13,31 @@ import {
 import { importUrls } from "https://deno.land/x/udd@0.8.2/search.ts";
 import { Update, UpdateSpec } from "./common.ts";
 
-function parseName(url: RegistryUrl) {
+interface PackageInfo {
+  parts: string[];
+  scope: string;
+  packageName: string;
+  version: string;
+}
+
+function parseName(registry: RegistryUrl) {
+  let name: string;
   try {
     // @ts-ignore use a method name() if exists
-    return url.name() as string;
+    name = registry.name() as string;
   } catch {
-    return defaultName(url);
+    try {
+      // @ts-ignore use a method parts() if exists
+      const { scope, packageName } = registry.parts() as PackageInfo;
+      name = `${scope}/${packageName}`;
+    } catch {
+      name = defaultName(registry);
+    }
   }
+  if (!name) {
+    throw new Error(`Could not find a module name for ${registry.url}`);
+  }
+  return name;
 }
 
 export class ModuleUpdate extends Update {
@@ -46,7 +65,9 @@ export async function getModuleUpdateSpecs(
   input: string,
   release?: UpdateSpec,
 ): Promise<ModuleUpdateSpec[]> {
-  const urls = importUrls(input, REGISTRIES);
+  // We need distinct() for some reason
+  const urls = distinct(importUrls(input, REGISTRIES));
+
   const registries = urls.map((url) => lookup(url, REGISTRIES));
   const specs: ModuleUpdateSpec[] = [];
 
@@ -54,8 +75,9 @@ export async function getModuleUpdateSpecs(
     if (!registry) continue;
 
     const name = parseName(registry);
-    const initial = registry.version();
+    if (!name) continue;
 
+    const initial = registry.version();
     if (release && !name.startsWith(release.name)) continue;
 
     const latest = release

@@ -9,11 +9,12 @@ const latest = {
   flat: await github.getLatestRelease("githubocto/flat-postprocessing"),
   lambda: await github.getLatestRelease("hayd/deno-lambda"),
   express: await github.getLatestRelease("expressjs/express"),
+  octokit: await github.getLatestRelease("octokit/core.js"),
 };
 
 // @denopendabot ignore-start
 
-Deno.test("getUpdateSpec/Update", async () => {
+Deno.test("deno.land", async () => {
   const input = `
     import { readJSON } from "https://deno.land/x/flat@0.0.14/mod.ts";
     import { Context } from "https://deno.land/x/lambda@1.26.0/mod.ts";
@@ -53,7 +54,7 @@ Deno.test("getUpdateSpec/Update", async () => {
   );
 });
 
-Deno.test("getUpdateSpec (release)", async () => {
+Deno.test("release", async () => {
   const input = `
     const url1 = "https://deno.land/std@0.158.0/testing/mod.ts";
     const url2 = "https://deno.land/x/denopendabot@${VERSION}/cli.ts";
@@ -69,7 +70,7 @@ Deno.test("getUpdateSpec (release)", async () => {
   assertEquals(specs[0].target, "1.0.0");
 });
 
-Deno.test("getUpdateSpec/Update (npm)", async () => {
+Deno.test("npm", async () => {
   const input = `
     import express from "npm:express@3.5.3";
     `;
@@ -90,6 +91,32 @@ Deno.test("getUpdateSpec/Update (npm)", async () => {
     updates[0].content(input),
     `
     import express from "npm:express@${latest.express}";
+    `,
+  );
+});
+
+Deno.test("esm.sh", async () => {
+  const latestRelease = latest.octokit?.slice(1);
+
+  const input = `
+    import { Octokit } from "https://esm.sh/@octokit/core@4.0.0";
+    `;
+  const specs = await getModuleUpdateSpecs(input);
+
+  assertEquals(specs.length, 1);
+  assertEquals(specs[0].target, latestRelease);
+
+  const updates = specs.map((it) => new ModuleUpdate("deps.ts", it));
+
+  assertEquals(updates[0].spec.name, "@octokit/core");
+  assertEquals(
+    updates[0].spec.url,
+    `https://esm.sh/@octokit/core@4.0.0`,
+  );
+  assertEquals(
+    updates[0].content(input),
+    `
+    import { Octokit } from "https://esm.sh/@octokit/core@${latestRelease}";
     `,
   );
 });
