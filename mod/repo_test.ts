@@ -99,20 +99,32 @@ describe("versionRegExp", () => {
   });
 });
 
-describe("getUpdateSpecs", async () => {
-  const s = `
-    const deno = "v1.26.0" # @denopendabot denoland/deno
-    const deno_std = "0.158.0" # @denopendabot denoland/deno_std
-  `;
-  const specs = await getRepoUpdateSpecs(s);
+describe("getUpdateSpecs", () => {
+  it("denoland/deno, denoland/deno_std", async () => {
+    const s = `
+      const deno = "v1.26.0" # @denopendabot denoland/deno
+      const deno_std = "0.158.0" # @denopendabot denoland/deno_std
+    `;
+    const specs = await getRepoUpdateSpecs(s);
 
-  assertEquals(specs.length, 2);
+    assertEquals(specs.length, 2);
 
-  assertEquals(specs[0].name, "denoland/deno");
-  assertEquals(specs[0].initial, "v1.26.0");
+    assertEquals(specs[0].name, "denoland/deno");
+    assertEquals(specs[0].initial, "v1.26.0");
 
-  assertEquals(specs[1].name, "denoland/deno_std");
-  assertEquals(specs[1].initial, "0.158.0");
+    assertEquals(specs[1].name, "denoland/deno_std");
+    assertEquals(specs[1].initial, "0.158.0");
+  });
+
+  it("cloudflare/wrangler2", async () => {
+    const s = "2.1.6 <!-- @denopendabot cloudflare/wrangler2";
+    const specs = await getRepoUpdateSpecs(s);
+
+    assertEquals(specs.length, 1);
+
+    assertEquals(specs[0].name, "cloudflare/wrangler2");
+    assertEquals(specs[0].initial, "2.1.6");
+  });
 });
 
 describe("getUpdateSpecs (release)", async () => {
