@@ -2,8 +2,9 @@ import { assertEquals } from "https://deno.land/std@0.170.0/testing/asserts.ts";
 import { getModuleUpdateSpecs, ModuleUpdate } from "./module.ts";
 import { VERSION } from "./version.ts";
 import { GitHubClient } from "./octokit.ts";
+import { env } from "./env.ts";
 
-const github = new GitHubClient();
+const github = new GitHubClient({ token: env.GITHUB_TOKEN });
 
 const latest = {
   flat: await github.getLatestRelease("githubocto/flat-postprocessing"),
