@@ -8,7 +8,7 @@ export const regexp = (
   version = semverRegExp.source,
 ) =>
   RegExp(
-    "(^.*[^v]|^)(" + version + ")(.+@denopendabot\\s+)(" + repo + ")($|\\s.*$)",
+    "(" + version + ")(.+@denopendabot\\s+)(" + repo + ")($|\\s.*$)",
     "mg",
   );
 
@@ -17,7 +17,7 @@ export const versionRegExp = (
   version = semverRegExp.source,
 ) =>
   RegExp(
-    "(?<=^.*[^v]|^)" + version + "(?=.+@denopendabot\\s+" + repo +
+    "(" + version + ")(?=.+@denopendabot\\s+" + repo +
       "($|\\s.*$))",
     "mg",
   );
@@ -41,9 +41,9 @@ export async function getRepoUpdateSpecs(
   const specs: UpdateSpec[] = [];
 
   for (const match of matches) {
-    const name = match[7];
+    const name = match[6];
 
-    const initial = match[2];
+    const initial = match[1];
     const target = (release?.name === name)
       ? release.target
       : await ensuredGitHub.getLatestRelease(name);
