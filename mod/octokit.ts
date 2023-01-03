@@ -248,7 +248,8 @@ export class GitHubClient {
         { owner, repo },
       );
       return release.tag_name;
-    } catch {
+    } catch (e) {
+      console.info(e);
       return null;
     }
   }
