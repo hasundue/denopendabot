@@ -27,6 +27,18 @@ jobs:
           project: denopendabot
           entrypoint: ./app.ts
 
+      - name: hoge
+        uses: hasundue/actions-deno-script@v3
+        with:
+          script: |
+            const a = hoge;
+
+      - name: Push deployment ID and URL to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with: 
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./app/pages
+
       - name: Set the deployment ID on Upstash
         run: >
           curl -X POST -d '${{ steps.deploy.outputs.deployment-id }}'
