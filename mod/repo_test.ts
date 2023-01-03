@@ -22,12 +22,12 @@ describe("regexp", () => {
     const m = Array.from(s.matchAll(regexp()));
 
     assert(m[0]);
-    assertEquals(m[0][2], "v1.26.0");
-    assertEquals(m[0][7], "denoland/deno");
+    assertEquals(m[0][1], "v1.26.0");
+    assertEquals(m[0][6], "denoland/deno");
 
     assert(m[1]);
-    assertEquals(m[1][2], "0.158.0");
-    assertEquals(m[1][7], "denoland/deno_std");
+    assertEquals(m[1][1], "0.158.0");
+    assertEquals(m[1][6], "denoland/deno_std");
   });
 
   it("plain text in markdown", () => {
@@ -38,12 +38,12 @@ describe("regexp", () => {
     const m = Array.from(s.matchAll(regexp()));
 
     assert(m[0]);
-    assertEquals(m[0][2], "v1.26.0");
-    assertEquals(m[0][7], "denoland/deno");
+    assertEquals(m[0][1], "v1.26.0");
+    assertEquals(m[0][6], "denoland/deno");
 
     assert(m[1]);
-    assertEquals(m[1][2], "0.158.0");
-    assertEquals(m[1][7], "denoland/deno_std");
+    assertEquals(m[1][1], "0.158.0");
+    assertEquals(m[1][6], "denoland/deno_std");
   });
 
   it("badges in markdown", () => {
@@ -54,12 +54,12 @@ describe("regexp", () => {
     const m = Array.from(s.matchAll(regexp()));
 
     assert(m[0]);
-    assertEquals(m[0][2], "v1.26.0");
-    assertEquals(m[0][7], "denoland/deno");
+    assertEquals(m[0][1], "v1.26.0");
+    assertEquals(m[0][6], "denoland/deno");
 
     assert(m[1]);
-    assertEquals(m[1][2], "0.158.0");
-    assertEquals(m[1][7], "denoland/deno_std");
+    assertEquals(m[1][1], "0.158.0");
+    assertEquals(m[1][6], "denoland/deno_std");
   });
 
   it("GitHub Action", () => {
@@ -70,8 +70,8 @@ describe("regexp", () => {
     `;
     const m = Array.from(s.matchAll(regexp()));
     assert(m[0]);
-    assertEquals(m[0][2], "v1.26.0");
-    assertEquals(m[0][7], "denoland/deno");
+    assertEquals(m[0][1], "v1.26.0");
+    assertEquals(m[0][6], "denoland/deno");
   });
 });
 
@@ -124,6 +124,17 @@ describe("getUpdateSpecs", () => {
 
     assertEquals(specs[0].name, "cloudflare/wrangler2");
     assertEquals(specs[0].initial, "2.1.6");
+  });
+
+  it("nodejs/node", async () => {
+    const s = "v16.7.0 <!-- @denopendabot nodejs/node";
+    const specs = await getRepoUpdateSpecs(s);
+    console.log(specs);
+
+    assertEquals(specs.length, 1);
+
+    assertEquals(specs[0].name, "nodejs/node");
+    assertEquals(specs[0].initial, "v16.7.0");
   });
 });
 
