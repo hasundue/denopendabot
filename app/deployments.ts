@@ -22,7 +22,7 @@ export const parseID = (url: string) => {
   return matched[0];
 };
 
-const getDeployments = async () => {
+export const getDeployments = async () => {
   const res = await octokit.request(
     "GET /repos/{owner}/{repo}/deployments",
     { owner, repo },

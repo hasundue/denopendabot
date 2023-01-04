@@ -1,10 +1,11 @@
 import {
+  assert,
   assertEquals,
   assertThrows,
 } from "https://deno.land/std@0.170.0/testing/asserts.ts";
 import { describe, it } from "https://deno.land/std@0.170.0/testing/bdd.ts";
 
-import { parseID } from "./deployments.ts";
+import { getDeployments, parseID } from "./deployments.ts";
 
 describe("parseID", () => {
   it("URL with an ID", () => {
@@ -18,4 +19,9 @@ describe("parseID", () => {
       () => parseID("https://denopendabot.deno.dev"),
     );
   });
+});
+
+describe("getDeployments", async () => {
+  const deployments = await getDeployments();
+  assert(deployments);
 });
