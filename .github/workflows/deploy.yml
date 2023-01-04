@@ -26,15 +26,3 @@ jobs:
         with:
           project: denopendabot
           entrypoint: ./app.ts
-
-      - name: Set the deployment ID on Upstash
-        run: >
-          curl -X POST -d '${{ steps.deploy.outputs.deployment-id }}'
-          ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/${{ env.deployment }}-id
-          -H "Authorization: Bearer ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}"
-
-      - name: Set the deployment URL on Upstash
-        run: >
-          curl -X POST -d '${{ steps.deploy.outputs.url }}'
-          ${{ secrets.UPSTASH_REDIS_REST_URL }}/set/${{ env.deployment }}-url
-          -H "Authorization: Bearer ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}"
