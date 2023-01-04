@@ -27,6 +27,7 @@ export const getDeployments = async () => {
     "GET /repos/{owner}/{repo}/deployments",
     { owner, repo },
   );
+  console.debug(res);
   const data = {
     production: res.data.filter((it) => it.environment === "Production")[0],
     staging: res.data.filter((it) => it.environment === "Preview")[0],

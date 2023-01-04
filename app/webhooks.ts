@@ -18,7 +18,6 @@ const app = new App({
     secret: env.WEBHOOK_SECRET,
   },
 });
-console.debug(app);
 
 export const octokit = await app.getInstallationOctokit(
   parseInt(env.INSTALLATION_ID),
