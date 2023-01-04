@@ -22,11 +22,16 @@ export const parseID = (url: string) => {
   return matched[0];
 };
 
-const getDeployments = async () => {
+export const getDeployments = async () => {
   const res = await octokit.request(
     "GET /repos/{owner}/{repo}/deployments",
     { owner, repo },
   );
+  if (!res) {
+    throw new Error(
+      `❗ Could not obtain deployments information from ${owner}/${repo}`,
+    );
+  }
   const data = {
     production: res.data.filter((it) => it.environment === "Production")[0],
     staging: res.data.filter((it) => it.environment === "Preview")[0],

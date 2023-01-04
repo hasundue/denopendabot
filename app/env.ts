@@ -21,11 +21,17 @@ type Env = {
 };
 
 const getEnv = () => {
+  let env: Env;
+
   if (Deno.env.get("CI") || Deno.env.get("DENO_DEPLOYMENT_ID")) {
-    return Deno.env.toObject() as Env;
+    env = Deno.env.toObject() as Env;
   } else {
-    return loadSync({ export: true }) as Env;
+    env = loadSync({ export: true }) as Env;
   }
+  // Do this because Deno Deploy escapes line breaks of environment variables
+  env.PRIVATE_KEY = env.PRIVATE_KEY.replaceAll("\\n", "\n");
+
+  return env;
 };
 
 export const env = getEnv();
