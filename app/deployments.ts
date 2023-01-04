@@ -1,8 +1,6 @@
 import { env } from "./env.ts";
 import { octokit } from "./webhooks.ts";
 
-console.debug(env);
-
 const [owner, repo] = env.APP_REPO.split("/");
 
 const getURL = async (deployment_id: number) => {
