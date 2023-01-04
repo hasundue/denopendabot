@@ -5,8 +5,6 @@ import { handler } from "./app/webhooks.ts";
 
 const app = new Hono();
 
-console.debug(app);
-
 // copy and transfer all requests to the staging deployment
 app.use("*", async (context, next) => {
   const deploy = await deployment();
@@ -20,18 +18,12 @@ app.use("*", async (context, next) => {
   await next();
 });
 
-console.debug(app);
-
 app.get("/", (context) => context.text("Hello, I'm Denopendabot!"));
-
-console.debug(app);
 
 // handle webhooks with octokit
 app.post("/api/github/webhooks", async (context) => {
   await handler(context.req);
   return context.json(null, 200);
 });
-
-console.debug(app);
 
 await serve(app.fetch, { onListen: () => {} });

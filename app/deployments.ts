@@ -59,7 +59,9 @@ export type Deployment = "production" | "staging" | "preview";
 
 export const deployment = async (): Promise<Deployment> => {
   const id = env["DENO_DEPLOYMENT_ID"];
+  console.debug(id);
   const deployments = await getDeployments();
+  console.debug(deployments);
 
   if (id === deployments.production.id) {
     return "production";
