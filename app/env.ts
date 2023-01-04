@@ -35,5 +35,3 @@ const getEnv = () => {
 };
 
 export const env = getEnv();
-
-console.debug(env);
