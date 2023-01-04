@@ -1,6 +1,8 @@
 import { env } from "./env.ts";
 import { octokit } from "./webhooks.ts";
 
+console.debug(env);
+
 const [owner, repo] = env.APP_REPO.split("/");
 
 const getURL = async (deployment_id: number) => {
@@ -23,51 +25,47 @@ export const parseID = (url: string) => {
 };
 
 export const getDeployments = async () => {
-  try {
-    const res = await octokit.request(
-      "GET /repos/{owner}/{repo}/deployments",
-      { owner, repo },
+  const res = await octokit.request(
+    "GET /repos/{owner}/{repo}/deployments",
+    { owner, repo },
+  );
+  if (!res) {
+    throw new Error(
+      `❗ Could not obtain deployments information from ${owner}/${repo}`,
     );
-    const data = {
-      production: res.data.filter((it) => it.environment === "Production")[0],
-      staging: res.data.filter((it) => it.environment === "Preview")[0],
-    };
-    const url = {
-      production: await getURL(data.production.id),
-      staging: await getURL(data.staging.id),
-    };
-    if (!url.production || !url.staging) {
-      throw new Error("Production or staging deployment not found");
-    }
-    const id = {
-      production: parseID(url.production),
-      staging: parseID(url.staging),
-    };
-    return {
-      production: {
-        id: id.production,
-        url: url.production,
-      },
-      staging: {
-        id: id.staging,
-        url: url.staging,
-      },
-    };
-  } catch (e) {
-    console.error(
-      `❗ could not obtain deployments information from ${owner}/${repo}`,
-    );
-    throw e;
   }
+  const data = {
+    production: res.data.filter((it) => it.environment === "Production")[0],
+    staging: res.data.filter((it) => it.environment === "Preview")[0],
+  };
+  const url = {
+    production: await getURL(data.production.id),
+    staging: await getURL(data.staging.id),
+  };
+  if (!url.production || !url.staging) {
+    throw new Error("Production or staging deployment not found");
+  }
+  const id = {
+    production: parseID(url.production),
+    staging: parseID(url.staging),
+  };
+  return {
+    production: {
+      id: id.production,
+      url: url.production,
+    },
+    staging: {
+      id: id.staging,
+      url: url.staging,
+    },
+  };
 };
 
 export type Deployment = "production" | "staging" | "preview";
 
 export const deployment = async (): Promise<Deployment> => {
   const id = env["DENO_DEPLOYMENT_ID"];
-  console.debug(id);
   const deployments = await getDeployments();
-  console.debug(deployments);
 
   if (id === deployments.production.id) {
     return "production";
