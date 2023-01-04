@@ -36,4 +36,4 @@ const getEnv = () => {
 
 export const env = getEnv();
 
-console.debug(env.PRIVATE_KEY);
+console.debug(env);
