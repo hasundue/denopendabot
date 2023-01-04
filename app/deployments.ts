@@ -23,36 +23,42 @@ export const parseID = (url: string) => {
 };
 
 export const getDeployments = async () => {
-  const res = await octokit.request(
-    "GET /repos/{owner}/{repo}/deployments",
-    { owner, repo },
-  );
-  console.debug(res);
-  const data = {
-    production: res.data.filter((it) => it.environment === "Production")[0],
-    staging: res.data.filter((it) => it.environment === "Preview")[0],
-  };
-  const url = {
-    production: await getURL(data.production.id),
-    staging: await getURL(data.staging.id),
-  };
-  if (!url.production || !url.staging) {
-    throw new Error("Production or staging deployment not found");
+  try {
+    const res = await octokit.request(
+      "GET /repos/{owner}/{repo}/deployments",
+      { owner, repo },
+    );
+    const data = {
+      production: res.data.filter((it) => it.environment === "Production")[0],
+      staging: res.data.filter((it) => it.environment === "Preview")[0],
+    };
+    const url = {
+      production: await getURL(data.production.id),
+      staging: await getURL(data.staging.id),
+    };
+    if (!url.production || !url.staging) {
+      throw new Error("Production or staging deployment not found");
+    }
+    const id = {
+      production: parseID(url.production),
+      staging: parseID(url.staging),
+    };
+    return {
+      production: {
+        id: id.production,
+        url: url.production,
+      },
+      staging: {
+        id: id.staging,
+        url: url.staging,
+      },
+    };
+  } catch (e) {
+    console.error(
+      `❗ could not obtain deployments information from ${owner}/${repo}`,
+    );
+    throw e;
   }
-  const id = {
-    production: parseID(url.production),
-    staging: parseID(url.staging),
-  };
-  return {
-    production: {
-      id: id.production,
-      url: url.production,
-    },
-    staging: {
-      id: id.staging,
-      url: url.staging,
-    },
-  };
 };
 
 export type Deployment = "production" | "staging" | "preview";
