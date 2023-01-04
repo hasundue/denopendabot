@@ -14,6 +14,7 @@ type Env = {
   INSTALLATION_ID: string;
 
   APP_ID: string;
+  PRIVATE_KEY: string;
   CLIENT_ID: string;
   CLIENT_SECRET: string;
   WEBHOOK_SECRET: string;

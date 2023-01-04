@@ -1,20 +1,15 @@
 import { intersect } from "https://deno.land/std@0.170.0/collections/intersect.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.1.0";
 import { App } from "https://esm.sh/@octokit/app@13.1.0";
-import type { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.4.0";
+import { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.4.0";
 import { env } from "./env.ts";
-import { privateKey } from "./redis.ts";
-import { Deployment, deployment } from "./deploy.ts";
+import { Deployment, deployment } from "./deployments.ts";
 import * as mod from "../mod.ts";
 import { GitHubClient } from "../mod/octokit.ts";
 
-if (!privateKey) {
-  throw Error("Private key is not deployed on Upstash Redis.");
-}
-
 const app = new App({
   appId: env.APP_ID,
-  privateKey,
+  privateKey: env.PRIVATE_KEY,
   oauth: {
     clientId: env.CLIENT_ID,
     clientSecret: env.CLIENT_SECRET,
@@ -23,6 +18,10 @@ const app = new App({
     secret: env.WEBHOOK_SECRET,
   },
 });
+
+export const octokit = await app.getInstallationOctokit(
+  parseInt(env.INSTALLATION_ID),
+);
 
 type ClientPayloadKeys =
   | "baseBranch"
