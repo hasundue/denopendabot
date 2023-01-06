@@ -46,6 +46,16 @@ Deno.test("getTree", async () => {
   assert(src.find((it) => it.path === "integration/src/deps.ts"));
 });
 
+Deno.test("getTreeWithSha", async () => {
+  const commit = await github.getLatestCommit(base);
+  const root = await github.getTreeWithSha(commit.sha);
+  assert(root.find((it) => it.path === "README.md"));
+
+  const src = await github.getTreeWithSha(commit.sha, "integration/src");
+  assert(!src.find((it) => it.path === "README.md"));
+  assert(src.find((it) => it.path === "integration/src/deps.ts"));
+});
+
 Deno.test("createBranch/deleteBranch", async () => {
   const baseBranch = await github.createBranch(base);
   assertEquals(baseBranch.name, base);
@@ -61,7 +71,7 @@ Deno.test("createBranch/deleteBranch", async () => {
 
 Deno.test("createPullRequest", async (t) => {
   const head = base + "-" + Date.now();
-  await github.createBranch(head, base);
+  const headBranch = await github.createBranch(head, base);
 
   const update = new ModuleUpdate("integration/src/deps.ts", {
     name: "deno.land/x/dax",
@@ -72,7 +82,11 @@ Deno.test("createPullRequest", async (t) => {
   const message = update.message();
 
   await t.step("createCommit", async () => {
-    const result = await github.createCommit(head, message, [update]);
+    const result = await github.createCommit(headBranch.commit.sha, message, [
+      update,
+    ]);
+    await github.updateBranch(head, result.sha);
+
     assertEquals(result.message, message);
   });
 

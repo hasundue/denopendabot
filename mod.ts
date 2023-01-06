@@ -133,17 +133,24 @@ export async function createCommits(
     : updates;
 
   const branch = options?.workingBranch ?? "denopendabot";
-  await github.createBranch(branch, options?.baseBranch);
+
+  const latest = await github.getLatestCommit(options?.baseBranch);
 
   const groupsByDep = groupBy(updatables, (it) => it.spec.name);
   const deps = Object.keys(groupsByDep);
 
   // create commits for each updated dependency
+  let sha = latest.sha;
   for (const dep of deps) {
     const updates = groupsByDep[dep]!;
     const message = updates[0].message();
-    await github.createCommit(branch, message, updates);
+    const commit = await github.createCommit(sha, message, updates);
+    sha = commit.sha;
   }
+
+  await github.createBranch(branch, options?.baseBranch);
+  await github.updateBranch(branch, sha);
+
   if (!authorized) {
     console.info(
       "📣 Skipped the workflow files since we are not authorized to update them.",

@@ -36,6 +36,8 @@ Deno.test("installation", async () => {
 
   // ensure the base branch
   await github.createBranch("test-install");
+  const latest = await github.getLatestCommit();
+  await github.updateBranch("test-install", latest.sha);
 
   const started_at = new Date();
 
