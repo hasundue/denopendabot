@@ -111,14 +111,18 @@ export class GitHubClient {
   }
 
   async getTree(branch: string, root?: string) {
-    const { owner, repo } = this.ensureRepository();
-
     const head = await this.getBranch(branch);
     if (!head) throw Error(`Branch ${branch} not found.`);
 
+    return await this.getTreeWithSha(head.commit.sha, root);
+  }
+
+  async getTreeWithSha(sha: string, root?: string) {
+    const { owner, repo } = this.ensureRepository();
+
     const { data } = await this.octokit.request(
       "GET /repos/{owner}/{repo}/git/trees/{tree_sha}",
-      { owner, repo, tree_sha: head.commit.sha, recursive: "true" },
+      { owner, repo, tree_sha: sha, recursive: "true" },
     );
     // we don't need the subtrees
     const blobs = data.tree.filter((it) => it.type === "blob");
@@ -140,23 +144,20 @@ export class GitHubClient {
   }
 
   async createCommit(
-    branch: string,
+    baseSha: string,
     message: string,
     updates: UpdateContent[],
   ) {
     const { owner, repo } = this.ensureRepository();
 
-    // ensure the target branch
-    const base = await this.createBranch(branch);
-
     // create a tree object for updated files
-    const baseTree = await this.getTree(branch);
+    const baseTree = await this.getTreeWithSha(baseSha);
     const blobs = await this.createBlobContents(updates, baseTree);
 
     // create a new tree on the target branch
     const { data: newTree } = await this.octokit.request(
       "POST /repos/{owner}/{repo}/git/trees",
-      { owner, repo, tree: blobs, base_tree: base.commit.sha },
+      { owner, repo, tree: blobs, base_tree: baseSha },
     );
     const author = {
       name: "denopendabot",
@@ -164,14 +165,12 @@ export class GitHubClient {
     };
     // create a new tree on the target branch
     const tree = newTree.sha;
-    const parents = [base.commit.sha];
+    const parents = [baseSha];
 
     const { data: commit } = await this.octokit.request(
       "POST /repos/{owner}/{repo}/git/commits",
       { owner, repo, message, author, tree, parents },
     );
-    // update the ref of the branch to the commit
-    await this.updateBranch(branch, commit.sha);
 
     console.debug(`📝 ${commit.message}`);
 
@@ -277,11 +276,7 @@ export class GitHubClient {
     const exists = await this.getBranch(branch);
 
     // update the branch and return if already exists
-    if (exists) {
-      const latest = await this.getLatestCommit(base);
-      await this.updateBranch(branch, latest.sha);
-      return exists;
-    }
+    if (exists) return exists;
     // get ref to the base branch
     const { data: baseRef } = await this.octokit.request(
       "GET /repos/{owner}/{repo}/git/ref/{ref}",
