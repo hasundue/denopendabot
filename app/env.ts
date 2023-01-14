@@ -1,4 +1,4 @@
-import { loadSync } from "https://deno.land/std@0.171.0/dotenv/mod.ts";
+import { loadSync } from "https://deno.land/std@0.172.0/dotenv/mod.ts";
 
 type Env = {
   CI?: string;
