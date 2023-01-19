@@ -1,4 +1,4 @@
-import { configSync } from "https://deno.land/std@0.172.0/dotenv/mod.ts";
+import { configSync } from "https://deno.land/std@0.173.0/dotenv/mod.ts";
 
 type Env = {
   DENO_DEPLOYMENT_ID?: string;
