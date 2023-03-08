@@ -40,12 +40,12 @@ export const getDeployments = async () => {
     production: await getURL(data.production.id),
     staging: await getURL(data.staging.id),
   };
-  if (!url.production || !url.staging) {
-    throw new Error("Production or staging deployment not found");
+  if (!url.production) {
+    throw new Error("No production deployment found");
   }
   const id = {
     production: parseID(url.production),
-    staging: parseID(url.staging),
+    staging: url.staging && parseID(url.staging),
   };
   return {
     production: {
