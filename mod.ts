@@ -139,6 +139,11 @@ export async function createCommits(
   const groupsByDep = groupBy(updatables, (it) => it.spec.name);
   const deps = Object.keys(groupsByDep);
 
+  if (deps.length === 0) {
+    console.info("🟢 No updates available, all dependencies are up to date.");
+    return;
+  }
+
   // create commits for each updated dependency
   let sha = latest.sha;
   for (const dep of deps) {
