@@ -121,5 +121,6 @@ Deno.test("run update", async () => {
   );
   assert(pr.merged, "Pull request has not been merged");
 
+  await github.deleteBranch(base);
   await github.deleteBranch(working);
 });
