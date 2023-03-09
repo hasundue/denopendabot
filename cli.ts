@@ -64,9 +64,7 @@ const updates = await getUpdates(repo, options);
 
 if (!updates.length) {
   console.info("🎉 Everything is up-to-date!");
-}
-
-if (!options.dryRun) {
+} else if (!options.dryRun) {
   await createCommits(repo, updates, options);
   await createPullRequest(repo, options);
 }

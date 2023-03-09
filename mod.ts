@@ -113,6 +113,10 @@ export async function createCommits(
   updates: Update[],
   options: GlobalOptions,
 ) {
+  if (updates.length === 0) {
+    throw new Error("❗ No updates available");
+  }
+
   const actionToken = getActionToken(options);
   const userToken = getUserToken(options);
 
