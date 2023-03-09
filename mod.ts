@@ -114,8 +114,7 @@ export async function createCommits(
   options: GlobalOptions,
 ) {
   if (updates.length === 0) {
-    console.info("🟢 No updates available, all dependencies are up to date.");
-    return;
+    throw new Error("❗ No updates available");
   }
 
   const actionToken = getActionToken(options);

@@ -193,6 +193,10 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
   };
 
   const updates = await mod.getUpdates(repository, options);
+  if (!updates.length) {
+    return;
+  }
+
   await mod.createCommits(repository, updates, options);
   await mod.createPullRequest(repository, options);
 });
