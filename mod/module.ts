@@ -1,9 +1,9 @@
-import { distinct } from "https://deno.land/std@0.179.0/collections/distinct.ts";
+import { distinct } from "https://deno.land/std@0.180.0/collections/distinct.ts";
 import {
   gt,
   prerelease,
   valid,
-} from "https://deno.land/std@0.179.0/semver/mod.ts";
+} from "https://deno.land/std@0.180.0/semver/mod.ts";
 import {
   defaultName,
   lookup,
