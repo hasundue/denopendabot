@@ -75,7 +75,7 @@ Deno.test("createPullRequest", async (t) => {
 
   const update = new ModuleUpdate("integration/src/deps.ts", {
     name: "deno.land/x/dax",
-    url: "https://deno.land/x/dax@0.30.0/mod.ts",
+    url: "https://deno.land/x/dax@0.30.1/mod.ts",
     initial: "0.14.0",
     target: (await github.getLatestRelease("dsherret/dax"))!,
   });
