@@ -14,4 +14,5 @@ const github = new GitHubClient({
   token: env.GITHUB_TOKEN,
 });
 
+await github.deleteBranch("test-action");
 await github.createBranch("test-action");

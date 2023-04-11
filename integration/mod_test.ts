@@ -16,6 +16,7 @@ const github = new GitHubClient({
 });
 
 Deno.test("integration (module)", async () => {
+  await github.deleteBranch(baseBranch);
   await github.createBranch(baseBranch);
 
   const workingBranch = baseBranch + "-" + env.GITHUB_REF_NAME;

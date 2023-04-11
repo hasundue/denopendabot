@@ -37,6 +37,20 @@ Deno.test("compareBranches", async () => {
   assert(commits);
 });
 
+Deno.test("createBranch/deleteBranch", async () => {
+  await github.deleteBranch(base);
+  const baseBranch = await github.createBranch(base);
+  assertEquals(baseBranch.name, base);
+
+  const head = base + "-" + Date.now();
+  const headBranch = await github.createBranch(head, base);
+  assertEquals(headBranch.name, head);
+
+  await github.deleteBranch(head);
+  const deleted = await github.getBranch(head);
+  assertEquals(deleted, null);
+});
+
 Deno.test("getTree", async () => {
   const root = await github.getTree(base);
   assert(root.find((it) => it.path === "README.md"));
@@ -54,19 +68,6 @@ Deno.test("getTreeWithSha", async () => {
   const src = await github.getTreeWithSha(commit.sha, "integration/src");
   assert(!src.find((it) => it.path === "README.md"));
   assert(src.find((it) => it.path === "integration/src/deps.ts"));
-});
-
-Deno.test("createBranch/deleteBranch", async () => {
-  const baseBranch = await github.createBranch(base);
-  assertEquals(baseBranch.name, base);
-
-  const head = base + "-" + Date.now();
-  const headBranch = await github.createBranch(head, base);
-  assertEquals(headBranch.name, head);
-
-  await github.deleteBranch(head);
-  const deleted = await github.getBranch(head);
-  assertEquals(deleted, null);
 });
 
 Deno.test("createPullRequest", async (t) => {
