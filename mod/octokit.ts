@@ -268,33 +268,32 @@ export class GitHubClient {
     return commits;
   }
 
+  /**
+   * Create a new branch from the base branch.
+   * Returns the sha of the new branch if successful.
+   */
   async createBranch(
     branch: string,
     base?: string,
-  ) {
+  ): Promise<string> {
     const { owner, repo } = this.ensureRepository();
-    const exists = await this.getBranch(branch);
 
-    // update the branch and return if already exists
-    if (exists) return exists;
+    const exists = await this.getBranch(branch);
+    if (exists) return exists.commit.sha;
+
     // get ref to the base branch
     const { data: baseRef } = await this.octokit.request(
       "GET /repos/{owner}/{repo}/git/ref/{ref}",
       { owner, repo, ref: "heads/" + (base ?? await this.defaultBranch()) },
     );
     // create a new branch (a new ref to an existing ref)
-    await this.octokit.request(
+    const { data: created } = await this.octokit.request(
       "POST /repos/{owner}/{repo}/git/refs",
       { owner, repo, ref: `refs/heads/${branch}`, sha: baseRef.object.sha },
     );
-    const created = await this.getBranch(branch);
-
-    if (!created) {
-      throw new Error(`Failed in creating a branch ${branch}`);
-    }
     console.info(`🔨 Created branch ${branch}`);
 
-    return created;
+    return created.object.sha;
   }
 
   async deleteBranch(branch: string) {

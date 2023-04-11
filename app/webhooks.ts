@@ -122,8 +122,8 @@ const createWorkflow = async (
   const message = "ci: setup Denopendabot";
   const content = await Deno.readTextFile("./app/denopendabot.yml");
 
-  const headBranch = await github.createBranch(head);
-  const commit = await github.createCommit(headBranch.commit.sha, message, [{
+  const headSha = await github.createBranch(head);
+  const commit = await github.createCommit(headSha, message, [{
     path: ".github/workflows/denopendabot.yml",
     content: () => content,
   }]);
