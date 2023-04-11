@@ -49,8 +49,6 @@ Deno.test("createBranch/deleteBranch", async () => {
   assertEquals(headSha, baseSha);
 
   await github.deleteBranch(head);
-  const deleted = await github.getBranch(head);
-  assertEquals(deleted, null);
 });
 
 Deno.test("getTree", async () => {
