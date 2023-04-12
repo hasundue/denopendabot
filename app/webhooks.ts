@@ -1,7 +1,7 @@
 import { intersect } from "https://deno.land/std@0.182.0/collections/intersect.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.2.0";
 import { App } from "https://esm.sh/@octokit/app@13.1.2";
-import { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.7.3";
+import { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@10.9.0";
 import { HonoRequest } from "https://deno.land/x/hono@v3.1.5/mod.ts";
 import { env } from "./env.ts";
 import { Deployment, deployment } from "./deployments.ts";
