@@ -1,4 +1,4 @@
-import { loadSync } from "https://deno.land/std@0.182.0/dotenv/mod.ts";
+import { loadSync } from "https://deno.land/std@0.183.0/dotenv/mod.ts";
 
 type Env = {
   DENO_DEPLOYMENT_ID?: string;
