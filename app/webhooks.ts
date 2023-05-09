@@ -192,9 +192,11 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
     release: inputs.release ?? undefined,
     labels,
   };
+  console.info("options:", options);
 
   const updates = await mod.getUpdates(repository, options);
   if (!updates.length) {
+    console.info(`👍 ${repository} is up to date`);
     return;
   }
 
