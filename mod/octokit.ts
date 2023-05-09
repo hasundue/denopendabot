@@ -1,3 +1,4 @@
+import { retry } from "https://deno.land/std@0.185.0/async/mod.ts";
 import { groupBy } from "https://deno.land/std@0.185.0/collections/group_by.ts";
 import { decode } from "https://deno.land/std@0.185.0/encoding/base64.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.2.0";
@@ -282,9 +283,11 @@ export class GitHubClient {
     if (exists) return exists.commit.sha;
 
     // get ref to the base branch
-    const { data: baseRef } = await this.octokit.request(
-      "GET /repos/{owner}/{repo}/git/ref/{ref}",
-      { owner, repo, ref: "heads/" + (base ?? await this.defaultBranch()) },
+    const { data: baseRef } = await retry(async () =>
+      this.octokit.request(
+        "GET /repos/{owner}/{repo}/git/ref/{ref}",
+        { owner, repo, ref: "heads/" + (base ?? await this.defaultBranch()) },
+      )
     );
     // create a new branch (a new ref to an existing ref)
     const { data: created } = await this.octokit.request(
