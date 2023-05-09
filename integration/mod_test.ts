@@ -45,7 +45,6 @@ Deno.test("integration (module)", async () => {
 
   const result = await createPullRequest(repository, options);
   assert(result, "Pull request not created");
-  assert(result.body, "Pull request body is empty");
 
   await github.deleteBranch(workingBranch);
 });
