@@ -61,17 +61,14 @@ Deno.test("app", async (t) => {
         "GET /repos/{owner}/{repo}/pulls",
         { owner, repo, state: "open" },
       );
-      const found = prs.find((pr) =>
+      const created = prs.find((pr) =>
         pr.user?.login === "denopendabot[bot]" &&
         new Date(pr.created_at) > started_at &&
         pr.title === "Setup Denopendabot"
       );
-      if (!found) {
-        throw new Error("Pull request has not been created");
-      }
-      return found;
+      assert(created, "Pull request has not been created");
+      return created;
     }, retryOptions);
-    assert(created);
 
     await github.deleteBranch(created.head.ref);
   });
@@ -108,31 +105,25 @@ Deno.test("app", async (t) => {
         "GET /repos/{owner}/{repo}/pulls",
         { owner, repo, state: "open" },
       );
-      const found = prs.find((pr) =>
+      const created = prs.find((pr) =>
         pr.user?.login === "denopendabot[bot]" &&
         new Date(pr.updated_at) > started_at &&
         pr.base.ref === base &&
         pr.head.ref === working
       );
-      if (!found) {
-        throw new Error("Pull request has not been created");
-      }
-      return found;
+      assert(created, "Pull request has not been created");
+      return created;
     }, retryOptions);
-    assert(created, "Pull request has not been created");
 
     // check if the pull request has been merged
-    const merged = await retry(async () => {
+    await retry(async () => {
       const { data: pr } = await octokit.request(
         "GET /repos/{owner}/{repo}/pulls/{pull_number}",
         { owner, repo, pull_number: created.number },
       );
-      if (!pr.merged) {
-        throw new Error("Pull request has not been merged");
-      }
+      assert(pr.merged, "Pull request has not been merged");
       return pr.merged;
     }, retryOptions);
-    assert(merged, "Pull request has not been merged");
 
     await github.deleteBranch(base);
     await github.deleteBranch(working);
