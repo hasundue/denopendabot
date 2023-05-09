@@ -13,7 +13,7 @@ const repository = env.GITHUB_REPOSITORY;
 const owner = env.GITHUB_REPOSITORY_OWNER;
 const repo = repository.split("/")[1];
 
-const retryOptions = { maxAttempts: 10, minTimeout: 10000, multiplier: 1 };
+const retryOptions = { maxAttempts: 60, minTimeout: 1000, multiplier: 1 };
 
 Deno.test("app", async (t) => {
   await t.step("installation", async () => {
@@ -61,11 +61,15 @@ Deno.test("app", async (t) => {
         "GET /repos/{owner}/{repo}/pulls",
         { owner, repo, state: "open" },
       );
-      return prs.find((pr) =>
+      const found = prs.find((pr) =>
         pr.user?.login === "denopendabot[bot]" &&
         new Date(pr.created_at) > started_at &&
         pr.title === "Setup Denopendabot"
       );
+      if (!found) {
+        throw new Error("Pull request has not been created");
+      }
+      return found;
     }, retryOptions);
     assert(created);
 
@@ -104,12 +108,16 @@ Deno.test("app", async (t) => {
         "GET /repos/{owner}/{repo}/pulls",
         { owner, repo, state: "open" },
       );
-      return prs.find((pr) =>
+      const found = prs.find((pr) =>
         pr.user?.login === "denopendabot[bot]" &&
         new Date(pr.updated_at) > started_at &&
         pr.base.ref === base &&
         pr.head.ref === working
       );
+      if (!found) {
+        throw new Error("Pull request has not been created");
+      }
+      return found;
     }, retryOptions);
     assert(created, "Pull request has not been created");
 
@@ -119,6 +127,9 @@ Deno.test("app", async (t) => {
         "GET /repos/{owner}/{repo}/pulls/{pull_number}",
         { owner, repo, pull_number: created.number },
       );
+      if (!pr.merged) {
+        throw new Error("Pull request has not been merged");
+      }
       return pr.merged;
     }, retryOptions);
     assert(merged, "Pull request has not been merged");
