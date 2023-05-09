@@ -36,15 +36,16 @@ Deno.test("integration (module)", async () => {
 
   assertEquals(spec, {
     name: "dax",
-    url: "https://deno.land/x/dax@0.14.0/mod.ts", // @denopendabot ignore
-    initial: "0.14.0",
+    url: "https://deno.land/x/dax@0.30.0/mod.ts", // @denopendabot ignore
+    initial: "0.30.0",
     target: (await github.getLatestRelease("dsherret/dax"))!,
   });
 
   await createCommits(repository, updates, options);
 
   const result = await createPullRequest(repository, options);
-  assert(result);
+  assert(result, "Pull request not created");
+  assert(result.body, "Pull request body is empty");
 
   await github.deleteBranch(workingBranch);
 });
