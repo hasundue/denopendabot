@@ -13,6 +13,8 @@ const repository = env.GITHUB_REPOSITORY;
 const owner = env.GITHUB_REPOSITORY_OWNER;
 const repo = repository.split("/")[1];
 
+const retryOptions = { maxAttempts: 10, minTimeout: 10000, multiplier: 1 };
+
 Deno.test("app", async (t) => {
   await t.step("installation", async () => {
     const octokit = new Octokit({ auth: env.GH_TOKEN });
@@ -64,7 +66,7 @@ Deno.test("app", async (t) => {
         new Date(pr.created_at) > started_at &&
         pr.title === "Setup Denopendabot"
       );
-    }, { maxAttempts: 10 });
+    }, retryOptions);
     assert(created);
 
     await github.deleteBranch(created.head.ref);
@@ -108,7 +110,7 @@ Deno.test("app", async (t) => {
         pr.base.ref === base &&
         pr.head.ref === working
       );
-    }, { maxAttempts: 10 });
+    }, retryOptions);
     assert(created, "Pull request has not been created");
 
     // check if the pull request has been merged
@@ -118,7 +120,7 @@ Deno.test("app", async (t) => {
         { owner, repo, pull_number: created.number },
       );
       return pr.merged;
-    });
+    }, retryOptions);
     assert(merged, "Pull request has not been merged");
 
     await github.deleteBranch(base);
