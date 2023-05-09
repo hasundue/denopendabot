@@ -13,7 +13,7 @@ const repository = env.GITHUB_REPOSITORY;
 const owner = env.GITHUB_REPOSITORY_OWNER;
 const repo = repository.split("/")[1];
 
-const retryOptions = { maxAttempts: 60, minTimeout: 1000, multiplier: 1 };
+const retryOptions = { maxAttempts: 10, minTimeout: 10000, multiplier: 1 };
 
 Deno.test("app", async (t) => {
   await t.step("installation", async () => {
