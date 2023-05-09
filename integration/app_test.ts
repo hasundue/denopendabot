@@ -82,7 +82,8 @@ Deno.test("app", async (t) => {
     const base = "test-app";
     const working = "test-app-" + env.GITHUB_REF_NAME;
 
-    // ensure the base branch
+    // recreate the base branch
+    await github.deleteBranch(base);
     await github.createBranch(base);
 
     // dispatch a `denopendabot-run` event
