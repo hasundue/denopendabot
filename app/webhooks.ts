@@ -174,7 +174,10 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
 
   const repository = payload.repository.full_name;
 
-  console.info(`🔥 ${sender} dispatched ${payload.action} at ${repository}`);
+  console.info(`🔥 ${sender} dispatched ${payload.action} at ${repository}`, {
+    baseBranch: inputs.baseBranch,
+    workingBranch: inputs.workingBranch,
+  });
 
   const labels = inputs.labels ? inputs.labels.split(" ") : [];
 
@@ -192,7 +195,6 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
     release: inputs.release ?? undefined,
     labels,
   };
-  console.info("options:", options);
 
   const updates = await mod.getUpdates(repository, options);
   if (!updates.length) {
