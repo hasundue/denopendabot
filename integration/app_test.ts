@@ -1,5 +1,5 @@
 import { assert } from "https://deno.land/std@0.185.0/testing/asserts.ts";
-import { delay } from "https://deno.land/std@0.185.0/async/mod.ts";
+import { retry } from "https://deno.land/std@0.185.0/async/mod.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.2.0";
 import { env } from "../app/env.ts";
 import { GitHubClient } from "../mod/octokit.ts";
@@ -52,19 +52,18 @@ Deno.test("installation", async () => {
   );
   console.log("🚀 Installed Denopendabot");
 
-  // wait for a moment until the app completes creating a pull request
-  await delay(10 * 1000);
-
   // check if a pull request is created to setup denopendabot.yml
-  const { data: prs } = await octokit.request(
-    "GET /repos/{owner}/{repo}/pulls",
-    { owner, repo, state: "open" },
-  );
-  const created = prs.find((pr) =>
-    pr.user?.login === "denopendabot[bot]" &&
-    new Date(pr.created_at) > started_at &&
-    pr.title === "Setup Denopendabot"
-  );
+  const created = await retry(async () => {
+    const { data: prs } = await octokit.request(
+      "GET /repos/{owner}/{repo}/pulls",
+      { owner, repo, state: "open" },
+    );
+    return prs.find((pr) =>
+      pr.user?.login === "denopendabot[bot]" &&
+      new Date(pr.created_at) > started_at &&
+      pr.title === "Setup Denopendabot"
+    );
+  }, { maxAttempts: 10 });
   assert(created);
 
   await github.deleteBranch(created.head.ref);
@@ -96,31 +95,30 @@ Deno.test("run update", async () => {
   });
   console.info("Dispatched a 'denopendabot-run' event");
 
-  // wait for a moment until the app completes the routine
-  await delay(10 * 1000);
-
   // check if a pull request has been created
-  const { data: prs } = await octokit.request(
-    "GET /repos/{owner}/{repo}/pulls",
-    { owner, repo, state: "open" },
-  );
-  const created = prs.find((pr) =>
-    pr.user?.login === "denopendabot[bot]" &&
-    new Date(pr.updated_at) > started_at &&
-    pr.base.ref === base &&
-    pr.head.ref === working
-  );
+  const created = await retry(async () => {
+    const { data: prs } = await octokit.request(
+      "GET /repos/{owner}/{repo}/pulls",
+      { owner, repo, state: "open" },
+    );
+    return prs.find((pr) =>
+      pr.user?.login === "denopendabot[bot]" &&
+      new Date(pr.updated_at) > started_at &&
+      pr.base.ref === base &&
+      pr.head.ref === working
+    );
+  }, { maxAttempts: 10 });
   assert(created, "Pull request has not been created");
 
-  // wait for a minute until the app completes merging the pull request
-  await delay(30 * 1000);
-
   // check if the pull request has been merged
-  const { data: pr } = await octokit.request(
-    "GET /repos/{owner}/{repo}/pulls/{pull_number}",
-    { owner, repo, pull_number: created.number },
-  );
-  assert(pr.merged, "Pull request has not been merged");
+  const merged = await retry(async () => {
+    const { data: pr } = await octokit.request(
+      "GET /repos/{owner}/{repo}/pulls/{pull_number}",
+      { owner, repo, pull_number: created.number },
+    );
+    return pr.merged;
+  });
+  assert(merged, "Pull request has not been merged");
 
   await github.deleteBranch(base);
   await github.deleteBranch(working);
