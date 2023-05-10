@@ -1,7 +1,7 @@
 import {
   assert,
   assertEquals,
-} from "https://deno.land/std@0.185.0/testing/asserts.ts";
+} from "https://deno.land/std@0.186.0/testing/asserts.ts";
 import { env } from "../mod/env.ts";
 import { createCommits, createPullRequest, getUpdates } from "../mod.ts";
 import { GitHubClient } from "../mod/octokit.ts";
