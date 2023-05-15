@@ -26,3 +26,5 @@ jobs:
         with:
           project: denopendabot
           entrypoint: ./app.ts
+        env:
+          DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
