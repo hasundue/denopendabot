@@ -22,7 +22,7 @@ jobs:
 
       - name: Upload to Deno Deploy
         id: deploy
-        uses: denoland/deployctl@v1
+        uses: denoland/deployctl@1.6.0 # @denopendabot denoland/deployctl
         with:
           project: denopendabot
           entrypoint: ./app.ts
