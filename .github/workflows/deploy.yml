@@ -11,20 +11,16 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write # Needed for auth with Deno Deploy
-      contents: read # Needed to clone the repository
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3.5.0
-
-      - name: Upload to Deno Deploy
-        id: deploy
-        uses: denoland/deployctl@1.6.0 # @denopendabot denoland/deployctl
+      
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
         with:
-          project: denopendabot
-          entrypoint: ./app.ts
-        env:
-          DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
+          deno-version: v1.33.2 # @denopendabot denoland/deno
+      - name: Upload to Deno Deploy
+        run: >
+          deno run -A --no-check https://deno.land/x/deploy/deployctl.ts
+          deploy --project=denopendabot ./app.ts
+          --token ${{ secrets.DENO_DEPLOY_TOKEN }}
