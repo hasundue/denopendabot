@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.190.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.191.0/testing/asserts.ts";
 import { getModuleUpdateSpecs, ModuleUpdate } from "./module.ts";
 import { VERSION } from "./version.ts";
 import { GitHubClient } from "./octokit.ts";
