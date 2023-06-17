@@ -1,7 +1,7 @@
 import { groupBy } from "https://deno.land/std@0.192.0/collections/group_by.ts";
 import { intersect } from "https://deno.land/std@0.192.0/collections/intersect.ts";
 import { withoutAll } from "https://deno.land/std@0.192.0/collections/without_all.ts";
-import { Octokit } from "https://esm.sh/@octokit/core@4.2.1";
+import { Octokit } from "https://esm.sh/@octokit/core@4.2.4";
 import { env } from "./mod/env.ts";
 import {
   CommitType,
