@@ -1,6 +1,6 @@
-import { retry } from "https://deno.land/std@0.192.0/async/mod.ts";
-import { groupBy } from "https://deno.land/std@0.192.0/collections/group_by.ts";
-import { decode } from "https://deno.land/std@0.192.0/encoding/base64.ts";
+import { retry } from "https://deno.land/std@0.193.0/async/mod.ts";
+import { groupBy } from "https://deno.land/std@0.193.0/collections/group_by.ts";
+import { decode } from "https://deno.land/std@0.193.0/encoding/base64.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.2.4";
 import { Update } from "./common.ts";
 
