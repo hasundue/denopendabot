@@ -1,8 +1,8 @@
 import {
   assert,
   assertEquals,
-} from "https://deno.land/std@0.192.0/testing/asserts.ts";
-import { describe, it } from "https://deno.land/std@0.192.0/testing/bdd.ts";
+} from "https://deno.land/std@0.193.0/testing/asserts.ts";
+import { describe, it } from "https://deno.land/std@0.193.0/testing/bdd.ts";
 import { UpdateSpec } from "./common.ts";
 import {
   getRepoUpdateSpecs,

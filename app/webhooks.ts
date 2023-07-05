@@ -1,4 +1,4 @@
-import { intersect } from "https://deno.land/std@0.192.0/collections/intersect.ts";
+import { intersect } from "https://deno.land/std@0.193.0/collections/intersect.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.1.0#~";
 import { App } from "https://esm.sh/@octokit/app@13.1.2#=";
 import { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@12.0.2";
