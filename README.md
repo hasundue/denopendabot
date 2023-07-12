@@ -10,7 +10,7 @@
 
 [![CI](https://github.com/hasundue/denopendabot/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/hasundue/denopendabot/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/hasundue/denopendabot/branch/main/graph/badge.svg)](https://codecov.io/gh/hasundue/denopendabot)
-![denoland/deno](https://img.shields.io/badge/Deno-v1.34.3-informational?logo=deno) <!-- @denopendabot denoland/deno -->
+![denoland/deno](https://img.shields.io/badge/Deno-v1.35.0-informational?logo=deno) <!-- @denopendabot denoland/deno -->
 
 <!-- deno-fmt-ignore-end -->
 
