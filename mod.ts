@@ -1,6 +1,6 @@
 import { groupBy } from "https://deno.land/std@0.193.0/collections/group_by.ts";
 import { intersect } from "https://deno.land/std@0.193.0/collections/intersect.ts";
-import { withoutAll } from "https://deno.land/std@0.193.0/collections/without_all.ts";
+import { globToRegExp } from "https://deno.land/std@0.193.0/path/glob.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@5.0.0";
 import { env } from "./mod/env.ts";
 import {
@@ -63,12 +63,11 @@ export async function getUpdates(
 
   const paths = baseTree.map((blob) => blob.path!);
   const pathsToInclude = options?.include || paths;
-  const pathsToExclude = options?.exclude || defaultExcludePaths;
+  const pathsToExclude = (options?.exclude || defaultExcludePaths)
+    .map((path) => globToRegExp(path));
 
-  const pathsToUpdate = withoutAll(
-    intersect(paths, pathsToInclude),
-    pathsToExclude,
-  );
+  const pathsToUpdate = intersect(paths, pathsToInclude)
+    .filter((path) => pathsToExclude.every((regex) => !regex.test(path)));
 
   const blobs = baseTree.filter((blob) => pathsToUpdate.includes(blob.path!));
   const updates: Update[] = [];
