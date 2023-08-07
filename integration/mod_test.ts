@@ -25,6 +25,7 @@ Deno.test("integration (module)", async () => {
     baseBranch,
     workingBranch,
     root: "integration/src",
+    exclude: ["*.md"],
     labels: ["test"],
   };
   const updates = await getUpdates(repository, options);

@@ -18,6 +18,6 @@ jobs:
         uses: ./
         with:
           mode: app
-          exclude: integration/src/deps.ts
+          exclude: integration/src/*
           auto-merge: any
           labels: dependencies
