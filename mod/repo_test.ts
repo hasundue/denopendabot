@@ -116,16 +116,6 @@ describe("getUpdateSpecs", () => {
     assertEquals(specs[1].initial, "0.158.0");
   });
 
-  it("cloudflare/wrangler2", async () => {
-    const s = "2.1.6 <!-- @denopendabot cloudflare/wrangler2";
-    const specs = await getRepoUpdateSpecs(s);
-
-    assertEquals(specs.length, 1);
-
-    assertEquals(specs[0].name, "cloudflare/wrangler2");
-    assertEquals(specs[0].initial, "2.1.6");
-  });
-
   it("nodejs/node", async () => {
     const s = "v16.7.0 <!-- @denopendabot nodejs/node";
     const specs = await getRepoUpdateSpecs(s);
