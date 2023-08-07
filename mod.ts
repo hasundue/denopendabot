@@ -66,6 +66,8 @@ export async function getUpdates(
   const pathsToExclude = (options?.exclude || defaultExcludePaths)
     .map((path) => globToRegExp(path));
 
+  console.debug(pathsToExclude);
+
   const pathsToUpdate = intersect(paths, pathsToInclude)
     .filter((path) => pathsToExclude.every((regex) => !regex.test(path)));
 
