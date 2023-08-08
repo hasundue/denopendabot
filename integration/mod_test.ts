@@ -1,3 +1,4 @@
+import { retry } from "https://deno.land/std@0.193.0/async/mod.ts";
 import {
   assert,
   assertEquals,
@@ -28,7 +29,10 @@ Deno.test("integration (module)", async () => {
     exclude: ["*.md"],
     labels: ["test"],
   };
-  const updates = await getUpdates(repository, options);
+
+  const updates = await retry(
+    () => getUpdates(repository, options)
+  );
 
   assertEquals(updates.length, 1);
   assertEquals(updates[0].path, "integration/src/deps.ts");
