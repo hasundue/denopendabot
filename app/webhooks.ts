@@ -1,3 +1,4 @@
+import { retry } from "https://deno.land/std@0.193.0/async/mod.ts";
 import { intersect } from "https://deno.land/std@0.193.0/collections/intersect.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.1.0#~";
 import { App } from "https://esm.sh/@octokit/app@13.1.2#=";
@@ -196,7 +197,9 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
     labels,
   };
 
-  const updates = await mod.getUpdates(repository, options);
+  const updates = await retry(
+    () => mod.getUpdates(repository, options),
+  );
   if (!updates.length) {
     console.info(`👍 ${repository} is up to date`);
     return;

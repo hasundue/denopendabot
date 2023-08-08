@@ -31,7 +31,7 @@ Deno.test("integration (module)", async () => {
   };
 
   const updates = await retry(
-    () => getUpdates(repository, options)
+    () => getUpdates(repository, options),
   );
 
   assertEquals(updates.length, 1);
