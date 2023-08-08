@@ -1,7 +1,8 @@
 import { groupBy } from "https://deno.land/std@0.193.0/collections/group_by.ts";
 import { intersect } from "https://deno.land/std@0.193.0/collections/intersect.ts";
 import { globToRegExp } from "https://deno.land/std@0.193.0/path/glob.ts";
-import { Octokit } from "https://esm.sh/@octokit/core@5.0.0";
+import { join } from "https://deno.land/std@0.193.0/path/mod.ts";
+import { Octokit } from "https://esm.sh/@octokit/core@4.1.0#~";
 import { env } from "./mod/env.ts";
 import {
   CommitType,
@@ -62,9 +63,14 @@ export async function getUpdates(
   const baseTree = await github.getTree(base, options?.root);
 
   const paths = baseTree.map((blob) => blob.path!);
-  const pathsToInclude = options?.include || paths;
-  const pathsToExclude = (options?.exclude || defaultExcludePaths)
-    .map((path) => globToRegExp(path));
+
+  const pathsToInclude = options?.include?.map(
+    (path) => options.root ? join(options.root, path) : path,
+  ) || paths;
+
+  const pathsToExclude = (options?.exclude || defaultExcludePaths).map(
+    (path) => options?.root ? join(options.root, path) : path,
+  ).map((path) => globToRegExp(path));
 
   const pathsToUpdate = intersect(paths, pathsToInclude)
     .filter((path) => pathsToExclude.every((regex) => !regex.test(path)));
