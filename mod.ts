@@ -2,7 +2,7 @@ import { groupBy } from "https://deno.land/std@0.193.0/collections/group_by.ts";
 import { intersect } from "https://deno.land/std@0.193.0/collections/intersect.ts";
 import { globToRegExp } from "https://deno.land/std@0.193.0/path/glob.ts";
 import { join } from "https://deno.land/std@0.193.0/path/mod.ts";
-import { Octokit } from "https://esm.sh/@octokit/core@5.0.0";
+import { Octokit } from "https://esm.sh/@octokit/core@4.1.0#~";
 import { env } from "./mod/env.ts";
 import {
   CommitType,
