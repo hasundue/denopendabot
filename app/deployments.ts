@@ -1,17 +1,25 @@
 import { env } from "./env.ts";
 import { octokit } from "./webhooks.ts";
 
+type Brand<T, U> = T & { _type: U };
+
+type GitHubDeployId = Brand<number, "GitHubDeployId">;
+type DenoDeployId = Brand<string, "DenoDeployId">;
+type DeployUrl = Brand<string, "DeployURL">;
+
 const [owner, repo] = env.APP_REPO.split("/");
 
-const getURL = async (deployment_id: number) => {
+async function getDeployUrl(
+  deployment_id: GitHubDeployId,
+): Promise<DeployUrl | undefined> {
   const { data } = await octokit.request(
     "GET /repos/{owner}/{repo}/deployments/{deployment_id}/statuses",
     { owner, repo, deployment_id },
   );
-  return data[0].environment_url;
-};
+  return data[0].environment_url as DeployUrl;
+}
 
-export const parseID = (url: string) => {
+export function parseDeployId(url: string): DenoDeployId {
   const regexp = new RegExp(
     "(?<=https://denopendabot-)" + "[a-z0-9]{12}" + "(?=.deno.dev)",
   );
@@ -19,62 +27,51 @@ export const parseID = (url: string) => {
   if (!matched) {
     throw new Error(`Invalid deployment URL: ${url}`);
   }
-  return matched[0];
-};
+  return matched[0] as DenoDeployId;
+}
 
-export const getDeployments = async () => {
-  const res = await octokit.request(
-    "GET /repos/{owner}/{repo}/deployments",
-    { owner, repo },
-  );
-  if (!res) {
-    throw new Error(
-      `❗ Could not obtain deployments information from ${owner}/${repo}`,
+const deployEnvs = [
+  "Production",
+  "Preview",
+] as const;
+
+export type DeployEnv = typeof deployEnvs[number];
+
+const MAX_PAGES = 10 as const; // Just an ad-hoc number
+
+export async function getDeployEnvUrl(
+  env: DeployEnv,
+): Promise<DeployUrl | undefined> {
+  for (let page = 1; page <= MAX_PAGES; page++) {
+    const res = await octokit.request(
+      "GET /repos/{owner}/{repo}/deployments",
+      { owner, repo, page },
     );
+    const data = res.data.filter((it) => it.environment === env)[0];
+    if (data) {
+      const url = await getDeployUrl(data.id as GitHubDeployId);
+      if (!url) {
+        throw new Error(
+          `❗ Could not find an URL for the deployment ${data.id}`,
+        );
+      }
+      return url;
+    }
   }
-  const data = {
-    production: res.data.filter((it) => it.environment === "Production")[0],
-    staging: res.data.filter((it) => it.environment === "Preview")[0],
-  };
-  const url = {
-    production: await getURL(data.production.id),
-    staging: await getURL(data.staging.id),
-  };
-  if (!url.production) {
-    throw new Error("No production deployment found");
+  return undefined;
+}
+
+export async function getDeployId(env: DeployEnv): Promise<DenoDeployId> {
+  const url = await getDeployEnvUrl(env);
+  if (!url) {
+    throw new Error(`❗ Could not find a ${env.toLowerCase()} deployment`);
   }
-  const id = {
-    production: parseID(url.production),
-    staging: url.staging && parseID(url.staging),
-  };
-  return {
-    production: {
-      id: id.production,
-      url: url.production,
-    },
-    staging: {
-      id: id.staging,
-      url: url.staging,
-    },
-  };
-};
+  return parseDeployId(url);
+}
 
-export type Deployment = "production" | "staging" | "preview";
-
-export const deployment = async (): Promise<Deployment> => {
-  const id = env["DENO_DEPLOYMENT_ID"];
-  const deployments = await getDeployments();
-
-  if (id === deployments.production.id) {
-    return "production";
-  } else if (id === deployments.staging.id) {
-    return "staging";
-  } else {
-    return "preview";
+export async function getThisDeployEnv(): Promise<DeployEnv> {
+  if (env.DENO_DEPLOYMENT_ID === await getDeployId("Production")) {
+    return "Production";
   }
-};
-
-export const location = async (deploy: "production" | "staging") => {
-  const deployments = await getDeployments();
-  return deployments[deploy].url;
-};
+  return "Preview";
+}

@@ -5,7 +5,7 @@ import { App } from "https://esm.sh/@octokit/app@13.1.2#=";
 import { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@12.0.3";
 import { HonoRequest } from "https://deno.land/x/hono@v3.3.0/mod.ts";
 import { env } from "./env.ts";
-import { Deployment, deployment } from "./deployments.ts";
+import { DeployEnv, getThisDeployEnv } from "./deployments.ts";
 import * as mod from "../mod.ts";
 import { GitHubClient } from "../mod/octokit.ts";
 
@@ -54,14 +54,14 @@ interface Payload {
 }
 
 type Context = {
-  deploy: Deployment;
+  deploy: DeployEnv;
   owner: string;
   repo: string;
   branch: string | null;
 };
 
 const getContext = async (payload: Payload): Promise<Context> => {
-  const deploy = await deployment();
+  const deploy = await getThisDeployEnv();
   const owner = payload.repository.owner.login;
   const repo = payload.repository.name;
 
@@ -83,11 +83,11 @@ const isTestContext = (context: Context) => {
   return `${owner}/${repo}` === env.APP_REPO && branch?.startsWith("test");
 };
 
-const associated = (context: Context) => {
-  if (context.deploy === "production") {
+const isAssociated = (context: Context) => {
+  if (context.deploy === "Production") {
     return !isTestContext(context);
   }
-  if (context.deploy === "staging") {
+  if (context.deploy === "Preview") {
     return isTestContext(context);
   }
   return false;
@@ -107,11 +107,11 @@ const createWorkflow = async (
   octokit: Octokit,
   repository: string,
 ) => {
-  const deploy = await deployment();
+  const deploy = await getThisDeployEnv();
   const testing = repository === env.APP_REPO;
 
-  if (deploy === "production" && testing) return;
-  if (deploy === "staging" && !testing) return;
+  if (deploy === "Production" && testing) return;
+  if (deploy === "Preview" && !testing) return;
 
   const github = new GitHubClient({ octokit, repository });
 
@@ -171,7 +171,7 @@ app.webhooks.on("repository_dispatch", async ({ octokit, payload }) => {
   const inputs = payload.client_payload as ClientPayload;
   const sender = payload.sender.login;
 
-  if (!associated(context) || payload.action !== "denopendabot-run") return;
+  if (!isAssociated(context) || payload.action !== "denopendabot-run") return;
 
   const repository = payload.repository.full_name;
 
@@ -219,7 +219,7 @@ app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
   const app = payload[name].app.slug;
 
   // skip if we are not in charge of this webhook
-  if (!associated(context)) return;
+  if (!isAssociated(context)) return;
 
   // skip if the conclusion is not success
   if (payload.check_suite.conclusion !== "success") return;
