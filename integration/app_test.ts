@@ -40,8 +40,13 @@ Deno.test("app", async (t) => {
     // ensure the base branch
     await github.deleteBranch("test-install");
     await github.createBranch("test-install");
+
     const latest = await github.getLatestCommit();
-    await github.updateBranch("test-install", latest.sha);
+
+    await retry(
+      () => github.updateBranch("test-install", latest.sha),
+      retryOptions,
+    );
 
     const started_at = new Date();
 
