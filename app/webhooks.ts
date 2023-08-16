@@ -239,16 +239,27 @@ app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
     ) {
       console.info(`✅ ${app} completed a check suite at ${owner}/${repo}`);
 
-      // Do not merge if another check run is ongoing
+      // merge the PR if all check runs are completed and success
       const { data: { check_runs } } = await octokit.request(
         "GET /repos/{owner}/{repo}/commits/{ref}/check-runs",
         { owner, repo, ref: branch },
       );
-      if (check_runs.find((it) => it.status !== "completed")) {
-        console.info(`☕ Waiting for another check run to be completed...`);
-        return;
+      for (const run of check_runs) {
+        const app = run.app?.slug ?? "[unknown]";
+
+        if (run.status !== "completed") {
+          console.info(
+            `☕ Waiting for another check run by ${app} to be completed...`,
+          );
+          console.debug(run);
+          return;
+        }
+        if (run.conclusion !== "success") {
+          console.info(`❗ Another check run by ${app} is not successful`);
+          console.debug(run);
+          return;
+        }
       }
-      // merge the pull request
       const { data: result } = await octokit.request(
         "PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge",
         { owner, repo, pull_number: number },
