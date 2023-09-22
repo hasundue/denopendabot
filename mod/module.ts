@@ -1,9 +1,6 @@
 import { distinct } from "https://deno.land/std@0.202.0/collections/distinct.ts";
-import {
-  gt,
-  prerelease,
-  valid,
-} from "https://deno.land/std@0.202.0/semver/mod.ts";
+import { format, gt } from "https://deno.land/std@0.202.0/semver/mod.ts";
+import { tryParse } from "https://deno.land/std@0.202.0/semver/try_parse.ts";
 import {
   defaultName,
   lookup,
@@ -76,17 +73,23 @@ export async function getModuleUpdateSpecs(
 
     const name = parseName(registry);
     if (!name) continue;
-
-    const initial = registry.version();
     if (release && !name.startsWith(release.name)) continue;
 
+    const initial = tryParse(registry.version());
     const latest = release
-      ? release.target
-      : (await registry.all()).find((v) => !prerelease(v));
+      ? tryParse(release.target)
+      : (await registry.all()).map((v) => tryParse(v)).find((v) =>
+        !v?.prerelease.length
+      );
 
-    if (valid(initial) && latest && gt(latest, initial)) {
-      console.debug(`💡 ${name} ${initial} => ${latest}`);
-      specs.push({ url: registry.url, name, initial, target: latest });
+    if (initial && latest && gt(latest, initial)) {
+      console.debug(`💡 ${name} ${format(initial)} => ${format(latest)}`);
+      specs.push({
+        url: registry.url,
+        name,
+        initial: format(initial),
+        target: format(latest),
+      });
     }
   }
 
