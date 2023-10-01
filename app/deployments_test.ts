@@ -1,8 +1,8 @@
 import {
   assertEquals,
   assertThrows,
-} from "https://deno.land/std@0.202.0/testing/asserts.ts";
-import { describe, it } from "https://deno.land/std@0.202.0/testing/bdd.ts";
+} from "https://deno.land/std@0.203.0/testing/asserts.ts";
+import { describe, it } from "https://deno.land/std@0.203.0/testing/bdd.ts";
 import { parseDeployId } from "./deployments.ts";
 
 describe("parseID", () => {
