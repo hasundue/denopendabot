@@ -194,11 +194,12 @@ export class GitHubClient {
     base: string;
     head: string;
     title: string;
+    body?: string;
     modifiable?: boolean;
     labels?: string[];
   }) {
     const { owner, repo } = this.ensureRepository();
-    const { base, head, title, labels, modifiable } = options;
+    const { base, head, title, body, labels, modifiable } = options;
 
     const prs = await this.getPullRequests({ state: "open" });
     const exists = prs.find((pr) => pr.head.ref === head);
@@ -206,11 +207,19 @@ export class GitHubClient {
     const { data: created } = exists
       ? await this.octokit.request(
         "PATCH /repos/{owner}/{repo}/pulls/{pull_number}",
-        { owner, repo, pull_number: exists.number, title },
+        { owner, repo, pull_number: exists.number, title, body },
       )
       : await this.octokit.request(
         "POST /repos/{owner}/{repo}/pulls",
-        { owner, repo, title, base, head, maintainer_can_modify: modifiable },
+        {
+          owner,
+          repo,
+          title,
+          body,
+          base,
+          head,
+          maintainer_can_modify: modifiable,
+        },
       );
     console.info(
       `🎈 Created a pull request "${created.title}" for ${owner}/${repo}`,
