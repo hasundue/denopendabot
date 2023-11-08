@@ -1,5 +1,5 @@
-import { assert } from "https://deno.land/std@0.204.0/testing/asserts.ts";
-import { retry } from "https://deno.land/std@0.204.0/async/mod.ts";
+import { assert } from "https://deno.land/std@0.205.0/testing/asserts.ts";
+import { retry } from "https://deno.land/std@0.205.0/async/mod.ts";
 import { Octokit } from "https://esm.sh/@octokit/core@4.1.0#~";
 import { env } from "../app/env.ts";
 import { GitHubClient } from "../mod/octokit.ts";
@@ -13,7 +13,7 @@ const repository = env.GITHUB_REPOSITORY;
 const owner = env.GITHUB_REPOSITORY_OWNER;
 const repo = repository.split("/")[1];
 
-const retryOptions = { maxAttempts: 10, minTimeout: 10000, multiplier: 1 };
+const retryOptions = { maxAttempts: 10, minTimeout: 60000, multiplier: 1 };
 
 Deno.test("app", async (t) => {
   await t.step("installation", async () => {
