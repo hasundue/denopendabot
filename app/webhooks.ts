@@ -3,7 +3,7 @@ import { intersect } from "https://deno.land/std@0.205.0/collections/intersect.t
 import { Octokit } from "npm:@octokit/core@5.0.1";
 import { App } from "npm:@octokit/app@14.0.1";
 import { EmitterWebhookEventName } from "npm:@octokit/webhooks@12.0.3";
-import { HonoRequest } from "https://deno.land/x/hono@v3.9.2/mod.ts";
+import { HonoRequest } from "https://deno.land/x/hono@v3.10.0-rc.1/mod.ts";
 import { env } from "./env.ts";
 import { DeployEnv, getThisDeployEnv } from "./deployments.ts";
 import * as mod from "../mod.ts";
