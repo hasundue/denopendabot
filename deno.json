@@ -2,6 +2,7 @@
   "tasks": {
     "run": "deno run --allow-env --allow-net --allow-read cli.ts",
     "run:app": "deno run --allow-env --allow-net --allow-read app.ts",
+    "check": "deno test --no-run",
     "test": "deno test --allow-env --allow-net --allow-read --no-check",
     "dev": "deno fmt && deno lint && deno task test -q mod/ app/ --fail-fast"
   }
