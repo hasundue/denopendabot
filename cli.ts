@@ -1,4 +1,5 @@
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/mod.ts";
+import { retry } from "https://deno.land/std@0.205.0/async/retry.ts";
 import { env } from "./mod/env.ts";
 import {
   createCommits,
@@ -60,7 +61,9 @@ const { args, options } = await new Command()
   .parse(Deno.args);
 
 const repo = args[0];
-const updates = await getUpdates(repo, options);
+const updates = await retry(
+  () => getUpdates(repo, options),
+);
 
 if (!updates.length) {
   console.info("🎉 Everything is up-to-date!");
