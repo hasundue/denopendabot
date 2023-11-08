@@ -1,8 +1,12 @@
 {
   "tasks": {
+    "cache": "deno cache ./**/*.ts",
     "run": "deno run --allow-env --allow-net --allow-read cli.ts",
     "run:app": "deno run --allow-env --allow-net --allow-read app.ts",
+    "check": "deno check ./**/*.ts",
     "test": "deno test --allow-env --allow-net --allow-read --no-check",
-    "dev": "deno fmt && deno lint && deno task test -q mod/ app/ --fail-fast"
+    "dev": "deno fmt && deno lint && deno task test -q mod/ app/ --fail-fast",
+    "update": "deno run -A https://deno.land/x/molt@0.11.0/cli.ts ./**/*.ts",
+    "update:commit": "deno task -q update --commit --prefix 'build(deps):' --pre-commit=fmt"
   }
 }

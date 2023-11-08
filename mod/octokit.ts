@@ -1,7 +1,7 @@
 import { retry } from "https://deno.land/std@0.205.0/async/mod.ts";
 import { groupBy } from "https://deno.land/std@0.205.0/collections/group_by.ts";
 import { decode } from "https://deno.land/std@0.205.0/encoding/base64.ts";
-import { Octokit } from "https://esm.sh/@octokit/core@4.1.0#~";
+import { Octokit } from "npm:@octokit/core@5.0.1";
 import { Update } from "./common.ts";
 
 type UpdateContent = Pick<Update, "path" | "content">;

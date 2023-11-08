@@ -1,9 +1,9 @@
 import { retry } from "https://deno.land/std@0.205.0/async/mod.ts";
 import { intersect } from "https://deno.land/std@0.205.0/collections/intersect.ts";
-import { Octokit } from "https://esm.sh/@octokit/core@4.1.0#~";
-import { App } from "https://esm.sh/@octokit/app@13.1.2#=";
-import { EmitterWebhookEventName } from "https://esm.sh/@octokit/webhooks@12.0.3";
-import { HonoRequest } from "https://deno.land/x/hono@v3.9.2/mod.ts";
+import { Octokit } from "npm:@octokit/core@5.0.1";
+import { App } from "npm:@octokit/app@14.0.1";
+import { EmitterWebhookEventName } from "npm:@octokit/webhooks@12.0.3";
+import { HonoRequest } from "https://deno.land/x/hono@v3.10.0-rc.1/mod.ts";
 import { env } from "./env.ts";
 import { DeployEnv, getThisDeployEnv } from "./deployments.ts";
 import * as mod from "../mod.ts";
@@ -275,9 +275,9 @@ app.webhooks.on("check_suite.completed", async ({ name, octokit, payload }) => {
 
 export const handler = async (request: HonoRequest<"/api/github/webhooks">) => {
   await app.webhooks.verifyAndReceive({
-    id: request.headers.get("x-github-delivery")!,
-    signature: (request.headers.get("x-hub-signature-256")!),
+    id: request.header("x-github-delivery")!,
+    name: request.header("x-github-event") as EmitterWebhookEventName,
     payload: await request.text(),
-    name: request.headers.get("x-github-event") as EmitterWebhookEventName,
+    signature: (request.header("x-hub-signature-256")!),
   });
 };

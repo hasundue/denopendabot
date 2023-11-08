@@ -68,7 +68,8 @@ by comments of `@denopendabot {owner}/{repo}`.
 - Commits are created for each updated module/repository individually
 - Each run of Denopendabot creates only one pull request
 
-See [example pull requests](https://github.com/hasundue/denopendabot/pulls?q=is%3Apr+is%3Amerged+label%3Atest).
+See
+[example pull requests](https://github.com/hasundue/denopendabot/pulls?q=is%3Apr+is%3Amerged+label%3Atest).
 
 ## :rocket: Getting started
 
