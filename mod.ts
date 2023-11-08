@@ -213,15 +213,18 @@ export async function createPullRequest(
 
   const type = pullRequestType(types);
   const scope = options?.release ? "version" : "deps";
-  const body = options?.release
+  const description = options?.release
     ? `bump the version from ${version} to ${options.release}`
     : "update dependencies";
-  const title = `${type}(${scope}): ${body}`;
+  const title = `${type}(${scope}): ${description}`;
+
+  const body = messages.map((message) => `- ${message}`).join("\n");
 
   return await github.createPullRequest({
     base,
     head,
     title,
+    body,
     modifiable: true,
     labels: options?.labels,
   });
