@@ -29,7 +29,7 @@ const getEnv = () => {
     env = loadSync({ export: true }) as Env;
   }
   // Do this because Deno Deploy escapes line breaks of environment variables
-  env.PRIVATE_KEY = env.PRIVATE_KEY.replaceAll("\\n", "\n");
+  // env.PRIVATE_KEY = env.PRIVATE_KEY.replaceAll("\\n", "\n");
 
   return env;
 };
