@@ -12,10 +12,6 @@ import { GitHubClient } from "../mod/octokit.ts";
 const app = new App({
   appId: env.APP_ID,
   privateKey: env.PRIVATE_KEY,
-  oauth: {
-    clientId: env.CLIENT_ID,
-    clientSecret: env.CLIENT_SECRET,
-  },
   webhooks: {
     secret: env.WEBHOOK_SECRET,
   },
