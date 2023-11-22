@@ -1,7 +1,7 @@
 import { retry } from "https://deno.land/std@0.205.0/async/mod.ts";
 import { intersect } from "https://deno.land/std@0.205.0/collections/intersect.ts";
 import { Octokit } from "npm:@octokit/core@5.0.1";
-import { App } from "npm:@octokit/app@^13.1.8";
+import { App } from "npm:@octokit/app@14.0.2";
 import { EmitterWebhookEventName } from "npm:@octokit/webhooks@12.0.3";
 import { HonoRequest } from "https://deno.land/x/hono@v3.10.0-rc.1/mod.ts";
 import { env } from "./env.ts";
