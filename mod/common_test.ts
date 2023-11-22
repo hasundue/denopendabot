@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.205.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.207.0/testing/asserts.ts";
 import { pullRequestType, removeIgnore } from "./common.ts";
 
 Deno.test("pullRequestType", () => {

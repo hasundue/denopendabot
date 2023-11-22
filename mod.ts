@@ -1,7 +1,7 @@
-import { groupBy } from "https://deno.land/std@0.205.0/collections/group_by.ts";
-import { intersect } from "https://deno.land/std@0.205.0/collections/intersect.ts";
-import { globToRegExp } from "https://deno.land/std@0.205.0/path/glob.ts";
-import { join } from "https://deno.land/std@0.205.0/path/mod.ts";
+import { groupBy } from "https://deno.land/std@0.207.0/collections/group_by.ts";
+import { intersect } from "https://deno.land/std@0.207.0/collections/intersect.ts";
+import { globToRegExp } from "https://deno.land/std@0.207.0/path/glob.ts";
+import { join } from "https://deno.land/std@0.207.0/path/mod.ts";
 import { Octokit } from "npm:@octokit/core@5.0.2";
 import { env } from "./mod/env.ts";
 import {
