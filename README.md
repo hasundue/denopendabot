@@ -1,8 +1,6 @@
-<div align="center">
-
-![denopendabot-simple-320](https://user-images.githubusercontent.com/309723/198542926-bc43533c-63cd-4595-b7d3-6c7b4ade9bfb.png)
-
-</div>
+> [!Warning]
+> Denopendabot is deprecated in favor of [molt](https://github.com/hasundue/molt).
+> Thanks for kind support and contribution!
 
 # denopendabot
 
@@ -20,10 +18,6 @@ dependencies of your Deno projects up-to-date.
 Obviously inspired by [Dependabot](https://github.com/features/security/), and
 making up for their missing support for Deno. Written in Deno, and running on
 Deno Deploy.
-
-> **Warning**\
-> Still under development. Many bugs might remain. Any breaking changes may be
-> introduced on each Feature release.
 
 ## :magic_wand: Features
 
