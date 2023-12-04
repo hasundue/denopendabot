@@ -1,6 +1,6 @@
-> [!Warning]
-> Denopendabot is deprecated in favor of [molt](https://github.com/hasundue/molt).
-> Thanks for kind support and contribution!
+> [!Warning] Denopendabot is deprecated in favor of
+> [molt](https://github.com/hasundue/molt). Thanks for kind support and
+> contribution!
 
 # denopendabot
 
