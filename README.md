@@ -1,4 +1,6 @@
-> [!Warning] Denopendabot is deprecated in favor of
+> [!Warning]\
+> Denopendabot is deprecated in favor of
+> [renovate](https://github.com/renovatebot/renovate) or
 > [molt](https://github.com/hasundue/molt). Thanks for kind support and
 > contribution!
 
