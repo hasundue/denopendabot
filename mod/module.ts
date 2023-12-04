@@ -1,6 +1,6 @@
-import { distinct } from "https://deno.land/std@0.207.0/collections/distinct.ts";
-import { format, gt } from "https://deno.land/std@0.207.0/semver/mod.ts";
-import { tryParse } from "https://deno.land/std@0.207.0/semver/try_parse.ts";
+import { distinct } from "https://deno.land/std@0.208.0/collections/distinct.ts";
+import { format, gt } from "https://deno.land/std@0.208.0/semver/mod.ts";
+import { tryParse } from "https://deno.land/std@0.208.0/semver/try_parse.ts";
 import {
   defaultName,
   lookup,
