@@ -142,6 +142,7 @@ export async function createCommits(
     : updates;
 
   const branch = options?.workingBranch ?? "denopendabot";
+  await github.createBranch(branch, options?.baseBranch);
 
   const latest = await github.getLatestCommit(options?.baseBranch);
 
@@ -157,7 +158,6 @@ export async function createCommits(
     sha = commit.sha;
   }
 
-  await github.createBranch(branch, options?.baseBranch);
   await github.updateBranch(branch, sha);
 
   if (!authorized) {
