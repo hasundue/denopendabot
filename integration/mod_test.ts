@@ -48,8 +48,12 @@ Deno.test("integration (module)", async () => {
 
   await createCommits(repository, updates, options);
 
-  const result = await createPullRequest(repository, options);
-  assert(result, "Pull request not created");
+  await retry(async () =>
+    assert(
+      await createPullRequest(repository, options),
+      "Pull request not created",
+    )
+  );
 
   await github.deleteBranch(workingBranch);
 });
