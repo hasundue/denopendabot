@@ -13,6 +13,10 @@ const github = new GitHubClient({
   token: env.GITHUB_TOKEN,
 });
 
+Deno.test("createBranch", async () => {
+  assert(await github.createBranch(base));
+});
+
 Deno.test("getLatestRelease", async () => {
   const tag = await github.getLatestRelease();
   assert(tag);
@@ -37,17 +41,15 @@ Deno.test("compareBranches", async () => {
   assert(commits);
 });
 
-Deno.test("createBranch/deleteBranch", async () => {
+Deno.test("updateBranch", async () => {
   const main = await github.getBranch("main");
   assert(main);
-  await github.deleteBranch(base);
-  const baseSha = await github.createBranch(base);
-  assert(baseSha);
+  await github.updateBranch(base, main.commit.sha);
+});
 
+Deno.test("deleteBranch", async () => {
   const head = base + "-" + Date.now();
-  const headSha = await github.createBranch(head, base);
-  assert(headSha);
-
+  assert(await github.createBranch(head, base));
   await github.deleteBranch(head);
 });
 
