@@ -81,14 +81,15 @@ export async function getModuleUpdateSpecs(
       : (await registry.all()).map((v) => tryParse(v)).find((v) =>
         !v?.prerelease.length
       );
+    const prefix = registry.version().startsWith("v") ? "v" : "";
 
     if (initial && latest && gt(latest, initial)) {
       console.debug(`💡 ${name} ${format(initial)} => ${format(latest)}`);
       specs.push({
         url: registry.url,
         name,
-        initial: format(initial),
-        target: format(latest),
+        initial: prefix + format(initial),
+        target: prefix + format(latest),
       });
     }
   }
