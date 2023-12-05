@@ -1,3 +1,5 @@
+import { assert } from "https://deno.land/std@0.208.0/assert/assert.ts";
+import { retry } from "https://deno.land/std@0.208.0/async/mod.ts";
 import { groupBy } from "https://deno.land/std@0.208.0/collections/group_by.ts";
 import { intersect } from "https://deno.land/std@0.208.0/collections/intersect.ts";
 import { globToRegExp } from "https://deno.land/std@0.208.0/path/glob.ts";
@@ -190,11 +192,15 @@ export async function createPullRequest(
   const base = options?.baseBranch ?? await github.defaultBranch();
   const head = options?.workingBranch ?? "denopendabot";
 
-  const { commits } = await github.compareBranches({ base, head });
+  const commits = await retry(async () => {
+    const { commits } = await github.compareBranches({ base, head });
+    assert(commits.length > 0);
+    return commits;
+  }).catch(() => []);
 
   if (!commits.length) {
     console.info(`📣 ${base} and ${head} are identical`);
-    return null;
+    return;
   }
 
   const messages = commits.map((commit) => commit.commit.message);
