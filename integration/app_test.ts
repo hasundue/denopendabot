@@ -1,5 +1,5 @@
-import { assert } from "https://deno.land/std@0.207.0/testing/asserts.ts";
-import { retry } from "https://deno.land/std@0.207.0/async/mod.ts";
+import { assert } from "https://deno.land/std@0.208.0/testing/asserts.ts";
+import { retry } from "https://deno.land/std@0.208.0/async/mod.ts";
 import { Octokit } from "npm:@octokit/core@5.0.2";
 import { env } from "../app/env.ts";
 import { GitHubClient } from "../mod/octokit.ts";

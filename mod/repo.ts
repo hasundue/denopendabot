@@ -1,4 +1,4 @@
-import { gt, parse } from "https://deno.land/std@0.207.0/semver/mod.ts";
+import { gt, parse } from "https://deno.land/std@0.208.0/semver/mod.ts";
 import { GitHubClient } from "./octokit.ts";
 import { semverRegExp, Update, UpdateSpec } from "./common.ts";
 import { env } from "./env.ts";

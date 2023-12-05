@@ -1,9 +1,9 @@
-import { retry } from "https://deno.land/std@0.207.0/async/mod.ts";
-import { intersect } from "https://deno.land/std@0.207.0/collections/intersect.ts";
+import { retry } from "https://deno.land/std@0.208.0/async/mod.ts";
+import { intersect } from "https://deno.land/std@0.208.0/collections/intersect.ts";
 import { Octokit } from "npm:@octokit/core@5.0.2";
 import { App } from "npm:@octokit/app@14.0.2";
-import { EmitterWebhookEventName } from "npm:@octokit/webhooks@12.0.8";
-import { HonoRequest } from "https://deno.land/x/hono@v3.10.2/mod.ts";
+import { EmitterWebhookEventName } from "npm:@octokit/webhooks@12.0.10";
+import { HonoRequest } from "https://deno.land/x/hono@v3.11.0/mod.ts";
 import { env } from "./env.ts";
 import { DeployEnv, getThisDeployEnv } from "./deployments.ts";
 import * as mod from "../mod.ts";

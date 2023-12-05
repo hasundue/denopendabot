@@ -1,5 +1,5 @@
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/mod.ts";
-import { retry } from "https://deno.land/std@0.207.0/async/retry.ts";
+import { retry } from "https://deno.land/std@0.208.0/async/retry.ts";
 import { env } from "./mod/env.ts";
 import {
   createCommits,
