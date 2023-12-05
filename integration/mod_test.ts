@@ -16,10 +16,12 @@ const github = new GitHubClient({
   token: env.GITHUB_TOKEN,
 });
 
-Deno.test("integration (module)", async () => {
-  await github.deleteBranch(baseBranch);
-  await github.createBranch(baseBranch);
+await github.createBranch(baseBranch);
 
+const main = await github.getBranch("main");
+await github.updateBranch(baseBranch, main!.commit.sha);
+
+Deno.test("integration (module)", async () => {
   const workingBranch = baseBranch + "-" + env.GITHUB_REF_NAME;
 
   const options = {
