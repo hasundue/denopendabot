@@ -6,7 +6,7 @@
     "check": "deno check ./**/*.ts",
     "test": "deno test --allow-env --allow-net --allow-read --no-check",
     "dev": "deno fmt && deno lint && deno task test -q mod/ app/ --fail-fast",
-    "update": "deno run -A https://deno.land/x/molt@0.14.0/cli.ts *.ts ./*/*.ts",
+    "update": "deno run -A https://deno.land/x/molt@0.14.2/cli.ts *.ts ./*/*.ts",
     "update:commit": "deno task -q update --commit --prefix 'build(deps):' --pre-commit=fmt"
   }
 }
