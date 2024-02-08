@@ -70,7 +70,7 @@ runs:
   steps:
     - name: Run Denopendabot GitHub App
       if: ${{ inputs.mode == 'app' }}
-      uses: peter-evans/repository-dispatch@v2
+      uses: peter-evans/repository-dispatch@v3
       with:
         event-type: denopendabot-run
         client-payload: >
