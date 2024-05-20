@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.1.6
 
       - name: Push
         uses: ad-m/github-push-action@v0.8.0
